@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDN Network Health & Attack Defense Center</title>
+    <title>SDN Network Health & Defense Center</title>
     
     <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5.3 & FontAwesome 6 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,18 +19,15 @@
 
     <style>
         :root {
-            --bg-base: #0a0e17;
-            --bg-card: rgba(16, 23, 38, 0.75);
-            --bg-card-hover: rgba(22, 33, 54, 0.85);
+            --bg-base: #070a12;
+            --bg-card: rgba(14, 20, 34, 0.85);
+            --bg-card-hover: rgba(20, 29, 48, 0.95);
             --border-subtle: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(56, 189, 248, 0.25);
+            --border-glow: rgba(56, 189, 248, 0.35);
             
             --cyan-primary: #38bdf8;
-            --cyan-glow: rgba(56, 189, 248, 0.35);
             --emerald-green: #10b981;
-            --emerald-glow: rgba(16, 185, 129, 0.35);
             --crimson-red: #f43f5e;
-            --crimson-glow: rgba(244, 63, 94, 0.4);
             --amber-alert: #f59e0b;
             --indigo-accent: #6366f1;
             
@@ -41,19 +38,18 @@
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background-color: var(--bg-base);
             background-image: 
-                radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.07) 0%, transparent 40%),
-                radial-gradient(circle at 88% 82%, rgba(244, 63, 94, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 60%);
-            background-attachment: fixed;
+                radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(244, 63, 94, 0.05) 0%, transparent 40%);
             color: var(--text-main);
             font-family: 'Inter', -apple-system, sans-serif;
             min-height: 100vh;
-            padding-bottom: 60px;
             overflow-x: hidden;
         }
 
@@ -67,650 +63,644 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Glassmorphism Cards */
-        .glass-card {
+        /* Glassmorphism Panel */
+        .glass-panel {
             background: var(--bg-card);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
-                        border-color 0.25s ease, 
-                        box-shadow 0.25s ease;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.45);
         }
 
-        .glass-card:hover {
-            border-color: var(--border-glow);
-            box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.08);
-        }
-
-        /* Modern Navigation Bar */
-        .navbar-custom {
-            background: rgba(10, 14, 23, 0.85);
+        /* Compact Navigation Bar */
+        .navbar-compact {
+            background: rgba(10, 14, 24, 0.92);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-subtle);
-            padding: 14px 28px;
+            padding: 8px 20px;
+            height: 52px;
             position: sticky;
             top: 0;
             z-index: 1000;
         }
 
-        /* Status Pulsing Badges */
-        .pulse-indicator {
-            width: 9px;
-            height: 9px;
+        /* Pulsing Status Dot */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 6px;
+            margin-right: 5px;
         }
-
         .pulse-green {
             background: var(--emerald-green);
             box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse-green-anim 1.8s infinite;
+            animation: pulse-g 1.8s infinite;
         }
-
         .pulse-red {
             background: var(--crimson-red);
             box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
-            animation: pulse-red-anim 1.2s infinite;
+            animation: pulse-r 1.2s infinite;
         }
-
         .pulse-yellow {
             background: var(--amber-alert);
             box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            animation: pulse-yellow-anim 1.8s infinite;
+            animation: pulse-y 1.8s infinite;
         }
 
-        @keyframes pulse-green-anim {
+        @keyframes pulse-g {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-
-        @keyframes pulse-red-anim {
+        @keyframes pulse-r {
             0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.8); }
-            70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
+            70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
             100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
         }
-
-        @keyframes pulse-yellow-anim {
+        @keyframes pulse-y {
             0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
-            70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+            70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
 
-        /* Metric Highlights */
-        .metric-title {
-            font-size: 0.82rem;
+        /* Compact KPI Header */
+        .kpi-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .kpi-chip-label {
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             color: var(--text-muted);
             font-weight: 600;
         }
-
-        .metric-value {
+        .kpi-chip-val {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.2rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            line-height: 1.1;
-            margin-top: 4px;
+            line-height: 1;
         }
 
-        /* Status Badges */
-        .badge-status {
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 20px;
-            letter-spacing: 0.03em;
-            display: inline-flex;
+        /* Modern CPU & RAM Allocation Gauges */
+        .meter-container {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+        }
+        .meter-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 4px;
         }
+        .meter-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .meter-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .meter-track {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .meter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.35s ease, background 0.35s ease;
+        }
+        .fill-green { background: linear-gradient(90deg, #10b981, #34d399); }
+        .fill-yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .fill-red { background: linear-gradient(90deg, #f43f5e, #fb7185); }
 
+        /* Status Badge */
+        .badge-status {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.02em;
+        }
         .status-NORMAL {
             background: rgba(16, 185, 129, 0.15);
             color: #34d399;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-
         .status-ALERT {
             background: rgba(245, 158, 11, 0.15);
             color: #fbbf24;
             border: 1px solid rgba(245, 158, 11, 0.35);
         }
-
         .status-ATTACKING {
-            background: rgba(244, 63, 94, 0.18);
+            background: rgba(244, 63, 94, 0.2);
             color: #fda4af;
-            border: 1px solid rgba(244, 63, 94, 0.45);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            animation: pulse-border 1.2s infinite;
         }
-
         .status-DOWN {
             background: rgba(100, 116, 139, 0.15);
             color: #94a3b8;
             border: 1px solid rgba(100, 116, 139, 0.3);
         }
 
-        /* Custom Progress Bars */
-        .load-bar-wrapper {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 6px;
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+            70% { box-shadow: 0 0 0 4px rgba(244, 63, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
         }
 
-        .load-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.4s ease;
-        }
-
-        .bar-green { background: linear-gradient(90deg, #10b981, #34d399); }
-        .bar-yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .bar-red { background: linear-gradient(90deg, #f43f5e, #fb7185); }
-
-        /* Buttons */
-        .btn-modern {
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.88rem;
-            padding: 7px 16px;
-            transition: all 0.2s ease;
+        /* Action Buttons */
+        .btn-compact {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             border: 1px solid transparent;
         }
-
-        .btn-modern-danger {
+        .btn-danger-compact {
             background: linear-gradient(135deg, #e11d48, #be123c);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
         }
-        .btn-modern-danger:hover {
+        .btn-danger-compact:hover {
             background: linear-gradient(135deg, #f43f5e, #e11d48);
             color: #fff;
-            box-shadow: 0 6px 18px rgba(225, 29, 72, 0.5);
             transform: translateY(-1px);
         }
-
-        .btn-modern-warning {
+        .btn-warning-compact {
             background: rgba(245, 158, 11, 0.15);
             color: #fbbf24;
             border-color: rgba(245, 158, 11, 0.4);
         }
-        .btn-modern-warning:hover {
+        .btn-warning-compact:hover {
             background: rgba(245, 158, 11, 0.25);
-            color: #fef3c7;
-            border-color: rgba(245, 158, 11, 0.6);
+            color: #fff;
         }
-
-        .btn-modern-success {
+        .btn-success-compact {
             background: rgba(16, 185, 129, 0.15);
             color: #34d399;
             border-color: rgba(16, 185, 129, 0.4);
         }
-        .btn-modern-success:hover {
+        .btn-success-compact:hover {
             background: rgba(16, 185, 129, 0.25);
-            color: #d1fae5;
-            border-color: rgba(16, 185, 129, 0.6);
+            color: #fff;
         }
-
-        .btn-modern-outline {
+        .btn-outline-compact {
             background: rgba(255, 255, 255, 0.04);
             border-color: var(--border-subtle);
             color: var(--text-main);
         }
-        .btn-modern-outline:hover {
-            background: rgba(255, 255, 255, 0.08);
+        .btn-outline-compact:hover {
+            background: rgba(255, 255, 255, 0.09);
             color: #fff;
             border-color: var(--border-glow);
         }
 
-        /* Interactive SVG Network Topology */
-        .topology-card {
-            background: radial-gradient(circle at center, rgba(16, 24, 40, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%);
+        /* Compact Interactive Topology */
+        .topology-box {
+            background: radial-gradient(circle at center, rgba(14, 22, 38, 0.95) 0%, rgba(8, 12, 20, 0.98) 100%);
             border: 1px solid var(--border-subtle);
-            border-radius: 12px;
+            border-radius: 8px;
             position: relative;
-            overflow: hidden;
         }
-
-        .topology-svg {
+        .topo-svg-compact {
             width: 100%;
-            height: 290px;
+            height: 165px;
         }
-
-        .topo-node {
-            cursor: pointer;
-            transition: transform 0.2s ease, filter 0.2s ease;
-        }
-        .topo-node:hover {
-            filter: drop-shadow(0 0 10px var(--cyan-primary));
-        }
-
         .topo-link {
             stroke: rgba(255, 255, 255, 0.15);
             stroke-width: 2;
             stroke-dasharray: 4, 4;
-            animation: link-dash 15s linear infinite;
+            animation: dash 12s linear infinite;
         }
-
         .topo-link-active {
             stroke: var(--cyan-primary);
-            stroke-width: 2.5;
-            animation: link-dash 2s linear infinite;
+            stroke-width: 2.2;
+            animation: dash 2s linear infinite;
         }
-
         .topo-link-attack {
             stroke: var(--crimson-red);
-            stroke-width: 3.5;
-            animation: link-dash-fast 0.6s linear infinite;
+            stroke-width: 3.2;
+            animation: dash-fast 0.6s linear infinite;
         }
-
         .topo-link-blocked {
             stroke: #475569;
             stroke-width: 2;
             stroke-dasharray: 2, 6;
         }
+        @keyframes dash { to { stroke-dashoffset: -40; } }
+        @keyframes dash-fast { to { stroke-dashoffset: -50; } }
 
-        @keyframes link-dash {
-            to { stroke-dashoffset: -40; }
+        /* Tabs Styling */
+        .nav-pills-compact .nav-link {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            color: var(--text-muted);
+            border-radius: 6px;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .nav-pills-compact .nav-link.active {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--cyan-primary);
+            border: 1px solid rgba(56, 189, 248, 0.35);
         }
 
-        @keyframes link-dash-fast {
-            to { stroke-dashoffset: -50; }
-        }
-
-        /* Cyber Terminal Log */
-        .terminal-container {
-            background: #06090f;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+        /* Compact Cyber Terminal */
+        .terminal-box {
+            background: #04070d;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.82rem;
-            height: 270px;
+            font-size: 0.76rem;
+            height: 175px;
             overflow-y: auto;
-            padding: 12px 16px;
+            padding: 8px 12px;
             color: #94a3b8;
-            line-height: 1.6;
+            line-height: 1.5;
         }
+        .terminal-box::-webkit-scrollbar { width: 5px; }
+        .terminal-box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
 
-        .terminal-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .terminal-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+        .log-line { margin-bottom: 3px; word-break: break-all; }
+        .tag-info { color: #38bdf8; font-weight: 600; }
+        .tag-warn { color: #fbbf24; font-weight: 600; }
+        .tag-attack { color: #f43f5e; font-weight: 600; }
+        .tag-sdn { color: #34d399; font-weight: 600; }
 
-        .log-entry {
-            margin-bottom: 4px;
-            word-break: break-word;
-        }
-        .log-time { color: #64748b; margin-right: 6px; }
-        .log-tag-info { color: #38bdf8; font-weight: 600; }
-        .log-tag-warn { color: #fbbf24; font-weight: 600; }
-        .log-tag-attack { color: #f43f5e; font-weight: 600; }
-        .log-tag-sdn { color: #34d399; font-weight: 600; }
-
-        /* Tables */
-        .table-dark-custom {
+        /* Table Styling */
+        .table-compact {
             color: var(--text-main);
             margin: 0;
+            font-size: 0.8rem;
         }
-        .table-dark-custom thead th {
-            background: rgba(255, 255, 255, 0.03);
+        .table-compact thead th {
+            background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid var(--border-subtle);
             color: var(--text-muted);
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 12px 14px;
+            padding: 6px 10px;
         }
-        .table-dark-custom tbody td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 12px 14px;
-            font-size: 0.88rem;
+        .table-compact tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 6px 10px;
         }
 
-        /* Floating Toast Notification */
-        .toast-container-custom {
+        /* Toast Container */
+        .toast-dock {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
+            bottom: 16px;
+            right: 16px;
             z-index: 2000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
-
-        .toast-bubble {
-            background: rgba(16, 23, 38, 0.95);
-            backdrop-filter: blur(12px);
+        .toast-card {
+            background: rgba(14, 20, 34, 0.95);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border-glow);
-            border-radius: 8px;
-            padding: 12px 18px;
+            border-radius: 6px;
+            padding: 8px 14px;
             color: var(--text-heading);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            font-size: 0.82rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 0.86rem;
-            animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            max-width: 360px;
+            gap: 10px;
+            animation: pop-in 0.25s ease;
         }
-
-        @keyframes slide-in {
-            from { transform: translateX(50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes pop-in {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation Bar -->
-    <nav class="navbar navbar-custom">
-        <div class="container-fluid px-0">
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 p-2" style="width: 44px; height: 44px;">
-                    <i class="fa-solid fa-shield-halved text-info fs-5"></i>
-                </div>
-                <div>
-                    <h5 class="m-0 fw-bold brand-font">SDN Health & Attack Defense Center</h5>
-                    <div class="small text-muted mono">Mininet OpenFlow 1.3 Topology & Telemetry Plane</div>
-                </div>
+    <!-- Header Navigation Bar (Height: 52px) -->
+    <nav class="navbar-compact d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-2 p-1" style="width: 32px; height: 32px;">
+                <i class="fa-solid fa-shield-halved text-info fs-6"></i>
+            </div>
+            <div>
+                <span class="fw-bold brand-font fs-6 text-white">SDN Attack Defense Center</span>
+                <span class="small text-muted mono ms-2 d-none d-md-inline" style="font-size: 0.75rem;">OpenFlow 1.3 | UDP Telemetry</span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-pill px-3 py-1 small d-flex align-items-center">
+                <span class="pulse-dot pulse-green" id="sdn-indicator"></span>
+                <span class="text-muted" style="font-size: 0.75rem;">Ryu SDN: <strong class="text-white" id="sdn-status">ONLINE</strong></span>
             </div>
 
-            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
-                <div class="d-none d-lg-flex align-items-center bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-1 text-muted small me-2">
-                    <span class="pulse-indicator pulse-green" id="sdn-indicator"></span>
-                    <span>SDN Controller: <strong class="text-white" id="sdn-status">ONLINE</strong></span>
-                </div>
+            <button class="btn btn-compact btn-outline-compact" onclick="triggerManualPing()" title="Refresh Telemetry">
+                <i class="fa-solid fa-rotate" id="refresh-icon"></i>
+            </button>
 
-                <button class="btn btn-modern btn-modern-outline" onclick="triggerManualPing()" title="Refresh telemetry immediately">
-                    <i class="fa-solid fa-rotate" id="refresh-icon"></i> Refresh
-                </button>
-
-                <button class="btn btn-modern btn-modern-danger" onclick="triggerSequentialCampaign()">
-                    <i class="fa-solid fa-bolt"></i> Run Sequential Campaign
-                </button>
-            </div>
+            <button class="btn btn-compact btn-danger-compact" onclick="triggerSequentialCampaign()">
+                <i class="fa-solid fa-bolt"></i> Sequential Campaign
+            </button>
         </div>
     </nav>
 
-    <!-- Main Container -->
-    <div class="container-fluid px-4 pt-4">
+    <!-- Main Single-Page Cockpit View -->
+    <div class="container-fluid px-3 pt-2 pb-3">
 
-        <!-- Top Metrics KPI Row -->
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="metric-title"><i class="fa-solid fa-server me-1 text-primary"></i> Active Nodes</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill mono">Mininet</span>
+        <!-- Top KPI Overview Bar -->
+        <div class="row g-2 mb-2">
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="kpi-chip">
+                    <i class="fa-solid fa-server text-primary fs-5"></i>
+                    <div>
+                        <div class="kpi-chip-label">Active Nodes</div>
+                        <div class="kpi-chip-val text-white" id="total-nodes">0</div>
                     </div>
-                    <div class="metric-value text-white" id="total-nodes">0</div>
-                    <div class="small text-muted mt-1" id="active-nodes-subtitle">Waiting for telemetry...</div>
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="metric-title"><i class="fa-solid fa-triangle-exclamation me-1 text-danger"></i> Attack Floods</span>
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill mono">Live Anomaly</span>
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="kpi-chip">
+                    <i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>
+                    <div>
+                        <div class="kpi-chip-label">Active Attacks</div>
+                        <div class="kpi-chip-val text-danger" id="total-attacks">0</div>
                     </div>
-                    <div class="metric-value text-danger" id="total-attacks">0</div>
-                    <div class="small text-muted mt-1" id="attacks-subtitle">Zero active flood streams</div>
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="metric-title"><i class="fa-solid fa-ban me-1 text-warning"></i> SDN Drop Rules</span>
-                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill mono">OpenFlow 1.3</span>
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="kpi-chip">
+                    <i class="fa-solid fa-ban text-warning fs-5"></i>
+                    <div>
+                        <div class="kpi-chip-label">SDN Drop Rules</div>
+                        <div class="kpi-chip-val text-warning" id="sdn-rules-count">0</div>
                     </div>
-                    <div class="metric-value text-warning" id="sdn-rules-count">0</div>
-                    <div class="small text-muted mt-1" id="rules-subtitle">Switch s1 data plane</div>
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="metric-title"><i class="fa-solid fa-heart-pulse me-1 text-success"></i> Health State</span>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill mono">Telemetry</span>
+            <div class="col-6 col-md-3 col-xl-3">
+                <div class="kpi-chip">
+                    <i class="fa-solid fa-microchip text-info fs-5"></i>
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between">
+                            <span class="kpi-chip-label">Cluster Avg CPU</span>
+                            <span class="fw-bold mono small text-white" id="cluster-avg-cpu">0%</span>
+                        </div>
+                        <div class="meter-track mt-1" style="height: 5px;">
+                            <div class="meter-fill fill-green" id="cluster-cpu-bar" style="width: 0%;"></div>
+                        </div>
                     </div>
-                    <div class="mt-2">
-                        <span class="badge badge-status status-NORMAL fs-6" id="overall-status">
-                            <span class="pulse-indicator pulse-green"></span> ALL NORMAL
-                        </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-3">
+                <div class="kpi-chip justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-success fs-5"></i>
+                        <div>
+                            <div class="kpi-chip-label">Defense State</div>
+                            <span class="badge badge-status status-NORMAL" id="overall-status">ALL NORMAL</span>
+                        </div>
                     </div>
-                    <div class="small text-muted mt-2">Socket Telemetry: UDP 5000</div>
+                    <span class="small text-muted mono" style="font-size: 0.72rem;">Target: 10.0.0.4:8080</span>
                 </div>
             </div>
         </div>
 
-        <!-- Interactive Network Topology Visualizer -->
-        <div class="row g-3 mb-4">
-            <div class="col-12">
-                <div class="topology-card p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2 px-2">
-                        <div>
-                            <h6 class="fw-bold m-0 text-white"><i class="fa-solid fa-diagram-project me-2 text-info"></i> Live SDN Network Topology Map</h6>
-                            <span class="small text-muted mono">Real-Time OpenFlow Switch s1 Data Plane & Host Link States</span>
+        <!-- Cockpit Main Grid: 2 Columns Side-by-Side (Fits in Viewport) -->
+        <div class="row g-2">
+            
+            <!-- LEFT COLUMN: Host Node Allocation Cards & Topology Map (Width: 55%) -->
+            <div class="col-lg-7">
+                <!-- Section 1: Host Node Resource Allocation Cards -->
+                <div class="glass-panel p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                        <span class="fw-bold small text-white">
+                            <i class="fa-solid fa-microchip me-1 text-info"></i> Host Node Health & Resource Allocation
+                        </span>
+                        <span class="small text-muted mono" style="font-size: 0.72rem;">Live Socket Stream: UDP 5000</span>
+                    </div>
+
+                    <!-- Dynamic Node Cards Grid -->
+                    <div class="row g-2" id="nodes-container">
+                        <!-- Populated dynamically via JS -->
+                        <div class="col-12">
+                            <div class="p-3 text-center text-muted small">
+                                <span class="spinner-border spinner-border-sm text-info me-1"></span> Waiting for host agents (h1, h2, h3)...
+                            </div>
                         </div>
-                        <div class="d-flex gap-3 small text-muted align-items-center">
-                            <span><span class="pulse-indicator pulse-green"></span> Normal Traffic</span>
-                            <span><span class="pulse-indicator pulse-red"></span> UDP DDoS Flood</span>
-                            <span><i class="fa-solid fa-ban text-secondary"></i> Blocked by FlowMod</span>
+                    </div>
+                </div>
+
+                <!-- Section 2: Compact Interactive Network Topology Diagram -->
+                <div class="glass-panel p-2 topology-box">
+                    <div class="d-flex justify-content-between align-items-center px-1 mb-1">
+                        <span class="fw-bold small text-white">
+                            <i class="fa-solid fa-diagram-project me-1 text-primary"></i> SDN Topology Map (Switch s1 & Links)
+                        </span>
+                        <div class="d-flex gap-2 text-muted" style="font-size: 0.72rem;">
+                            <span><span class="pulse-dot pulse-green"></span>Normal</span>
+                            <span><span class="pulse-dot pulse-red"></span>DDoS Flood</span>
+                            <span><i class="fa-solid fa-ban text-secondary"></i>Blocked</span>
                         </div>
                     </div>
 
                     <!-- SVG Topology Diagram -->
-                    <svg class="topology-svg" id="topology-svg" viewBox="0 0 1000 280">
-                        <defs>
-                            <linearGradient id="link-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
-                                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.8"/>
-                            </linearGradient>
-                            <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="4" result="blur" />
-                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                            </filter>
-                        </defs>
-
-                        <!-- Links from Hosts to Switch (Center: 500, 140) -->
-                        <line id="link-h1" class="topo-link" x1="160" y1="80" x2="500" y2="140" />
-                        <line id="link-h2" class="topo-link" x1="160" y1="200" x2="500" y2="140" />
-                        <line id="link-h3" class="topo-link" x1="330" y1="230" x2="500" y2="140" />
-                        <line id="link-h4" class="topo-link" x1="840" y1="140" x2="500" y2="140" />
-                        <!-- Switch to Ryu Controller Link -->
-                        <line id="link-ryu" class="topo-link-active" x1="500" y1="140" x2="500" y2="40" stroke-dasharray="2, 2" />
+                    <svg class="topo-svg-compact" viewBox="0 0 900 165">
+                        <!-- Host Links to Switch (Center: 450, 85) -->
+                        <line id="link-h1" class="topo-link" x1="140" y1="45" x2="450" y2="85" />
+                        <line id="link-h2" class="topo-link" x1="140" y1="125" x2="450" y2="85" />
+                        <line id="link-h3" class="topo-link" x1="290" y1="145" x2="450" y2="85" />
+                        <line id="link-h4" class="topo-link" x1="760" y1="85" x2="450" y2="85" />
+                        <line id="link-ryu" class="topo-link-active" x1="450" y1="85" x2="450" y2="22" stroke-dasharray="2, 2" />
 
                         <!-- Center OpenFlow Switch s1 -->
-                        <g class="topo-node" transform="translate(500, 140)">
-                            <circle r="36" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" />
-                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-family="'Outfit', sans-serif" font-weight="700" font-size="13">Switch s1</text>
-                            <text text-anchor="middle" dy="12" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9">DPID: 0001</text>
-                            <text text-anchor="middle" dy="23" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">OpenFlow 1.3</text>
+                        <g transform="translate(450, 85)">
+                            <circle r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2.2" />
+                            <text text-anchor="middle" dy="-3" fill="#f8fafc" font-weight="700" font-size="10">Switch s1</text>
+                            <text text-anchor="middle" dy="10" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="7">OpenFlow 1.3</text>
                         </g>
 
                         <!-- Ryu Controller Node -->
-                        <g class="topo-node" transform="translate(500, 40)">
-                            <rect x="-65" y="-20" width="130" height="34" rx="17" fill="#0f172a" stroke="#6366f1" stroke-width="2" />
-                            <text text-anchor="middle" dy="2" fill="#e0e7ff" font-family="'Outfit', sans-serif" font-weight="600" font-size="11">
-                                <tspan fill="#818cf8">⚡</tspan> Ryu Controller c0
+                        <g transform="translate(450, 22)">
+                            <rect x="-55" y="-14" width="110" height="26" rx="13" fill="#0f172a" stroke="#6366f1" stroke-width="1.6" />
+                            <text text-anchor="middle" dy="3" fill="#e0e7ff" font-weight="600" font-size="9">
+                                <tspan fill="#818cf8">⚡</tspan> Ryu Controller
                             </text>
-                            <text text-anchor="middle" dy="18" fill="#6366f1" font-family="'JetBrains Mono', monospace" font-size="8">REST: 8080</text>
                         </g>
 
                         <!-- Host h1 Node (10.0.0.1) -->
-                        <g class="topo-node" id="node-viz-h1" transform="translate(160, 80)">
-                            <rect x="-65" y="-26" width="130" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="1.8" />
-                            <text text-anchor="middle" dy="-6" fill="#f8fafc" font-weight="600" font-size="12">Host h1 (Node-1)</text>
-                            <text text-anchor="middle" dy="10" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="10">10.0.0.1</text>
-                            <text id="viz-status-h1" text-anchor="middle" dy="21" fill="#10b981" font-size="8" font-weight="600">NORMAL</text>
+                        <g id="node-viz-h1" transform="translate(140, 45)">
+                            <rect x="-55" y="-20" width="110" height="40" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
+                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10">Host h1 (Node-1)</text>
+                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.1</text>
+                            <text id="viz-status-h1" text-anchor="middle" dy="16" fill="#10b981" font-size="7" font-weight="700">NORMAL</text>
                         </g>
 
                         <!-- Host h2 Node (10.0.0.2) -->
-                        <g class="topo-node" id="node-viz-h2" transform="translate(160, 200)">
-                            <rect x="-65" y="-26" width="130" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="1.8" />
-                            <text text-anchor="middle" dy="-6" fill="#f8fafc" font-weight="600" font-size="12">Host h2 (Node-2)</text>
-                            <text text-anchor="middle" dy="10" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="10">10.0.0.2</text>
-                            <text id="viz-status-h2" text-anchor="middle" dy="21" fill="#10b981" font-size="8" font-weight="600">NORMAL</text>
+                        <g id="node-viz-h2" transform="translate(140, 125)">
+                            <rect x="-55" y="-20" width="110" height="40" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
+                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10">Host h2 (Node-2)</text>
+                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.2</text>
+                            <text id="viz-status-h2" text-anchor="middle" dy="16" fill="#10b981" font-size="7" font-weight="700">NORMAL</text>
                         </g>
 
                         <!-- Host h3 Node (10.0.0.3) -->
-                        <g class="topo-node" id="node-viz-h3" transform="translate(330, 230)">
-                            <rect x="-65" y="-26" width="130" height="52" rx="8" fill="#111827" stroke="#334155" stroke-width="1.8" />
-                            <text text-anchor="middle" dy="-6" fill="#f8fafc" font-weight="600" font-size="12">Host h3 (Node-3)</text>
-                            <text text-anchor="middle" dy="10" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="10">10.0.0.3</text>
-                            <text id="viz-status-h3" text-anchor="middle" dy="21" fill="#10b981" font-size="8" font-weight="600">NORMAL</text>
+                        <g id="node-viz-h3" transform="translate(290, 145)">
+                            <rect x="-55" y="-18" width="110" height="36" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
+                            <text text-anchor="middle" dy="-4" fill="#f8fafc" font-weight="600" font-size="10">Host h3 (Node-3)</text>
+                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.3</text>
                         </g>
 
-                        <!-- Host h4 Server & Target (10.0.0.4) -->
-                        <g class="topo-node" id="node-viz-h4" transform="translate(840, 140)">
-                            <rect x="-70" y="-30" width="140" height="60" rx="10" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
-                            <text text-anchor="middle" dy="-8" fill="#ffffff" font-weight="700" font-size="13">Host h4 (Target)</text>
-                            <text text-anchor="middle" dy="8" fill="#c7d2fe" font-family="'JetBrains Mono', monospace" font-size="10">10.0.0.4</text>
-                            <text text-anchor="middle" dy="22" fill="#a5b4fc" font-size="8" font-weight="600">CENTRAL C2 SERVER</text>
+                        <!-- Host h4 Server/Target (10.0.0.4) -->
+                        <g id="node-viz-h4" transform="translate(760, 85)">
+                            <rect x="-60" y="-22" width="120" height="44" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.8" />
+                            <text text-anchor="middle" dy="-6" fill="#ffffff" font-weight="700" font-size="10">Host h4 (Target)</text>
+                            <text text-anchor="middle" dy="6" fill="#c7d2fe" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.4:5050</text>
+                            <text text-anchor="middle" dy="16" fill="#a5b4fc" font-size="7" font-weight="600">CENTRAL C2 SERVER</text>
                         </g>
                     </svg>
                 </div>
             </div>
-        </div>
 
-        <!-- Dynamic Agent Node Cards Grid -->
-        <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold m-0"><i class="fa-solid fa-microchip me-2 text-info"></i> Agent Nodes & Command Control</h5>
-                <span class="small text-muted mono">Authenticated TCP C2 Socket Channel (Token Protected)</span>
-            </div>
-            <div class="row g-3" id="nodes-container">
-                <!-- Populated dynamically via JS -->
-            </div>
-        </div>
-
-        <!-- Real-Time Metrics Charts -->
-        <div class="row g-3 mb-4">
-            <div class="col-lg-6">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold m-0"><i class="fa-solid fa-chart-line me-2 text-primary"></i> Outbound Network Traffic Spikes (KB / s)</h6>
-                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 mono">Flood Anomaly</span>
-                    </div>
-                    <canvas id="networkChart" height="210"></canvas>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold m-0"><i class="fa-solid fa-gauge-high me-2 text-warning"></i> Host System Resource Utilization (%)</h6>
-                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 mono">CPU & Memory</span>
-                    </div>
-                    <canvas id="resourceChart" height="210"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- OpenFlow FlowMod Rules & Live Cyber Terminal -->
-        <div class="row g-3">
-            <!-- OpenFlow Table -->
-            <div class="col-lg-7">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="fw-bold m-0"><i class="fa-solid fa-route me-2 text-danger"></i> Active OpenFlow FlowMod Rules (Switch s1)</h6>
-                            <span class="small text-muted mono">Priority 1000 DROP Actions Installed via Ryu Controller</span>
-                        </div>
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mono" id="active-flow-count-badge">0 Active</span>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-dark-custom align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Rule ID</th>
-                                    <th>Attacker IP</th>
-                                    <th>Match Filter</th>
-                                    <th>Action</th>
-                                    <th>Installed</th>
-                                    <th class="text-end">Mitigation</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sdn-rules-table">
-                                <tr><td colspan="6" class="text-center text-muted py-4">No active drop rules installed on switch s1</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Cyber Terminal Log -->
+            <!-- RIGHT COLUMN: Real-Time Charts & Controller Tables (Width: 45%) -->
             <div class="col-lg-5">
-                <div class="glass-card p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="fw-bold m-0 text-success"><i class="fa-solid fa-terminal me-2"></i> Live Audit & Alert Console</h6>
-                            <span class="small text-muted mono">Real-Time Event Stream</span>
-                        </div>
-                        <button class="btn btn-sm btn-modern-outline py-1 px-2" onclick="clearTerminal()" title="Clear console">
+                
+                <!-- Section 1: Live Real-Time Telemetry Charts with Tab Switcher -->
+                <div class="glass-panel p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                        <ul class="nav nav-pills nav-pills-compact" id="chart-tabs">
+                            <li class="nav-item">
+                                <button class="nav-link active" onclick="switchChartTab('traffic')">
+                                    <i class="fa-solid fa-chart-line me-1"></i> Traffic Spikes (KB/s)
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" onclick="switchChartTab('resources')">
+                                    <i class="fa-solid fa-gauge-high me-1"></i> CPU & RAM Trends
+                                </button>
+                            </li>
+                        </ul>
+                        <span class="badge bg-dark text-muted mono" style="font-size: 0.7rem;">Live Stream</span>
+                    </div>
+
+                    <div style="height: 175px; position: relative;">
+                        <canvas id="activeChart" style="height: 100% !important;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Section 2: OpenFlow Drop Rules & Live Terminal Logs with Tab Switcher -->
+                <div class="glass-panel p-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                        <ul class="nav nav-pills nav-pills-compact" id="panel-tabs">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="tab-btn-rules" onclick="switchPanelTab('rules')">
+                                    <i class="fa-solid fa-route me-1 text-danger"></i> Switch s1 Rules 
+                                    <span class="badge bg-danger rounded-pill ms-1" id="tab-rules-badge">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tab-btn-terminal" onclick="switchPanelTab('terminal')">
+                                    <i class="fa-solid fa-terminal me-1 text-success"></i> Audit Console
+                                </button>
+                            </li>
+                        </ul>
+
+                        <button class="btn btn-compact btn-outline-compact py-0 px-2" style="font-size: 0.72rem;" onclick="clearTerminal()">
                             <i class="fa-solid fa-trash-can"></i> Clear
                         </button>
                     </div>
 
-                    <div class="terminal-container" id="terminal-log">
-                        <div class="log-entry"><span class="log-time">[INIT]</span> <span class="log-tag-info">[SYSTEM]</span> SDN Health Monitoring & Mitigation Console Online.</div>
-                        <div class="log-entry"><span class="log-time">[INIT]</span> <span class="log-tag-sdn">[OPENFLOW]</span> Connected to Ryu OpenFlow 1.3 Controller at http://127.0.0.1:8080.</div>
+                    <!-- Tab Content 1: OpenFlow Table -->
+                    <div id="panel-rules" style="height: 175px; overflow-y: auto;">
+                        <table class="table table-compact align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Rule ID</th>
+                                    <th>Attacker IP</th>
+                                    <th>Match</th>
+                                    <th>Action</th>
+                                    <th class="text-end">Control</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sdn-rules-table">
+                                <tr><td colspan="5" class="text-center text-muted py-4">No active drop rules on switch s1</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tab Content 2: Cyber Terminal Log -->
+                    <div id="panel-terminal" class="terminal-box d-none">
+                        <div class="log-line"><span class="tag-info">[INIT]</span> Telemetry cockpit initialized. Listening on UDP:5000.</div>
+                        <div class="log-line"><span class="tag-sdn">[SDN]</span> Connected to Ryu OpenFlow 1.3 Controller at http://127.0.0.1:8080.</div>
                     </div>
                 </div>
+
             </div>
         </div>
 
     </div>
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container-custom" id="toast-container"></div>
+    <!-- Toast Notification Dock -->
+    <div class="toast-dock" id="toast-dock"></div>
 
-    <!-- Single Attack Duration Modal -->
+    <!-- Attack Parameter Modal -->
     <div class="modal fade" id="attackModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-card border-danger border-opacity-50">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-burst me-2"></i> Launch DDoS Flood Attack</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content glass-panel border-danger border-opacity-50">
+                <div class="modal-header border-0 pb-1 pt-2 px-3">
+                    <h6 class="modal-title fw-bold text-danger"><i class="fa-solid fa-burst me-1"></i> Trigger UDP Flood</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="small text-muted">Dispatches an authenticated TCP C2 command to the selected host to begin generating high-frequency UDP packet floods towards target host <strong class="text-white">10.0.0.4:8080</strong>.</p>
-                    
+                <div class="modal-body px-3 py-2">
                     <input type="hidden" id="modal-agent-id">
                     <input type="hidden" id="modal-c2-port">
 
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">Attack Duration (Seconds):</label>
-                        <select class="form-select bg-dark text-white border-secondary" id="modal-duration">
-                            <option value="10">10 Seconds (Quick Evaluation Test)</option>
-                            <option value="15" selected>15 Seconds (Standard Campaign Test)</option>
-                            <option value="30">30 Seconds (Extended Flood Test)</option>
-                        </select>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">Target Host:</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary mono" value="10.0.0.4:8080" readonly>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">Target IP / Port:</label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary mono" value="10.0.0.4:8080" readonly>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">Attack Duration:</label>
+                        <select class="form-select form-select-sm bg-dark text-white border-secondary" id="modal-duration">
+                            <option value="10">10 Seconds</option>
+                            <option value="15" selected>15 Seconds</option>
+                            <option value="30">30 Seconds</option>
+                        </select>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-modern-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-modern-danger" onclick="executeModalAttack()">Execute Attack</button>
+                <div class="modal-footer border-0 pt-0 pb-2 px-3">
+                    <button type="button" class="btn btn-compact btn-outline-compact" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-compact btn-danger-compact" onclick="executeModalAttack()">Dispatch Attack</button>
                 </div>
             </div>
         </div>
@@ -720,147 +710,113 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Global State & Chart Handles
-        let networkChart, resourceChart;
+        // Global State
+        let activeChart;
+        let currentChartTab = 'traffic'; // 'traffic' or 'resources'
         let chartTimestamps = [];
         let agentNetHistory = {};
         let agentCpuHistory = {};
         let agentMemHistory = {};
-        let activeAttackingNodes = new Set();
         let activeBlockedNodes = new Set();
         let attackModalInstance = null;
 
-        // Initialize Charts with Modern Glassmorphism Styling
-        function initCharts() {
-            const chartFont = { family: 'Inter', size: 11 };
+        // Initialize Compact Chart
+        function initChart() {
+            const chartFont = { family: 'Inter', size: 10 };
+            const ctx = document.getElementById('activeChart').getContext('2d');
 
-            // 1. Network Traffic Chart
-            const ctxNet = document.getElementById('networkChart').getContext('2d');
-            networkChart = new Chart(ctxNet, {
+            activeChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: [], datasets: [] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: { duration: 300 },
-                    interaction: { mode: 'index', intersect: false },
+                    animation: { duration: 250 },
                     plugins: {
                         legend: {
-                            labels: { color: '#94a3b8', font: chartFont, usePointStyle: true, boxWidth: 6 }
+                            labels: { color: '#94a3b8', font: chartFont, usePointStyle: true, boxWidth: 5, padding: 6 }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            backgroundColor: 'rgba(10, 14, 24, 0.95)',
                             borderColor: 'rgba(56, 189, 248, 0.3)',
                             borderWidth: 1,
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1'
+                            titleFont: { size: 10 },
+                            bodyFont: { size: 10 }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#64748b', font: chartFont },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' }
+                            ticks: { color: '#64748b', font: chartFont, maxTicksLimit: 6 },
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' }
                         },
                         y: {
                             ticks: { color: '#64748b', font: chartFont },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                            title: { display: true, text: 'KB Sent (Delta)', color: '#64748b', font: chartFont }
-                        }
-                    }
-                }
-            });
-
-            // 2. Resource Utilization Chart
-            const ctxRes = document.getElementById('resourceChart').getContext('2d');
-            resourceChart = new Chart(ctxRes, {
-                type: 'line',
-                data: { labels: [], datasets: [] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 300 },
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            labels: { color: '#94a3b8', font: chartFont, usePointStyle: true, boxWidth: 6 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            borderColor: 'rgba(245, 158, 11, 0.3)',
-                            borderWidth: 1,
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: '#64748b', font: chartFont },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' }
-                        },
-                        y: {
-                            min: 0,
-                            max: 100,
-                            ticks: { color: '#64748b', font: chartFont },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                            title: { display: true, text: 'Percentage (%)', color: '#64748b', font: chartFont }
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' }
                         }
                     }
                 }
             });
         }
 
-        // Terminal Logger Helper
-        function logTerminal(message, tag = 'INFO') {
-            const box = document.getElementById('terminal-log');
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString();
+        // Switch Chart View
+        function switchChartTab(tab) {
+            currentChartTab = tab;
+            const tabs = document.querySelectorAll('#chart-tabs .nav-link');
+            tabs[0].classList.toggle('active', tab === 'traffic');
+            tabs[1].classList.toggle('active', tab === 'resources');
+            renderChartData();
+        }
 
-            let tagClass = 'log-tag-info';
-            if (tag === 'WARN') tagClass = 'log-tag-warn';
-            if (tag === 'ATTACK') tagClass = 'log-tag-attack';
-            if (tag === 'SDN') tagClass = 'log-tag-sdn';
+        // Switch Bottom Panel View
+        function switchPanelTab(tab) {
+            const isRules = tab === 'rules';
+            document.getElementById('tab-btn-rules').classList.toggle('active', isRules);
+            document.getElementById('tab-btn-terminal').classList.toggle('active', !isRules);
+            document.getElementById('panel-rules').classList.toggle('d-none', !isRules);
+            document.getElementById('panel-terminal').classList.toggle('d-none', isRules);
+        }
 
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${tagClass}">[${tag}]</span> ${message}`;
-            box.appendChild(entry);
+        // Logging & Toast Utilities
+        function logTerminal(msg, tag = 'INFO') {
+            const box = document.getElementById('panel-terminal');
+            const timeStr = new Date().toLocaleTimeString();
+            let tagClass = 'tag-info';
+            if (tag === 'WARN') tagClass = 'tag-warn';
+            if (tag === 'ATTACK') tagClass = 'tag-attack';
+            if (tag === 'SDN') tagClass = 'tag-sdn';
+
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span style="color:#64748b;">[${timeStr}]</span> <span class="${tagClass}">[${tag}]</span> ${msg}`;
+            box.appendChild(line);
             box.scrollTop = box.scrollHeight;
         }
 
         function clearTerminal() {
-            document.getElementById('terminal-log').innerHTML = '';
-            logTerminal("Terminal buffer cleared.", "INFO");
+            document.getElementById('panel-terminal').innerHTML = '';
+            logTerminal("Console buffer cleared.", "INFO");
         }
 
-        // Toast Notification Trigger
-        function showToast(title, message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast-bubble';
+        function showToast(title, msg, type = 'info') {
+            const dock = document.getElementById('toast-dock');
+            const card = document.createElement('div');
+            card.className = 'toast-card';
+            let icon = '<i class="fa-solid fa-circle-info text-info"></i>';
+            if (type === 'danger') icon = '<i class="fa-solid fa-triangle-exclamation text-danger"></i>';
+            if (type === 'success') icon = '<i class="fa-solid fa-shield-halved text-success"></i>';
+            if (type === 'warning') icon = '<i class="fa-solid fa-bolt text-warning"></i>';
 
-            let icon = '<i class="fa-solid fa-circle-info text-info fs-5"></i>';
-            if (type === 'danger') icon = '<i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>';
-            if (type === 'success') icon = '<i class="fa-solid fa-shield-halved text-success fs-5"></i>';
-            if (type === 'warning') icon = '<i class="fa-solid fa-bolt text-warning fs-5"></i>';
-
-            toast.innerHTML = `
-                ${icon}
-                <div>
-                    <div class="fw-bold">${title}</div>
-                    <div class="small text-muted">${message}</div>
-                </div>
-            `;
-            container.appendChild(toast);
-
+            card.innerHTML = `${icon} <div><div class="fw-bold">${title}</div><div class="text-muted" style="font-size:0.75rem;">${msg}</div></div>`;
+            dock.appendChild(card);
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(50px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 4500);
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(10px)';
+                card.style.transition = 'all 0.25s ease';
+                setTimeout(() => card.remove(), 250);
+            }, 3500);
         }
 
-        // Periodic Metrics Fetch
+        // Main Telemetry Fetch Loop
         async function fetchMetrics() {
             try {
                 const res = await fetch('/api/metrics');
@@ -868,25 +824,24 @@
                 const data = await res.json();
 
                 renderNodes(data.nodes);
-                renderSDNRules(data.sdn.active_rules);
+                renderSDNRules(data.sdn.active_rules || []);
                 updateSummary(data);
                 updateTopologyVisualizer(data.nodes, data.sdn.active_rules || []);
-                updateCharts(data.nodes);
+                storeChartData(data.nodes);
+                renderChartData();
             } catch (err) {
-                console.error("Telemetry query failed:", err);
+                console.error("Fetch metrics error:", err);
             }
         }
 
-        // Render Dynamic Node Cards
+        // Render Prominent CPU & RAM Allocation Meters
         function renderNodes(nodes) {
             const container = document.getElementById('nodes-container');
             if (!nodes || nodes.length === 0) {
                 container.innerHTML = `
                     <div class="col-12">
-                        <div class="glass-card p-4 text-center text-muted">
-                            <i class="fa-solid fa-satellite-dish fs-3 mb-2 text-secondary"></i>
-                            <div class="fw-bold text-white">No Monitored Nodes Active</div>
-                            <div class="small mt-1">Start agents via <code class="text-info">sudo python3 topology.py</code> or <code class="text-info">python agent.py</code></div>
+                        <div class="p-3 text-center text-muted small">
+                            <span class="spinner-border spinner-border-sm text-info me-1"></span> Waiting for host agents to connect...
                         </div>
                     </div>`;
                 return;
@@ -894,76 +849,68 @@
 
             container.innerHTML = nodes.map(node => {
                 const isAttacking = node.active_attack || node.status === 'ATTACKING';
-                const cpuClass = node.cpu_percent > 80 ? 'bar-red' : (node.cpu_percent > 50 ? 'bar-yellow' : 'bar-green');
-                const memClass = node.memory_percent > 80 ? 'bar-red' : (node.memory_percent > 50 ? 'bar-yellow' : 'bar-green');
                 const isBlocked = activeBlockedNodes.has(node.ip_address);
+                
+                // Color thresholds for CPU and RAM
+                const cpuColor = node.cpu_percent > 80 ? 'fill-red' : (node.cpu_percent > 50 ? 'fill-yellow' : 'fill-green');
+                const memColor = node.memory_percent > 80 ? 'fill-red' : (node.memory_percent > 50 ? 'fill-yellow' : 'fill-green');
+                const cpuTextColor = node.cpu_percent > 80 ? 'text-danger' : (node.cpu_percent > 50 ? 'text-warning' : 'text-success');
 
                 return `
                     <div class="col-md-4">
-                        <div class="glass-card p-3 ${isAttacking ? 'border-danger border-opacity-75' : ''}">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="bg-dark p-2 rounded-2 text-info">
-                                        <i class="fa-solid fa-desktop"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold m-0 text-white">${node.agent_id}</h6>
-                                        <span class="small text-muted mono">${node.ip_address}</span>
-                                    </div>
+                        <div class="p-2 rounded-2 ${isAttacking ? 'border border-danger border-opacity-75 bg-danger bg-opacity-10' : 'bg-dark bg-opacity-40 border border-secondary border-opacity-15'}">
+                            <!-- Card Header -->
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="pulse-dot ${isAttacking ? 'pulse-red' : 'pulse-green'}"></span>
+                                    <strong class="text-white small">${node.agent_id}</strong>
+                                    <span class="mono text-muted" style="font-size: 0.7rem;">(${node.ip_address})</span>
                                 </div>
-                                <span class="badge badge-status status-${node.status}">
-                                    <span class="pulse-indicator ${isAttacking ? 'pulse-red' : 'pulse-green'}"></span>
-                                    ${node.status}
-                                </span>
+                                <span class="badge badge-status status-${node.status}">${node.status}</span>
                             </div>
 
-                            <!-- Resource Gauges (CPU & RAM) -->
-                            <div class="p-2 bg-dark bg-opacity-40 rounded-3 my-3 border border-secondary border-opacity-10">
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-muted"><i class="fa-solid fa-microchip me-1"></i> CPU Load</span>
-                                        <span class="fw-bold ${node.cpu_percent > 80 ? 'text-danger' : 'text-white'} mono">${node.cpu_percent}%</span>
-                                    </div>
-                                    <div class="load-bar-wrapper">
-                                        <div class="load-bar-fill ${cpuClass}" style="width: ${Math.min(node.cpu_percent, 100)}%;"></div>
-                                    </div>
+                            <!-- Dedicated CPU Allocation Meter -->
+                            <div class="meter-container">
+                                <div class="meter-header">
+                                    <span class="meter-title"><i class="fa-solid fa-microchip text-info"></i> CPU ALLOCATION</span>
+                                    <span class="meter-val ${cpuTextColor} mono">${node.cpu_percent}%</span>
                                 </div>
-                                <div>
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-muted"><i class="fa-solid fa-memory me-1"></i> RAM Load</span>
-                                        <span class="fw-bold mono text-white">${node.memory_percent}%</span>
-                                    </div>
-                                    <div class="load-bar-wrapper">
-                                        <div class="load-bar-fill ${memClass}" style="width: ${Math.min(node.memory_percent, 100)}%;"></div>
-                                    </div>
+                                <div class="meter-track">
+                                    <div class="meter-fill ${cpuColor}" style="width: ${Math.min(node.cpu_percent, 100)}%;"></div>
                                 </div>
                             </div>
 
-                            <!-- Network I/O Telemetry -->
-                            <div class="d-flex justify-content-between small text-muted mb-3 mono">
-                                <div>
-                                    <i class="fa-solid fa-arrow-up text-primary me-1"></i> Sent: 
-                                    <strong class="text-white">${(node.bytes_sent / 1024 / 1024).toFixed(2)} MB</strong>
+                            <!-- Dedicated RAM Allocation Meter -->
+                            <div class="meter-container">
+                                <div class="meter-header">
+                                    <span class="meter-title"><i class="fa-solid fa-memory text-warning"></i> RAM ALLOCATION</span>
+                                    <span class="meter-val text-white mono">${node.memory_percent}%</span>
                                 </div>
-                                <div>
-                                    <i class="fa-solid fa-arrow-down text-success me-1"></i> Recv: 
-                                    <strong class="text-white">${(node.bytes_recv / 1024 / 1024).toFixed(2)} MB</strong>
+                                <div class="meter-track">
+                                    <div class="meter-fill ${memColor}" style="width: ${Math.min(node.memory_percent, 100)}%;"></div>
                                 </div>
                             </div>
 
-                            <!-- Interactive Control Action Buttons -->
-                            <div class="d-flex gap-2">
+                            <!-- Sub-Metrics: Bandwidth & Process Threads -->
+                            <div class="d-flex justify-content-between text-muted mono mb-2" style="font-size: 0.72rem;">
+                                <span><i class="fa-solid fa-arrow-up text-primary"></i> ${(node.bytes_sent / 1024 / 1024).toFixed(1)} MB</span>
+                                <span><i class="fa-solid fa-arrow-down text-success"></i> ${(node.bytes_recv / 1024 / 1024).toFixed(1)} MB</span>
+                                <span><i class="fa-solid fa-list-check text-secondary"></i> ${node.processes} procs</span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-1">
                                 ${isAttacking ? `
-                                    <button class="btn btn-sm btn-modern-danger w-100" onclick="stopAttack('${node.agent_id}', ${node.c2_port || 5001})">
-                                        <i class="fa-solid fa-stop me-1"></i> Halt Flood
+                                    <button class="btn btn-compact btn-danger-compact w-100" onclick="stopAttack('${node.agent_id}', ${node.c2_port || 5001})">
+                                        <i class="fa-solid fa-stop"></i> Halt
                                     </button>` : `
-                                    <button class="btn btn-sm btn-modern-outline w-100" onclick="openAttackModal('${node.agent_id}', ${node.c2_port || 5001})">
-                                        <i class="fa-solid fa-burst text-danger me-1"></i> Attack
+                                    <button class="btn btn-compact btn-outline-compact w-100" onclick="openAttackModal('${node.agent_id}', ${node.c2_port || 5001})">
+                                        <i class="fa-solid fa-burst text-danger"></i> Attack
                                     </button>`
                                 }
-                                <button class="btn btn-sm ${isBlocked ? 'btn-modern-success' : 'btn-modern-warning'} w-100" 
+                                <button class="btn btn-compact ${isBlocked ? 'btn-success-compact' : 'btn-warning-compact'} w-100" 
                                         onclick="${isBlocked ? `sdnUnblock('${node.ip_address}')` : `sdnMitigate('${node.agent_id}', '${node.ip_address}')`}">
-                                    <i class="fa-solid ${isBlocked ? 'fa-lock-open' : 'fa-ban'} me-1"></i> 
+                                    <i class="fa-solid ${isBlocked ? 'fa-lock-open' : 'fa-ban'}"></i> 
                                     ${isBlocked ? 'Unblock' : 'SDN Drop'}
                                 </button>
                             </div>
@@ -976,18 +923,15 @@
         // Render OpenFlow Drop Rules
         function renderSDNRules(rules) {
             const table = document.getElementById('sdn-rules-table');
-            const badge = document.getElementById('active-flow-count-badge');
+            const badge = document.getElementById('tab-rules-badge');
             activeBlockedNodes.clear();
 
+            badge.innerText = rules.length;
+
             if (!rules || rules.length === 0) {
-                table.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No active drop flow rules on switch s1</td></tr>';
-                badge.innerText = '0 Active';
-                badge.className = 'badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 mono';
+                table.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No active drop rules on switch s1</td></tr>';
                 return;
             }
-
-            badge.innerText = `${rules.length} DROP Rule${rules.length > 1 ? 's' : ''}`;
-            badge.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mono';
 
             table.innerHTML = rules.map(rule => {
                 const srcIp = rule.match ? rule.match.ipv4_src : (rule.src_ip || 'Unknown');
@@ -995,14 +939,13 @@
 
                 return `
                     <tr>
-                        <td class="mono text-warning font-monospace">${rule.rule_id}</td>
-                        <td><strong class="text-white">${srcIp}</strong> <span class="text-muted">(${rule.agent_id || 'Agent'})</span></td>
-                        <td><span class="badge bg-dark border border-secondary text-info mono">eth_type=0x0800</span></td>
-                        <td><span class="badge bg-danger text-white"><i class="fa-solid fa-ban me-1"></i> DROP</span></td>
-                        <td class="small text-muted mono">${rule.installed_at || 'Active'}</td>
+                        <td class="mono text-warning" style="font-size:0.75rem;">${rule.rule_id}</td>
+                        <td><strong class="text-white">${srcIp}</strong> <span class="text-muted small">(${rule.agent_id || 'Node'})</span></td>
+                        <td><span class="badge bg-dark border border-secondary text-info mono" style="font-size:0.68rem;">ipv4_src</span></td>
+                        <td><span class="badge bg-danger"><i class="fa-solid fa-ban"></i> DROP</span></td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-modern-success py-1 px-3" onclick="sdnUnblock('${srcIp}')">
-                                <i class="fa-solid fa-lock-open me-1"></i> Unblock
+                            <button class="btn btn-compact btn-success-compact py-0 px-2" onclick="sdnUnblock('${srcIp}')">
+                                <i class="fa-solid fa-lock-open"></i>
                             </button>
                         </td>
                     </tr>
@@ -1010,63 +953,56 @@
             }).join('');
         }
 
-        // Update Summary Cards
+        // Update KPI Overview
         function updateSummary(data) {
             document.getElementById('total-nodes').innerText = data.nodes.length;
-            document.getElementById('active-nodes-subtitle').innerText = `${data.nodes.length} host node(s) connected`;
-
             const attacks = data.nodes.filter(n => n.active_attack || n.status === 'ATTACKING').length;
             document.getElementById('total-attacks').innerText = attacks;
-            document.getElementById('attacks-subtitle').innerText = attacks > 0 ? `${attacks} active flood streams` : 'Zero active flood streams';
-
             const rulesCount = data.sdn && data.sdn.active_rules ? data.sdn.active_rules.length : 0;
             document.getElementById('sdn-rules-count').innerText = rulesCount;
-            document.getElementById('rules-subtitle').innerText = rulesCount > 0 ? `${rulesCount} blocked IP address(es)` : 'Switch s1 data plane clear';
+
+            // Calculate cluster average CPU
+            if (data.nodes.length > 0) {
+                const avgCpu = Math.round(data.nodes.reduce((acc, curr) => acc + (curr.cpu_percent || 0), 0) / data.nodes.length);
+                document.getElementById('cluster-avg-cpu').innerText = `${avgCpu}%`;
+                const bar = document.getElementById('cluster-cpu-bar');
+                bar.style.width = `${Math.min(avgCpu, 100)}%`;
+                bar.className = 'meter-fill ' + (avgCpu > 80 ? 'fill-red' : (avgCpu > 50 ? 'fill-yellow' : 'fill-green'));
+            }
 
             const overallBadge = document.getElementById('overall-status');
             if (attacks > 0) {
-                overallBadge.className = 'badge badge-status status-ATTACKING fs-6';
-                overallBadge.innerHTML = '<span class="pulse-indicator pulse-red"></span> ATTACK UNDERWAY';
+                overallBadge.className = 'badge badge-status status-ATTACKING';
+                overallBadge.innerHTML = '<span class="pulse-dot pulse-red"></span> ATTACK UNDERWAY';
             } else if (rulesCount > 0) {
-                overallBadge.className = 'badge badge-status status-ALERT fs-6';
-                overallBadge.innerHTML = '<span class="pulse-indicator pulse-yellow"></span> MITIGATION ACTIVE';
+                overallBadge.className = 'badge badge-status status-ALERT';
+                overallBadge.innerHTML = '<span class="pulse-dot pulse-yellow"></span> DROP ACTIVE';
             } else {
-                overallBadge.className = 'badge badge-status status-NORMAL fs-6';
-                overallBadge.innerHTML = '<span class="pulse-indicator pulse-green"></span> ALL NORMAL';
-            }
-
-            // Update SDN status
-            if (data.sdn && data.sdn.status === 'ONLINE') {
-                document.getElementById('sdn-status').innerText = 'ONLINE';
-                document.getElementById('sdn-indicator').className = 'pulse-indicator pulse-green';
+                overallBadge.className = 'badge badge-status status-NORMAL';
+                overallBadge.innerHTML = '<span class="pulse-dot pulse-green"></span> ALL NORMAL';
             }
         }
 
-        // Update Interactive Network Topology Diagram
+        // Update Topology Map
         function updateTopologyVisualizer(nodes, rules) {
             const blockedIps = new Set(rules.map(r => r.match ? r.match.ipv4_src : r.src_ip));
 
-            // Map agent nodes to svg ids
             nodes.forEach(node => {
-                let idSuffix = null;
-                if (node.agent_id.includes('1') || node.ip_address.endsWith('.1')) idSuffix = 'h1';
-                if (node.agent_id.includes('2') || node.ip_address.endsWith('.2')) idSuffix = 'h2';
-                if (node.agent_id.includes('3') || node.ip_address.endsWith('.3')) idSuffix = 'h3';
+                let suffix = null;
+                if (node.agent_id.includes('1') || node.ip_address.endsWith('.1')) suffix = 'h1';
+                if (node.agent_id.includes('2') || node.ip_address.endsWith('.2')) suffix = 'h2';
+                if (node.agent_id.includes('3') || node.ip_address.endsWith('.3')) suffix = 'h3';
 
-                if (idSuffix) {
-                    const line = document.getElementById(`link-${idSuffix}`);
-                    const statusText = document.getElementById(`viz-status-${idSuffix}`);
+                if (suffix) {
+                    const line = document.getElementById(`link-${suffix}`);
+                    const statusText = document.getElementById(`viz-status-${suffix}`);
                     const isAttacking = node.active_attack || node.status === 'ATTACKING';
                     const isBlocked = blockedIps.has(node.ip_address);
 
                     if (line) {
-                        if (isBlocked) {
-                            line.className.baseVal = 'topo-link-blocked';
-                        } else if (isAttacking) {
-                            line.className.baseVal = 'topo-link-attack';
-                        } else {
-                            line.className.baseVal = 'topo-link-active';
-                        }
+                        if (isBlocked) line.className.baseVal = 'topo-link-blocked';
+                        else if (isAttacking) line.className.baseVal = 'topo-link-attack';
+                        else line.className.baseVal = 'topo-link-active';
                     }
 
                     if (statusText) {
@@ -1085,62 +1021,61 @@
             });
         }
 
-        // Update Charts
-        function updateCharts(nodes) {
+        // Chart Data Ingestion
+        function storeChartData(nodes) {
             const now = new Date().toLocaleTimeString();
-            if (chartTimestamps.length > 12) chartTimestamps.shift();
+            if (chartTimestamps.length > 10) chartTimestamps.shift();
             chartTimestamps.push(now);
 
-            const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#818cf8'];
-
-            // 1. Network KB Sent Dataset
-            const netDatasets = nodes.map((node, i) => {
+            nodes.forEach(node => {
+                // Network history
                 if (!agentNetHistory[node.agent_id]) agentNetHistory[node.agent_id] = [];
-                if (agentNetHistory[node.agent_id].length > 12) agentNetHistory[node.agent_id].shift();
+                if (agentNetHistory[node.agent_id].length > 10) agentNetHistory[node.agent_id].shift();
+                agentNetHistory[node.agent_id].push(Math.round(node.bytes_sent / 1024));
 
-                const kbSent = Math.round(node.bytes_sent / 1024);
-                agentNetHistory[node.agent_id].push(kbSent);
-
-                return {
-                    label: `${node.agent_id} (${node.ip_address})`,
-                    data: agentNetHistory[node.agent_id],
-                    borderColor: colors[i % colors.length],
-                    backgroundColor: colors[i % colors.length] + '15',
-                    fill: true,
-                    tension: 0.35,
-                    borderWidth: 2,
-                    pointRadius: 2
-                };
-            });
-
-            networkChart.data.labels = chartTimestamps;
-            networkChart.data.datasets = netDatasets;
-            networkChart.update('none');
-
-            // 2. Resource Utilization Dataset (CPU %)
-            const resDatasets = nodes.map((node, i) => {
+                // CPU history
                 if (!agentCpuHistory[node.agent_id]) agentCpuHistory[node.agent_id] = [];
-                if (agentCpuHistory[node.agent_id].length > 12) agentCpuHistory[node.agent_id].shift();
-
+                if (agentCpuHistory[node.agent_id].length > 10) agentCpuHistory[node.agent_id].shift();
                 agentCpuHistory[node.agent_id].push(node.cpu_percent);
-
-                return {
-                    label: `${node.agent_id} CPU %`,
-                    data: agentCpuHistory[node.agent_id],
-                    borderColor: colors[i % colors.length],
-                    borderDash: [4, 4],
-                    tension: 0.25,
-                    borderWidth: 1.8,
-                    pointRadius: 2
-                };
             });
-
-            resourceChart.data.labels = chartTimestamps;
-            resourceChart.data.datasets = resDatasets;
-            resourceChart.update('none');
         }
 
-        // Interactive Attack Modal Launch
+        function renderChartData() {
+            if (!activeChart) return;
+            const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b'];
+            const nodeIds = Object.keys(agentNetHistory);
+
+            if (currentChartTab === 'traffic') {
+                activeChart.data.labels = chartTimestamps;
+                activeChart.data.datasets = nodeIds.map((id, i) => ({
+                    label: `${id} KB/s`,
+                    data: agentNetHistory[id],
+                    borderColor: colors[i % colors.length],
+                    backgroundColor: colors[i % colors.length] + '18',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 1.8,
+                    pointRadius: 2
+                }));
+                activeChart.options.scales.y.title = { display: false };
+                activeChart.update('none');
+            } else {
+                activeChart.data.labels = chartTimestamps;
+                activeChart.data.datasets = nodeIds.map((id, i) => ({
+                    label: `${id} CPU %`,
+                    data: agentCpuHistory[id],
+                    borderColor: colors[i % colors.length],
+                    borderDash: [3, 3],
+                    tension: 0.2,
+                    borderWidth: 1.6,
+                    pointRadius: 2
+                }));
+                activeChart.options.scales.y.title = { display: false };
+                activeChart.update('none');
+            }
+        }
+
+        // C2 & SDN Action Handlers
         function openAttackModal(agentId, c2Port) {
             document.getElementById('modal-agent-id').value = agentId;
             document.getElementById('modal-c2-port').value = c2Port;
@@ -1156,25 +1091,25 @@
             const duration = parseInt(document.getElementById('modal-duration').value) || 15;
 
             if (attackModalInstance) attackModalInstance.hide();
-            logTerminal(`[C2 REQUEST] Launching DDoS flood attack on ${agentId} (${duration}s)...`, "ATTACK");
-            showToast("Attack Dispatched", `Targeting 10.0.0.4 from ${agentId} for ${duration}s`, "danger");
+            logTerminal(`Launching DDoS flood on ${agentId} (${duration}s)...`, "ATTACK");
+            showToast("Attack Triggered", `Target: 10.0.0.4 from ${agentId} (${duration}s)`, "danger");
 
             try {
                 const res = await fetch('/api/attack/start', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ agent_id: agentId, c2_port: c2Port, duration: duration })
+                    body: JSON.stringify({ agent_id: agentId, c2_port: c2Port, duration })
                 });
                 const data = await res.json();
-                logTerminal(`[C2 ACK] ${data.message || JSON.stringify(data)}`, "ATTACK");
+                logTerminal(`C2 ACK: ${data.message || 'Started'}`, "ATTACK");
                 fetchMetrics();
             } catch (err) {
-                logTerminal(`C2 Connection Error: ${err}`, "WARN");
+                logTerminal(`C2 Error: ${err}`, "WARN");
             }
         }
 
         async function stopAttack(agentId, c2Port) {
-            logTerminal(`[C2 COMMAND] Dispatching STOP_ATTACK to ${agentId}...`, "WARN");
+            logTerminal(`Stopping attack on ${agentId}...`, "WARN");
             try {
                 const res = await fetch('/api/attack/stop', {
                     method: 'POST',
@@ -1182,28 +1117,28 @@
                     body: JSON.stringify({ agent_id: agentId, c2_port: c2Port })
                 });
                 const data = await res.json();
-                logTerminal(`[C2 ACK] ${data.message || 'Attack stopped'}`, "INFO");
-                showToast("Attack Stopped", `Terminated flood engine on ${agentId}`, "warning");
+                logTerminal(`C2 ACK: ${data.message || 'Stopped'}`, "INFO");
+                showToast("Attack Stopped", `Flood engine halted on ${agentId}`, "warning");
                 fetchMetrics();
             } catch (err) {
-                logTerminal(`Failed to stop attack: ${err}`, "WARN");
+                logTerminal(`Stop failed: ${err}`, "WARN");
             }
         }
 
         async function triggerSequentialCampaign() {
-            logTerminal("🚀 [CAMPAIGN] Initiating Sequential Attack Campaign across all agents...", "ATTACK");
-            showToast("Campaign Launched", "Sequential DDoS floods executing across nodes", "danger");
+            logTerminal("Initiating Sequential DDoS Attack Campaign across nodes...", "ATTACK");
+            showToast("Sequential Campaign", "Attacking h1 -> h2 -> h3 in sequence", "danger");
             try {
                 const res = await fetch('/api/campaign/start', { method: 'POST' });
                 const data = await res.json();
-                logTerminal(`[CAMPAIGN STATUS] ${data.message}`, "INFO");
+                logTerminal(`Campaign: ${data.message}`, "INFO");
             } catch (err) {
-                logTerminal(`Campaign failed: ${err}`, "WARN");
+                logTerminal(`Campaign error: ${err}`, "WARN");
             }
         }
 
         async function sdnMitigate(agentId, srcIp) {
-            logTerminal(`[SDN REST] Sending FlowMod mitigation request for ${srcIp} (${agentId})...`, "SDN");
+            logTerminal(`Sending SDN FlowMod drop request for ${srcIp}...`, "SDN");
             try {
                 const res = await fetch('/api/sdn/mitigate', {
                     method: 'POST',
@@ -1211,8 +1146,8 @@
                     body: JSON.stringify({ agent_id: agentId, src_ip: srcIp })
                 });
                 const data = await res.json();
-                logTerminal(`[SDN ACK] FlowMod DROP rule installed on switch s1 for ${srcIp}`, "SDN");
-                showToast("SDN FlowMod Installed", `Traffic from ${srcIp} now dropped at switch s1`, "success");
+                logTerminal(`SDN ACK: FlowMod DROP rule installed for ${srcIp}`, "SDN");
+                showToast("SDN FlowMod Dropped", `Traffic from ${srcIp} dropped at switch s1`, "success");
                 fetchMetrics();
             } catch (err) {
                 logTerminal(`SDN Mitigation failed: ${err}`, "WARN");
@@ -1220,7 +1155,7 @@
         }
 
         async function sdnUnblock(srcIp) {
-            logTerminal(`[SDN REST] Removing FlowMod DROP rule for IP ${srcIp}...`, "SDN");
+            logTerminal(`Removing SDN FlowMod drop rule for ${srcIp}...`, "SDN");
             try {
                 const res = await fetch('/api/sdn/unblock', {
                     method: 'POST',
@@ -1228,8 +1163,8 @@
                     body: JSON.stringify({ src_ip: srcIp })
                 });
                 const data = await res.json();
-                logTerminal(`[SDN ACK] FlowMod rule deleted. Traffic restored for ${srcIp}`, "SDN");
-                showToast("Traffic Restored", `Unblocked ${srcIp} on OpenFlow switch s1`, "info");
+                logTerminal(`SDN ACK: Drop rule removed for ${srcIp}`, "SDN");
+                showToast("Traffic Restored", `Unblocked ${srcIp} on switch s1`, "info");
                 fetchMetrics();
             } catch (err) {
                 logTerminal(`SDN Unblock failed: ${err}`, "WARN");
@@ -1240,13 +1175,13 @@
             const icon = document.getElementById('refresh-icon');
             icon.classList.add('fa-spin');
             fetchMetrics().then(() => {
-                setTimeout(() => icon.classList.remove('fa-spin'), 600);
+                setTimeout(() => icon.classList.remove('fa-spin'), 500);
             });
         }
 
-        // Initialize and Start Polling Loop
+        // Initialize on DOM Ready
         window.addEventListener('DOMContentLoaded', () => {
-            initCharts();
+            initChart();
             fetchMetrics();
             setInterval(fetchMetrics, 2000);
         });
