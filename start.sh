@@ -31,10 +31,14 @@ fi
 check_dependencies() {
     echo -e "[*] Checking Python dependencies (flask, psutil)..."
     if ! $PY_BIN -c "import flask, psutil" >/dev/null 2>&1; then
-        echo -e "[*] Installing required packages via pip..."
-        $PY_BIN -m pip install flask psutil || {
-            echo -e "${YELLOW}[WARNING] pip install failed. If in managed environment, use: sudo apt install python3-flask python3-psutil${RESET}"
-        }
+        echo -e "[*] Installing required packages from requirements.txt..."
+        if [ -f "requirements.txt" ]; then
+            $PY_BIN -m pip install -r requirements.txt || {
+                echo -e "${YELLOW}[WARNING] pip install failed. If in managed environment, use: sudo apt install python3-flask python3-psutil${RESET}"
+            }
+        else
+            $PY_BIN -m pip install flask psutil || true
+        fi
     fi
 }
 

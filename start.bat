@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-title Network Health Monitoring & SDN System Manager
+title Network Health Monitoring and SDN System Manager
 
 :: Ensure current working directory is the repository folder
 cd /d "%~dp0"
@@ -26,21 +26,25 @@ exit /b 1
 %PY_CMD% -c "import flask, psutil" >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo ========================================================================
-    echo  [*] Installing required Python packages (flask, psutil)...
+    echo  [*] Installing required Python packages from requirements.txt...
     echo ========================================================================
-    %PY_CMD% -m pip install flask psutil
+    if exist requirements.txt (
+        %PY_CMD% -m pip install -r requirements.txt
+    ) else (
+        %PY_CMD% -m pip install flask psutil
+    )
     if %ERRORLEVEL% neq 0 (
-        echo [WARNING] Automatic pip install failed. Please run 'pip install flask psutil' manually.
+        echo [WARNING] Automatic pip install failed. Please run 'pip install -r requirements.txt' manually.
     )
 )
 
 :MENU
 cls
 echo ========================================================================
-echo   NETWORKING COURSE PROJECT: HEALTH MONITORING & SDN SYSTEM
+echo   NETWORKING COURSE PROJECT: HEALTH MONITORING AND SDN SYSTEM
 echo ========================================================================
 echo.
-echo   [1] Start Local Simulation (Controller + Server + 3 Agents + Dashboard)
+echo   [1] Start Local Simulation (Controller + Server + 3 Agents + UI)
 echo   [2] Run Automated Verification Suite (demo_runner.py)
 echo   [3] Open Web Dashboard in Browser (http://127.0.0.1:5050)
 echo   [4] Launch Mininet Topology in WSL (Linux: topology.py)
@@ -48,9 +52,10 @@ echo   [5] Stop All Running Components
 echo   [Q] Quit
 echo.
 echo ========================================================================
+set "CHOICE="
 set /p CHOICE="Select an option [1-5, Q] (Default: 1): "
 
-if "%CHOICE%"=="" set CHOICE=1
+if not defined CHOICE set CHOICE=1
 if "%CHOICE%"=="1" goto START_SIMULATION
 if "%CHOICE%"=="2" goto RUN_TESTS
 if "%CHOICE%"=="3" goto OPEN_BROWSER
@@ -62,20 +67,20 @@ goto MENU
 :START_SIMULATION
 echo.
 echo ========================================================================
-echo   LAUNCHING LOCAL NETWORK HEALTH & SDN SIMULATION
+echo   LAUNCHING LOCAL NETWORK HEALTH AND SDN SIMULATION
 echo ========================================================================
 echo [*] Starting SDN Controller on port 8080...
-start "SDN Controller (Port 8080)" %PY_CMD% sdn_controller.py
+start "SDN Controller" %PY_CMD% sdn_controller.py
 timeout /t 1 /nobreak >nul
 
 echo [*] Starting Central Monitoring Server on port 5050...
-start "Central Server (Port 5050)" %PY_CMD% server.py
+start "Central Server" %PY_CMD% server.py
 timeout /t 2 /nobreak >nul
 
-echo [*] Launching 3 Host Agents (Node-1, Node-2, Node-3)...
-start "Agent Node-1 (C2: 5001)" %PY_CMD% agent.py --agent-id Node-1 --c2-port 5001
-start "Agent Node-2 (C2: 5002)" %PY_CMD% agent.py --agent-id Node-2 --c2-port 5002
-start "Agent Node-3 (C2: 5003)" %PY_CMD% agent.py --agent-id Node-3 --c2-port 5003
+echo [*] Launching 3 Host Agents: Node-1, Node-2, Node-3...
+start "Agent Node-1" %PY_CMD% agent.py --agent-id Node-1 --c2-port 5001
+start "Agent Node-2" %PY_CMD% agent.py --agent-id Node-2 --c2-port 5002
+start "Agent Node-3" %PY_CMD% agent.py --agent-id Node-3 --c2-port 5003
 
 echo.
 echo [*] Waiting 3 seconds for sockets to initialize...
@@ -99,6 +104,7 @@ echo   [M] Return to Main Menu
 echo.
 
 :SIM_LOOP
+set "SUBCHOICE="
 set /p SUBCHOICE="Action [T / K / M]: "
 if /i "%SUBCHOICE%"=="T" goto RUN_TESTS
 if /i "%SUBCHOICE%"=="K" goto STOP_ALL
