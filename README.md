@@ -2,7 +2,22 @@
 
 A Computer Networks project combining socket-based host telemetry, OpenFlow Software-Defined Networking (SDN), and automated attack mitigation.
 
-## Quick Start (3 Steps)
+## Windows Quick Start (1-Click)
+Simply double-click or run:
+```cmd
+start.bat
+```
+This automatically verifies Python dependencies, launches the Controller, Central Server, and 3 Agent nodes in separate windows, and opens the live dashboard at `http://127.0.0.1:5050`.
+
+## Linux / WSL Quick Start (1-Click)
+Run:
+```bash
+chmod +x start.sh
+./start.sh
+```
+This gives an interactive menu to launch either the full **Mininet + Ryu Pipeline** or a **Local Simulation**, and can also clean up background processes.
+
+## Mininet Manual Launch (3 Steps)
 
 ### Step 1: Start Ryu SDN Controller (Terminal 1)
 ```bash
