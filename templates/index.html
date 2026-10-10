@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Health & SDN Attack Monitoring Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --accent-cyan: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --text-main: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: 50px;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .badge-status {
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .status-NORMAL { background-color: rgba(63, 185, 80, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-ALERT { background-color: rgba(210, 153, 34, 0.2); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+        .status-ATTACKING { background-color: rgba(248, 81, 73, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .status-DOWN { background-color: rgba(139, 148, 158, 0.2); color: #8b949e; border: 1px solid #8b949e; }
+
+        .btn-action {
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+
+        .terminal-box {
+            background-color: #090d11;
+            border: 1px solid var(--border-color);
+            font-family: "Courier New", Courier, monospace;
+            padding: 15px;
+            border-radius: 6px;
+            height: 220px;
+            overflow-y: auto;
+            color: #7ee787;
+        }
+
+        .table-custom {
+            color: var(--text-main);
+        }
+        .table-custom th {
+            background-color: #21262d;
+            border-color: var(--border-color);
+            color: #8b949e;
+        }
+        .table-custom td {
+            border-color: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-dark px-4 py-3 mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 font-monospace fs-4">
+                <i class="fa-solid fa-shield-halved text-primary me-2"></i>
+                Network Health & SDN Attack Monitoring Center
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-outline-secondary border px-3 py-2">
+                    <i class="fa-solid fa-network-wired me-1"></i> SDN Controller: <strong text-success id="sdn-status">ONLINE</strong>
+                </span>
+                <button class="btn btn-danger btn-action px-3" onclick="triggerSequentialCampaign()">
+                    <i class="fa-solid fa-bolt me-1"></i> Run Sequential Attack Campaign
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        
+        <!-- Key Health Metrics Overview -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <div class="metric-label"><i class="fa-solid fa-server me-1"></i> Active Monitored Nodes</div>
+                    <div class="metric-value text-primary" id="total-nodes">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <div class="metric-label"><i class="fa-solid fa-triangle-exclamation me-1"></i> Active Anomalies / Attacks</div>
+                    <div class="metric-value text-danger" id="total-attacks">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <div class="metric-label"><i class="fa-solid fa-lock me-1"></i> SDN Flow Drop Rules</div>
+                    <div class="metric-value text-warning" id="sdn-rules-count">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <div class="metric-label"><i class="fa-solid fa-heart-pulse me-1"></i> System Health Status</div>
+                    <div class="mt-2"><span class="badge badge-status status-NORMAL fs-6" id="overall-status">NORMAL</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Node Cards Row -->
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-microchip me-2 text-info"></i> Agent Node Status & Control Panel</h5>
+            <div class="row g-3" id="nodes-container">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+
+        <!-- Real-time Charts Section -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="card p-3">
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-chart-line me-2 text-primary"></i> Outbound Network Traffic Spikes (Bytes / sec)</h6>
+                    <canvas id="networkChart" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-3">
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-gauge-high me-2 text-warning"></i> CPU & Memory Load Trends (%)</h6>
+                    <canvas id="resourceChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- SDN Flow Rules & Audit Logs Section -->
+        <div class="row g-3">
+            <div class="col-lg-7">
+                <div class="card p-3">
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-route me-2 text-danger"></i> SDN Controller Flow Rules (OpenFlow Switch s1)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-custom align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Rule ID</th>
+                                    <th>Target Source</th>
+                                    <th>Action</th>
+                                    <th>Installed Time</th>
+                                    <th>Control</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sdn-rules-table">
+                                <tr><td colspan="5" class="text-center text-muted">No active drop flow rules</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card p-3">
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-terminal me-2 text-success"></i> Live System Audit & Alert Terminal Log</h6>
+                    <div class="terminal-box" id="terminal-log">
+                        <div>[SYSTEM] Central Telemetry & SDN Control Center Started...</div>
+                        <div>[SYSTEM] Listening for agent health reports on UDP:5000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let networkChart, resourceChart;
+        let chartTimestamps = [];
+        let agentNetData = {};
+        let agentCpuData = {};
+
+        function initCharts() {
+            const ctxNet = document.getElementById('networkChart').getContext('2d');
+            networkChart = new Chart(ctxNet, {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#c9d1d9' } } },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } }
+                    }
+                }
+            });
+
+            const ctxRes = document.getElementById('resourceChart').getContext('2d');
+            resourceChart = new Chart(ctxRes, {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#c9d1d9' } } },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#30363d' }, min: 0, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function logTerminal(message) {
+            const box = document.getElementById('terminal-log');
+            const timeStr = new Date().toLocaleTimeString();
+            box.innerHTML += `<div>[${timeStr}] ${message}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function fetchMetrics() {
+            try {
+                const res = await fetch('/api/metrics');
+                const data = await res.json();
+                
+                renderNodes(data.nodes);
+                renderSDNRules(data.sdn.active_rules);
+                updateSummary(data);
+                updateCharts(data.nodes);
+            } catch (err) {
+                console.error("Error fetching metrics:", err);
+            }
+        }
+
+        function renderNodes(nodes) {
+            const container = document.getElementById('nodes-container');
+            if (!nodes || nodes.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="alert alert-dark text-center">No agents connected yet. Launch `python agent.py` to start reporting.</div></div>';
+                return;
+            }
+
+            container.innerHTML = nodes.map(node => `
+                <div class="col-md-4">
+                    <div class="card p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold m-0"><i class="fa-solid fa-desktop me-2 text-info"></i> ${node.agent_id}</h6>
+                            <span class="badge badge-status status-${node.status}">${node.status}</span>
+                        </div>
+                        <div class="small text-muted mb-3"><i class="fa-solid fa-network-wired"></i> IP: ${node.ip_address} | C2 Port: ${node.c2_port || 5001}</div>
+                        
+                        <div class="row g-2 text-center mb-3">
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-dark">
+                                    <div class="small text-muted">CPU</div>
+                                    <div class="fw-bold ${node.cpu_percent > 80 ? 'text-danger' : ''}">${node.cpu_percent}%</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-dark">
+                                    <div class="small text-muted">RAM</div>
+                                    <div class="fw-bold">${node.memory_percent}%</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-dark">
+                                    <div class="small text-muted">Processes</div>
+                                    <div class="fw-bold">${node.processes}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="small mb-3">
+                            <div><i class="fa-solid fa-upload me-1 text-primary"></i> Sent: <strong>${(node.bytes_sent / 1024 / 1024).toFixed(2)} MB</strong></div>
+                            <div><i class="fa-solid fa-download me-1 text-success"></i> Recv: <strong>${(node.bytes_recv / 1024 / 1024).toFixed(2)} MB</strong></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            ${node.active_attack ? 
+                                `<button class="btn btn-sm btn-outline-danger w-100" onclick="stopAttack('${node.agent_id}', ${node.c2_port || 5001})"><i class="fa-solid fa-stop me-1"></i> Stop Attack</button>` :
+                                `<button class="btn btn-sm btn-danger w-100" onclick="triggerSingleAttack('${node.agent_id}', ${node.c2_port || 5001})"><i class="fa-solid fa-burst me-1"></i> Launch DDoS</button>`
+                            }
+                            <button class="btn btn-sm btn-outline-warning w-100" onclick="sdnMitigate('${node.agent_id}', '${node.ip_address}')"><i class="fa-solid fa-ban me-1"></i> SDN Block</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSDNRules(rules) {
+            const table = document.getElementById('sdn-rules-table');
+            if (!rules || rules.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No active OpenFlow drop rules</td></tr>';
+                return;
+            }
+
+            table.innerHTML = rules.map(rule => `
+                <tr>
+                    <td class="font-monospace text-warning">${rule.rule_id}</td>
+                    <td><strong>${rule.match.ipv4_src}</strong> (${rule.agent_id})</td>
+                    <td><span class="badge bg-danger">DROP</span></td>
+                    <td>${rule.installed_at}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success" onclick="sdnUnblock('${rule.match.ipv4_src}')">Unblock</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateSummary(data) {
+            document.getElementById('total-nodes').innerText = data.nodes.length;
+            const attacks = data.nodes.filter(n => n.active_attack || n.status === 'ATTACKING').length;
+            document.getElementById('total-attacks').innerText = attacks;
+            document.getElementById('sdn-rules-count').innerText = data.sdn.active_rules ? data.sdn.active_rules.length : 0;
+            
+            const overallBadge = document.getElementById('overall-status');
+            if (attacks > 0) {
+                overallBadge.className = "badge badge-status status-ATTACKING fs-6";
+                overallBadge.innerText = "ATTACK UNDERWAY";
+            } else {
+                overallBadge.className = "badge badge-status status-NORMAL fs-6";
+                overallBadge.innerText = "NORMAL";
+            }
+        }
+
+        function updateCharts(nodes) {
+            const now = new Date().toLocaleTimeString();
+            if (chartTimestamps.length > 10) chartTimestamps.shift();
+            chartTimestamps.push(now);
+
+            // Build Net dataset
+            const netDatasets = nodes.map((node, i) => {
+                if (!agentNetData[node.agent_id]) agentNetData[node.agent_id] = [];
+                if (agentNetData[node.agent_id].length > 10) agentNetData[node.agent_id].shift();
+                agentNetData[node.agent_id].push(node.bytes_sent / 1024);
+
+                const colors = ['#58a6ff', '#f85149', '#3fb950', '#d29922'];
+                return {
+                    label: `${node.agent_id} (KB Sent)`,
+                    data: agentNetData[node.agent_id],
+                    borderColor: colors[i % colors.length],
+                    tension: 0.3
+                };
+            });
+
+            networkChart.data.labels = chartTimestamps;
+            networkChart.data.datasets = netDatasets;
+            networkChart.update();
+        }
+
+        async function triggerSingleAttack(agentId, c2Port) {
+            logTerminal(`Initiating DDoS Attack on ${agentId} via TCP C2 Port ${c2Port}...`);
+            const res = await fetch('/api/attack/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ agent_id: agentId, c2_port: c2Port, duration: 15 })
+            });
+            const data = await res.json();
+            logTerminal(`[C2 Response] ${data.message}`);
+            fetchMetrics();
+        }
+
+        async function stopAttack(agentId, c2Port) {
+            logTerminal(`Sending STOP_ATTACK command to ${agentId}...`);
+            const res = await fetch('/api/attack/stop', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ agent_id: agentId, c2_port: c2Port })
+            });
+            const data = await res.json();
+            logTerminal(`[C2 Response] ${data.message}`);
+            fetchMetrics();
+        }
+
+        async function triggerSequentialCampaign() {
+            logTerminal("🚀 Launching Sequential DDoS Attack Campaign across all connected nodes...");
+            const res = await fetch('/api/campaign/start', { method: 'POST' });
+            const data = await res.json();
+            logTerminal(`[CAMPAIGN] ${data.message}`);
+        }
+
+        async function sdnMitigate(agentId, srcIp) {
+            logTerminal(`Sending SDN REST request to block IP ${srcIp} (${agentId}) at OpenFlow Switch s1...`);
+            const res = await fetch('/api/sdn/mitigate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ agent_id: agentId, src_ip: srcIp })
+            });
+            const data = await res.json();
+            logTerminal(`[SDN Controller] ${data.message || 'FlowMod rule installed'}`);
+            fetchMetrics();
+        }
+
+        async function sdnUnblock(srcIp) {
+            logTerminal(`Removing SDN Drop FlowMod rule for IP ${srcIp}...`);
+            const res = await fetch('/api/sdn/unblock', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ src_ip: srcIp })
+            });
+            const data = await res.json();
+            logTerminal(`[SDN Controller] ${data.message || 'FlowMod rule removed'}`);
+            fetchMetrics();
+        }
+
+        // Initialize and auto-refresh
+        initCharts();
+        fetchMetrics();
+        setInterval(fetchMetrics, 2000);
+    </script>
+</body>
+</html>
