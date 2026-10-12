@@ -141,7 +141,40 @@ run_tests() {
     echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
     echo -e "${BOLD}${CYAN}   RUNNING 5-STAGE AUTOMATED EVALUATION SUITE${RESET}"
     echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
+
+    # Check if a Central Server is already reachable
+    local server_running=false
+    if curl -s -m 2 http://10.0.0.4:5050/api/metrics >/dev/null 2>&1 || curl -s -m 2 http://127.0.0.1:5050/api/metrics >/dev/null 2>&1; then
+        server_running=true
+    fi
+
+    local started_temp_cluster=false
+    if [ "$server_running" = false ]; then
+        echo -e "${YELLOW}[*] No active Central Server detected. Automatically launching test cluster...${RESET}"
+        check_dependencies
+        $PY_BIN sdn_controller.py > /tmp/sdn_controller.log 2>&1 &
+        sleep 1
+        $PY_BIN server.py > /tmp/server.log 2>&1 &
+        sleep 2
+        $PY_BIN agent.py --agent-id Node-1 --c2-port 5001 > /tmp/agent_node1.log 2>&1 &
+        $PY_BIN agent.py --agent-id Node-2 --c2-port 5002 > /tmp/agent_node2.log 2>&1 &
+        $PY_BIN agent.py --agent-id Node-3 --c2-port 5003 > /tmp/agent_node3.log 2>&1 &
+        sleep 3
+        started_temp_cluster=true
+        echo -e "${GREEN}[*] Test cluster initialized successfully!${RESET}\n"
+    fi
+
     $PY_BIN demo_runner.py
+
+    if [ "$started_temp_cluster" = true ]; then
+        echo ""
+        read -rp "Keep test cluster running in background? [y/N]: " keep_running
+        if [[ ! "$keep_running" =~ ^[yY]$ ]]; then
+            stop_all
+        else
+            echo -e "${GREEN}[OK] Cluster running in background on http://127.0.0.1:5050${RESET}"
+        fi
+    fi
 }
 
 # Interactive CLI Menu

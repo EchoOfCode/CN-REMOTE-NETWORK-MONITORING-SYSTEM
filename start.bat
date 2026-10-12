@@ -116,6 +116,19 @@ echo.
 echo ========================================================================
 echo   RUNNING AUTOMATED EVALUATION TEST SUITE
 echo ========================================================================
+%PY_CMD% -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5050/api/metrics', timeout=1)" >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo [*] No running server detected. Starting local cluster for test suite...
+    start "SDN Controller" /min %PY_CMD% sdn_controller.py
+    start "Central Server" /min %PY_CMD% server.py
+    timeout /t 2 /nobreak >nul
+    start "Agent Node-1" /min %PY_CMD% agent.py --agent-id Node-1 --c2-port 5001
+    start "Agent Node-2" /min %PY_CMD% agent.py --agent-id Node-2 --c2-port 5002
+    start "Agent Node-3" /min %PY_CMD% agent.py --agent-id Node-3 --c2-port 5003
+    timeout /t 3 /nobreak >nul
+    echo [*] Test cluster active. Running tests...
+    echo.
+)
 %PY_CMD% demo_runner.py --server-url http://127.0.0.1:5050
 echo.
 pause
