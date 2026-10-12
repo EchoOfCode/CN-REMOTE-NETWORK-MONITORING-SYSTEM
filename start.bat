@@ -127,21 +127,42 @@ goto MENU
 
 :LAUNCH_WSL
 where wsl >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [ERROR] WSL (Windows Subsystem for Linux) is not detected on this machine.
-    echo Mininet requires Linux or WSL to run kernel network namespaces and Open vSwitch.
-    echo.
-    pause
-    goto MENU
-)
+if %ERRORLEVEL% neq 0 goto NO_WSL
+
 echo.
 echo ========================================================================
 echo   LAUNCHING MININET TOPOLOGY INSIDE WSL
 echo ========================================================================
-echo Note: Root privileges are required for Mininet.
-echo.
+echo Note: Mininet requires a Linux distribution in WSL with root privileges.
+echo [*] Checking Python 3 inside WSL...
+wsl python3 --version >nul 2>&1
+if %ERRORLEVEL% neq 0 goto WSL_NO_PYTHON
+
+echo [*] Starting Mininet topology in WSL...
 wsl sudo python3 topology.py
+echo.
+pause
+goto MENU
+
+:WSL_NO_PYTHON
+echo.
+echo [ERROR] Python 3 is not found in your default WSL Linux environment.
+echo Mininet and topology.py require an Ubuntu/Debian WSL distribution with Mininet and Python 3.
+echo.
+echo TIP: If you want to run and test the complete system on Windows right now:
+echo   --^> Select Option [1] "Start Local Simulation" from the menu!
+echo       It runs the controller, server, 3 agents, and live web UI natively on Windows.
+echo.
+pause
+goto MENU
+
+:NO_WSL
+echo.
+echo [ERROR] WSL (Windows Subsystem for Linux) is not detected on this machine.
+echo Mininet requires Linux or WSL to run kernel network namespaces and Open vSwitch.
+echo.
+echo TIP: To run the system on Windows without WSL:
+echo   --^> Select Option [1] "Start Local Simulation" from the menu!
 echo.
 pause
 goto MENU

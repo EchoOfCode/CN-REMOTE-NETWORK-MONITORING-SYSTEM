@@ -60,6 +60,10 @@ def build_sdn_topology():
     c0.start()
     s1.start([c0])
 
+    # Ensure baseline forwarding on s1 (enables ping & traffic if ryu-manager is absent or mock)
+    os.system('ovs-ofctl add-flow s1 "priority=0,actions=NORMAL" 2>/dev/null || ovs-ofctl -O OpenFlow13 add-flow s1 "priority=0,actions=NORMAL" 2>/dev/null || true')
+    os.system('ovs-vsctl set-fail-mode s1 standalone 2>/dev/null || true')
+
     # Allow controller handshake & switch flow table setup
     time.sleep(2)
 
