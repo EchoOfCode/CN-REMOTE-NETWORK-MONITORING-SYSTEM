@@ -148,6 +148,10 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
             self._send_response(404, {"error": "Endpoint not found"})
 
 
+class SDNServer(HTTPServer):
+    allow_reuse_address = True
+
+
 def run_sdn_controller(port=8080):
     print("========================================")
     print("   SDN CONTROLLER REST API (STANDALONE) ")
@@ -155,7 +159,7 @@ def run_sdn_controller(port=8080):
     print(f"Controller listening on http://0.0.0.0:{port}")
     print("OpenFlow Switch: s1 (DPID: 0000000000000001)")
     print("========================================\n")
-    server = HTTPServer(('0.0.0.0', port), SDNRESTHandler)
+    server = SDNServer(('0.0.0.0', port), SDNRESTHandler)
     server.serve_forever()
 
 
