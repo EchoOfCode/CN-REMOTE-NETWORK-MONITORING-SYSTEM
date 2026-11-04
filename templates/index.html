@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDN Network Health & Defense Center</title>
+    <title>SDN Attack Defense Center — Autonomous SOC Cockpit</title>
     
-    <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+    <!-- Google Fonts: Inter, Syne, Outfit, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5.3 & FontAwesome 6 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,21 +19,37 @@
 
     <style>
         :root {
-            --bg-base: #070a12;
-            --bg-card: rgba(14, 20, 34, 0.85);
-            --bg-card-hover: rgba(20, 29, 48, 0.95);
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(56, 189, 248, 0.35);
+            /* Futuristic Cybernetic Palette */
+            --bg-void: #030712;
+            --bg-surface: rgba(11, 16, 27, 0.82);
+            --bg-surface-elevated: rgba(18, 25, 43, 0.92);
+            --bg-surface-hover: rgba(26, 36, 61, 0.96);
             
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glass-bright: rgba(255, 255, 255, 0.16);
+            --border-glow-cyan: rgba(56, 189, 248, 0.45);
+            --border-glow-crimson: rgba(244, 63, 94, 0.55);
+            
+            /* High-Contrast Accents */
             --cyan-primary: #38bdf8;
+            --cyan-glow: rgba(56, 189, 248, 0.28);
             --emerald-green: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.25);
             --crimson-red: #f43f5e;
+            --crimson-glow: rgba(244, 63, 94, 0.35);
             --amber-alert: #f59e0b;
+            --amber-glow: rgba(245, 158, 11, 0.25);
             --indigo-accent: #6366f1;
             
+            /* Text Hierarchy */
             --text-heading: #f8fafc;
             --text-main: #cbd5e1;
             --text-muted: #64748b;
+            --text-faint: #475569;
+            
+            /* Spring Transitions */
+            --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         * {
@@ -43,119 +59,176 @@
         }
 
         body {
-            background-color: var(--bg-base);
+            background-color: var(--bg-void);
             background-image: 
-                radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 90% 85%, rgba(244, 63, 94, 0.05) 0%, transparent 40%);
+                radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 88% 85%, rgba(244, 63, 94, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
+                radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
             color: var(--text-main);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Typography Extensions */
         h1, h2, h3, h4, h5, h6, .brand-font {
             font-family: 'Outfit', sans-serif;
             color: var(--text-heading);
-            letter-spacing: -0.02em;
+            letter-spacing: -0.025em;
+        }
+
+        .display-font {
+            font-family: 'Syne', sans-serif;
         }
 
         .mono {
             font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.015em;
         }
 
-        /* Glassmorphism Panel */
+        /* Premium Glassmorphism Panels */
         .glass-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            box-shadow: 
+                0 16px 36px -8px rgba(0, 0, 0, 0.65),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            position: relative;
+            transition: border-color 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
         }
 
-        /* Compact Navigation Bar */
+        .glass-panel:hover {
+            border-color: var(--border-glass-bright);
+        }
+
+        /* Compact Command Bar (Navbar) */
         .navbar-compact {
-            background: rgba(10, 14, 24, 0.92);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 8px 20px;
-            height: 52px;
+            background: rgba(7, 11, 20, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 8px 24px;
+            height: 56px;
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
-        /* Pulsing Status Dot */
+        .brand-badge {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 9px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+        }
+
+        /* Breathing Status Indicators */
         .pulse-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 5px;
+            margin-right: 6px;
+            position: relative;
         }
         .pulse-green {
             background: var(--emerald-green);
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse-g 1.8s infinite;
+            box-shadow: 0 0 8px var(--emerald-green);
+            animation: pulse-g 2s infinite;
         }
         .pulse-red {
             background: var(--crimson-red);
-            box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+            box-shadow: 0 0 10px var(--crimson-red);
             animation: pulse-r 1.2s infinite;
         }
         .pulse-yellow {
             background: var(--amber-alert);
-            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            box-shadow: 0 0 8px var(--amber-alert);
             animation: pulse-y 1.8s infinite;
         }
 
         @keyframes pulse-g {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         @keyframes pulse-r {
-            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.8); }
-            70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.85); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
             100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
         }
         @keyframes pulse-y {
-            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
-            70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
 
-        /* Compact KPI Header */
+        /* Top HUD Metric Chips */
         .kpi-chip {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 6px 14px;
+            background: rgba(14, 21, 37, 0.65);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            padding: 8px 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            transition: all 0.25s var(--ease-spring);
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-chip::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+        }
+        .kpi-chip:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4);
         }
         .kpi-chip-label {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.08em;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
         }
         .kpi-chip-val {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.35rem;
+            font-weight: 800;
             line-height: 1;
+            letter-spacing: -0.03em;
         }
 
-        /* Modern CPU & RAM Allocation Gauges */
+        /* Telemetry Meters (CPU & RAM) */
         .meter-container {
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(3, 7, 18, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin-bottom: 7px;
+            transition: all 0.2s ease;
+        }
+        .meter-container:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(3, 7, 18, 0.75);
         }
         .meter-header {
             display: flex;
@@ -164,44 +237,101 @@
             margin-bottom: 4px;
         }
         .meter-title {
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             gap: 5px;
         }
         .meter-val {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
             font-weight: 700;
         }
         .meter-track {
-            height: 7px;
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 4px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
             overflow: hidden;
             position: relative;
         }
         .meter-fill {
             height: 100%;
-            border-radius: 4px;
-            transition: width 0.35s ease, background 0.35s ease;
+            border-radius: 6px;
+            transition: width 0.4s var(--ease-spring), background 0.3s ease;
+            position: relative;
         }
-        .fill-green { background: linear-gradient(90deg, #10b981, #34d399); }
-        .fill-yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .fill-red { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+        .fill-green { 
+            background: linear-gradient(90deg, #10b981, #34d399); 
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .fill-yellow { 
+            background: linear-gradient(90deg, #f59e0b, #fbbf24); 
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        .fill-red { 
+            background: linear-gradient(90deg, #f43f5e, #fb7185); 
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.65);
+        }
 
-        /* Status Badge */
+        /* Node Cards */
+        .node-card {
+            background: rgba(14, 20, 35, 0.7);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            padding: 10px;
+            transition: all 0.25s var(--ease-spring);
+            position: relative;
+            overflow: hidden;
+        }
+        .node-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .node-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.25);
+            box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5);
+        }
+        .node-card:hover::before {
+            opacity: 1;
+        }
+
+        .node-card--attacking {
+            border: 1px solid rgba(244, 63, 94, 0.6) !important;
+            background: rgba(244, 63, 94, 0.08) !important;
+            box-shadow: 0 0 24px -2px rgba(244, 63, 94, 0.35) !important;
+            animation: pulse-border-red 1.5s infinite;
+        }
+        @keyframes pulse-border-red {
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+        }
+
+        /* Status Badges */
         .badge-status {
-            font-size: 0.72rem;
-            font-weight: 600;
+            font-size: 0.68rem;
+            font-weight: 700;
             padding: 3px 8px;
-            border-radius: 12px;
-            letter-spacing: 0.02em;
+            border-radius: 20px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-flex;
+            align-items: center;
         }
         .status-NORMAL {
-            background: rgba(16, 185, 129, 0.15);
+            background: rgba(16, 185, 129, 0.12);
             color: #34d399;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
@@ -213,8 +343,8 @@
         .status-ATTACKING {
             background: rgba(244, 63, 94, 0.2);
             color: #fda4af;
-            border: 1px solid rgba(244, 63, 94, 0.5);
-            animation: pulse-border 1.2s infinite;
+            border: 1px solid rgba(244, 63, 94, 0.55);
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
         }
         .status-DOWN {
             background: rgba(100, 116, 139, 0.15);
@@ -222,76 +352,102 @@
             border: 1px solid rgba(100, 116, 139, 0.3);
         }
 
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
-            70% { box-shadow: 0 0 0 4px rgba(244, 63, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
-        }
-
-        /* Action Buttons */
+        /* Tactile Action Buttons (Apple / Linear Spring Press) */
         .btn-compact {
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            transition: all 0.15s ease;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            transition: all 0.18s var(--ease-spring);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 6px;
             border: 1px solid transparent;
+            cursor: pointer;
+            letter-spacing: -0.01em;
+            user-select: none;
         }
+        .btn-compact:hover {
+            transform: translateY(-1.5px);
+        }
+        .btn-compact:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
         .btn-danger-compact {
             background: linear-gradient(135deg, #e11d48, #be123c);
             color: #fff;
+            box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
         }
         .btn-danger-compact:hover {
             background: linear-gradient(135deg, #f43f5e, #e11d48);
+            box-shadow: 0 6px 18px rgba(244, 63, 94, 0.5);
             color: #fff;
-            transform: translateY(-1px);
         }
+
         .btn-warning-compact {
-            background: rgba(245, 158, 11, 0.15);
+            background: rgba(245, 158, 11, 0.14);
             color: #fbbf24;
             border-color: rgba(245, 158, 11, 0.4);
         }
         .btn-warning-compact:hover {
             background: rgba(245, 158, 11, 0.25);
+            border-color: rgba(245, 158, 11, 0.6);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
+
         .btn-success-compact {
-            background: rgba(16, 185, 129, 0.15);
+            background: rgba(16, 185, 129, 0.14);
             color: #34d399;
             border-color: rgba(16, 185, 129, 0.4);
         }
         .btn-success-compact:hover {
             background: rgba(16, 185, 129, 0.25);
+            border-color: rgba(16, 185, 129, 0.6);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+
         .btn-outline-compact {
             background: rgba(255, 255, 255, 0.04);
-            border-color: var(--border-subtle);
+            border-color: var(--border-glass);
             color: var(--text-main);
         }
         .btn-outline-compact:hover {
             background: rgba(255, 255, 255, 0.09);
             color: #fff;
-            border-color: var(--border-glow);
+            border-color: var(--border-glass-bright);
         }
 
-        /* Compact Interactive Topology */
+        /* Topology Visualizer Schematic */
         .topology-box {
-            background: radial-gradient(circle at center, rgba(14, 22, 38, 0.95) 0%, rgba(8, 12, 20, 0.98) 100%);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
+            background: 
+                radial-gradient(circle at center, rgba(17, 24, 43, 0.96) 0%, rgba(6, 10, 18, 0.98) 100%);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
             position: relative;
+            overflow: hidden;
         }
+        .topology-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
         .topo-svg-compact {
             width: 100%;
-            height: 165px;
+            height: 170px;
+            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6));
         }
         .topo-link {
-            stroke: rgba(255, 255, 255, 0.15);
+            stroke: rgba(255, 255, 255, 0.16);
             stroke-width: 2;
             stroke-dasharray: 4, 4;
             animation: dash 12s linear infinite;
@@ -300,125 +456,138 @@
             stroke: var(--cyan-primary);
             stroke-width: 2.2;
             animation: dash 2s linear infinite;
+            filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.5));
         }
         .topo-link-attack {
             stroke: var(--crimson-red);
             stroke-width: 3.2;
-            animation: dash-fast 0.6s linear infinite;
+            animation: dash-fast 0.5s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.8));
         }
         .topo-link-blocked {
             stroke: #475569;
             stroke-width: 2;
             stroke-dasharray: 2, 6;
+            opacity: 0.5;
         }
         @keyframes dash { to { stroke-dashoffset: -40; } }
         @keyframes dash-fast { to { stroke-dashoffset: -50; } }
 
-        /* Tabs Styling */
+        /* Navigation Pills */
         .nav-pills-compact .nav-link {
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 4px 12px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 5px 12px;
             color: var(--text-muted);
-            border-radius: 6px;
+            border-radius: 8px;
             background: transparent;
-            transition: all 0.2s;
+            transition: all 0.2s var(--ease-spring);
+            border: 1px solid transparent;
         }
         .nav-pills-compact .nav-link.active {
-            background: rgba(56, 189, 248, 0.15);
+            background: rgba(56, 189, 248, 0.12);
             color: var(--cyan-primary);
-            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-color: rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
         }
 
-        /* Compact Cyber Terminal */
+        /* Cyberpunk Audit Console */
         .terminal-box {
-            background: #04070d;
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 6px;
+            background: #02050b;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             height: 175px;
             overflow-y: auto;
-            padding: 8px 12px;
+            padding: 10px 14px;
             color: #94a3b8;
-            line-height: 1.5;
+            line-height: 1.6;
+            position: relative;
         }
         .terminal-box::-webkit-scrollbar { width: 5px; }
         .terminal-box::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
 
         .log-line { margin-bottom: 3px; word-break: break-all; }
-        .tag-info { color: #38bdf8; font-weight: 600; }
-        .tag-warn { color: #fbbf24; font-weight: 600; }
-        .tag-attack { color: #f43f5e; font-weight: 600; }
-        .tag-sdn { color: #34d399; font-weight: 600; }
+        .tag-info { color: #38bdf8; font-weight: 700; }
+        .tag-warn { color: #fbbf24; font-weight: 700; }
+        .tag-attack { color: #f43f5e; font-weight: 700; }
+        .tag-sdn { color: #34d399; font-weight: 700; }
 
-        /* Table Styling */
+        /* Tables */
         .table-compact {
             color: var(--text-main);
             margin: 0;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
         .table-compact thead th {
             background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-glass);
             color: var(--text-muted);
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
-            padding: 6px 10px;
+            letter-spacing: 0.05em;
+            padding: 8px 12px;
+            font-weight: 700;
         }
         .table-compact tbody td {
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            padding: 6px 10px;
+            padding: 7px 12px;
+        }
+        .table-compact tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        /* Toast Container */
+        /* Toast Notifications */
         .toast-dock {
             position: fixed;
-            bottom: 16px;
-            right: 16px;
+            bottom: 20px;
+            right: 20px;
             z-index: 2000;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         .toast-card {
-            background: rgba(14, 20, 34, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-glow);
-            border-radius: 6px;
-            padding: 8px 14px;
+            background: rgba(11, 17, 31, 0.96);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glass-bright);
+            border-radius: 10px;
+            padding: 10px 16px;
             color: var(--text-heading);
             font-size: 0.82rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: pop-in 0.25s ease;
+            gap: 12px;
+            animation: toast-in 0.3s var(--ease-spring);
         }
-        @keyframes pop-in {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes toast-in {
+            from { transform: translateY(24px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation Bar (Height: 52px) -->
+    <!-- Header Navigation Bar (Height: 56px) -->
     <nav class="navbar-compact d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-2 p-1" style="width: 32px; height: 32px;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="brand-badge">
                 <i class="fa-solid fa-shield-halved text-info fs-6"></i>
             </div>
             <div>
                 <span class="fw-bold brand-font fs-6 text-white">SDN Attack Defense Center</span>
-                <span class="small text-muted mono ms-2 d-none d-md-inline" style="font-size: 0.75rem;">OpenFlow 1.3 | UDP Telemetry</span>
+                <span class="small text-muted mono ms-2 d-none d-md-inline" style="font-size: 0.72rem;">
+                    <i class="fa-solid fa-code-fork text-primary me-1"></i>OpenFlow 1.3 / UDP Telemetry
+                </span>
             </div>
         </div>
 
         <div class="d-flex align-items-center gap-2">
-            <div class="bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-pill px-3 py-1 small d-flex align-items-center">
+            <div class="bg-dark bg-opacity-70 border border-secondary border-opacity-25 rounded-pill px-3 py-1 small d-flex align-items-center">
                 <span class="pulse-dot pulse-green" id="sdn-indicator"></span>
-                <span class="text-muted" style="font-size: 0.75rem;">Ryu SDN: <strong class="text-white" id="sdn-status">ONLINE</strong></span>
+                <span class="text-muted" style="font-size: 0.74rem;">SDN Controller: <strong class="text-white" id="sdn-status">ONLINE</strong></span>
             </div>
 
             <button class="btn btn-compact btn-outline-compact" onclick="triggerManualPing()" title="Refresh Telemetry">
@@ -429,20 +598,20 @@
                 <i class="fa-solid fa-burst"></i> Multi-Node DDoS
             </button>
 
-            <button class="btn btn-compact btn-danger-compact" onclick="triggerSequentialCampaign()">
+            <button class="btn btn-compact btn-danger-compact" onclick="triggerSequentialCampaign()" title="Sequential Campaign Across All Nodes">
                 <i class="fa-solid fa-bolt"></i> Sequential Campaign
             </button>
         </div>
     </nav>
 
     <!-- Main Single-Page Cockpit View -->
-    <div class="container-fluid px-3 pt-2 pb-3">
+    <div class="container-fluid px-3 pt-3 pb-3">
 
         <!-- Top KPI Overview Bar -->
         <div class="row g-2 mb-2">
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="kpi-chip">
-                    <i class="fa-solid fa-server text-primary fs-5"></i>
+                    <i class="fa-solid fa-server text-primary fs-4"></i>
                     <div>
                         <div class="kpi-chip-label">Active Nodes</div>
                         <div class="kpi-chip-val text-white" id="total-nodes">0</div>
@@ -452,7 +621,7 @@
 
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="kpi-chip">
-                    <i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>
+                    <i class="fa-solid fa-triangle-exclamation text-danger fs-4"></i>
                     <div>
                         <div class="kpi-chip-label">Active Attacks</div>
                         <div class="kpi-chip-val text-danger" id="total-attacks">0</div>
@@ -462,7 +631,7 @@
 
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="kpi-chip">
-                    <i class="fa-solid fa-ban text-warning fs-5"></i>
+                    <i class="fa-solid fa-ban text-warning fs-4"></i>
                     <div>
                         <div class="kpi-chip-label">SDN Drop Rules</div>
                         <div class="kpi-chip-val text-warning" id="sdn-rules-count">0</div>
@@ -472,7 +641,7 @@
 
             <div class="col-6 col-md-3 col-xl-3">
                 <div class="kpi-chip">
-                    <i class="fa-solid fa-microchip text-info fs-5"></i>
+                    <i class="fa-solid fa-microchip text-info fs-4"></i>
                     <div class="w-100">
                         <div class="d-flex justify-content-between">
                             <span class="kpi-chip-label">Cluster Avg CPU</span>
@@ -488,7 +657,7 @@
             <div class="col-12 col-xl-3">
                 <div class="kpi-chip justify-content-between">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-heart-pulse text-success fs-5"></i>
+                        <i class="fa-solid fa-heart-pulse text-success fs-4"></i>
                         <div>
                             <div class="kpi-chip-label">Defense State</div>
                             <span class="badge badge-status status-NORMAL" id="overall-status">ALL NORMAL</span>
@@ -530,66 +699,77 @@
                         <span class="fw-bold small text-white">
                             <i class="fa-solid fa-diagram-project me-1 text-primary"></i> SDN Topology Map (Switch s1 & Links)
                         </span>
-                        <div class="d-flex gap-2 text-muted" style="font-size: 0.72rem;">
+                        <div class="d-flex gap-3 text-muted" style="font-size: 0.72rem;">
                             <span><span class="pulse-dot pulse-green"></span>Normal</span>
                             <span><span class="pulse-dot pulse-red"></span>DDoS Flood</span>
-                            <span><i class="fa-solid fa-ban text-secondary"></i>Blocked</span>
+                            <span><i class="fa-solid fa-ban text-secondary me-1"></i>Blocked</span>
                         </div>
                     </div>
 
                     <!-- SVG Topology Diagram -->
-                    <svg class="topo-svg-compact" viewBox="0 0 900 165">
-                        <!-- Host Links to Switch (Center: 450, 85) -->
-                        <line id="link-h1" class="topo-link" x1="140" y1="45" x2="450" y2="85" />
-                        <line id="link-h2" class="topo-link" x1="140" y1="125" x2="450" y2="85" />
-                        <line id="link-h3" class="topo-link" x1="290" y1="145" x2="450" y2="85" />
-                        <line id="link-h4" class="topo-link" x1="760" y1="85" x2="450" y2="85" />
-                        <line id="link-ryu" class="topo-link-active" x1="450" y1="85" x2="450" y2="22" stroke-dasharray="2, 2" />
+                    <svg class="topo-svg-compact" viewBox="0 0 900 170">
+                        <defs>
+                            <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                            <linearGradient id="switchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1e293b" />
+                                <stop offset="100%" stop-color="#0f172a" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Host Links to Switch (Center: 450, 90) -->
+                        <line id="link-h1" class="topo-link" x1="140" y1="45" x2="450" y2="90" />
+                        <line id="link-h2" class="topo-link" x1="140" y1="130" x2="450" y2="90" />
+                        <line id="link-h3" class="topo-link" x1="290" y1="150" x2="450" y2="90" />
+                        <line id="link-h4" class="topo-link" x1="760" y1="90" x2="450" y2="90" />
+                        <line id="link-ryu" class="topo-link-active" x1="450" y1="90" x2="450" y2="24" stroke-dasharray="2, 2" />
 
                         <!-- Center OpenFlow Switch s1 -->
-                        <g transform="translate(450, 85)">
-                            <circle r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2.2" />
-                            <text text-anchor="middle" dy="-3" fill="#f8fafc" font-weight="700" font-size="10">Switch s1</text>
-                            <text text-anchor="middle" dy="10" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="7">OpenFlow 1.3</text>
+                        <g transform="translate(450, 90)">
+                            <circle r="28" fill="url(#switchGrad)" stroke="#38bdf8" stroke-width="2.4" filter="url(#glow-cyan)" />
+                            <text text-anchor="middle" dy="-3" fill="#f8fafc" font-weight="800" font-size="11" font-family="'Outfit', sans-serif">Switch s1</text>
+                            <text text-anchor="middle" dy="11" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600">OpenFlow 1.3</text>
                         </g>
 
                         <!-- Ryu Controller Node -->
-                        <g transform="translate(450, 22)">
-                            <rect x="-55" y="-14" width="110" height="26" rx="13" fill="#0f172a" stroke="#6366f1" stroke-width="1.6" />
-                            <text text-anchor="middle" dy="3" fill="#e0e7ff" font-weight="600" font-size="9">
-                                <tspan fill="#818cf8">⚡</tspan> Ryu Controller
+                        <g transform="translate(450, 24)">
+                            <rect x="-65" y="-14" width="130" height="28" rx="14" fill="#0f172a" stroke="#6366f1" stroke-width="1.8" />
+                            <text text-anchor="middle" dy="4" fill="#e0e7ff" font-weight="700" font-size="10" font-family="'Outfit', sans-serif">
+                                <tspan fill="#818cf8">⚡</tspan> SDN Controller
                             </text>
                         </g>
 
                         <!-- Host h1 Node (10.0.0.1) -->
                         <g id="node-viz-h1" transform="translate(140, 45)">
-                            <rect x="-55" y="-20" width="110" height="40" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
-                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10">Host h1 (Node-1)</text>
-                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.1</text>
-                            <text id="viz-status-h1" text-anchor="middle" dy="16" fill="#10b981" font-size="7" font-weight="700">NORMAL</text>
+                            <rect x="-55" y="-20" width="110" height="42" rx="8" fill="#111827" stroke="#334155" stroke-width="1.6" />
+                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="700" font-size="10">Host h1 (Node-1)</text>
+                            <text text-anchor="middle" dy="9" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.1</text>
+                            <text id="viz-status-h1" text-anchor="middle" dy="18" fill="#10b981" font-size="7.5" font-weight="700">NORMAL</text>
                         </g>
 
                         <!-- Host h2 Node (10.0.0.2) -->
-                        <g id="node-viz-h2" transform="translate(140, 125)">
-                            <rect x="-55" y="-20" width="110" height="40" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
-                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10">Host h2 (Node-2)</text>
-                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.2</text>
-                            <text id="viz-status-h2" text-anchor="middle" dy="16" fill="#10b981" font-size="7" font-weight="700">NORMAL</text>
+                        <g id="node-viz-h2" transform="translate(140, 130)">
+                            <rect x="-55" y="-20" width="110" height="42" rx="8" fill="#111827" stroke="#334155" stroke-width="1.6" />
+                            <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="700" font-size="10">Host h2 (Node-2)</text>
+                            <text text-anchor="middle" dy="9" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.2</text>
+                            <text id="viz-status-h2" text-anchor="middle" dy="18" fill="#10b981" font-size="7.5" font-weight="700">NORMAL</text>
                         </g>
 
                         <!-- Host h3 Node (10.0.0.3) -->
-                        <g id="node-viz-h3" transform="translate(290, 145)">
-                            <rect x="-55" y="-18" width="110" height="36" rx="6" fill="#111827" stroke="#334155" stroke-width="1.5" />
-                            <text text-anchor="middle" dy="-4" fill="#f8fafc" font-weight="600" font-size="10">Host h3 (Node-3)</text>
-                            <text text-anchor="middle" dy="8" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.3</text>
+                        <g id="node-viz-h3" transform="translate(290, 150)">
+                            <rect x="-55" y="-18" width="110" height="38" rx="8" fill="#111827" stroke="#334155" stroke-width="1.6" />
+                            <text text-anchor="middle" dy="-4" fill="#f8fafc" font-weight="700" font-size="10">Host h3 (Node-3)</text>
+                            <text text-anchor="middle" dy="9" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.3</text>
                         </g>
 
                         <!-- Host h4 Server/Target (10.0.0.4) -->
-                        <g id="node-viz-h4" transform="translate(760, 85)">
-                            <rect x="-60" y="-22" width="120" height="44" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.8" />
-                            <text text-anchor="middle" dy="-6" fill="#ffffff" font-weight="700" font-size="10">Host h4 (Target)</text>
-                            <text text-anchor="middle" dy="6" fill="#c7d2fe" font-family="'JetBrains Mono', monospace" font-size="8">10.0.0.4:5050</text>
-                            <text text-anchor="middle" dy="16" fill="#a5b4fc" font-size="7" font-weight="600">CENTRAL C2 SERVER</text>
+                        <g id="node-viz-h4" transform="translate(760, 90)">
+                            <rect x="-65" y="-22" width="130" height="46" rx="10" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
+                            <text text-anchor="middle" dy="-6" fill="#ffffff" font-weight="800" font-size="10.5">Host h4 (Target)</text>
+                            <text text-anchor="middle" dy="7" fill="#c7d2fe" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.4:5050</text>
+                            <text text-anchor="middle" dy="18" fill="#a5b4fc" font-size="7" font-weight="700">CENTRAL C2 SERVER</text>
                         </g>
                     </svg>
                 </div>
@@ -613,7 +793,7 @@
                                 </button>
                             </li>
                         </ul>
-                        <span class="badge bg-dark text-muted mono" style="font-size: 0.7rem;">Live Stream</span>
+                        <span class="badge bg-dark border border-secondary border-opacity-25 text-muted mono" style="font-size: 0.68rem;">Live Stream</span>
                     </div>
 
                     <div style="height: 175px; position: relative;">
@@ -664,7 +844,7 @@
                     <!-- Tab Content 2: Cyber Terminal Log -->
                     <div id="panel-terminal" class="terminal-box d-none">
                         <div class="log-line"><span class="tag-info">[INIT]</span> Telemetry cockpit initialized. Listening on UDP:5000.</div>
-                        <div class="log-line"><span class="tag-sdn">[SDN]</span> Connected to Ryu OpenFlow 1.3 Controller at http://127.0.0.1:8080.</div>
+                        <div class="log-line"><span class="tag-sdn">[SDN]</span> Connected to SDN OpenFlow Controller on port 8080.</div>
                     </div>
                 </div>
 
@@ -714,7 +894,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Global State
+        // Global State (Sacred - Preserved)
         let activeChart;
         let currentChartTab = 'traffic'; // 'traffic' or 'resources'
         let chartTimestamps = [];
@@ -726,7 +906,7 @@
 
         // Initialize Compact Chart
         function initChart() {
-            const chartFont = { family: 'Inter', size: 10 };
+            const chartFont = { family: 'JetBrains Mono', size: 10 };
             const ctx = document.getElementById('activeChart').getContext('2d');
 
             activeChart = new Chart(ctx, {
@@ -735,17 +915,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: { duration: 250 },
+                    animation: { duration: 300, easing: 'easeOutQuart' },
                     plugins: {
                         legend: {
-                            labels: { color: '#94a3b8', font: chartFont, usePointStyle: true, boxWidth: 5, padding: 6 }
+                            labels: { color: '#94a3b8', font: chartFont, usePointStyle: true, boxWidth: 6, padding: 8 }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(10, 14, 24, 0.95)',
-                            borderColor: 'rgba(56, 189, 248, 0.3)',
+                            backgroundColor: 'rgba(7, 11, 20, 0.94)',
+                            borderColor: 'rgba(56, 189, 248, 0.35)',
                             borderWidth: 1,
-                            titleFont: { size: 10 },
-                            bodyFont: { size: 10 }
+                            titleFont: { family: 'JetBrains Mono', size: 10 },
+                            bodyFont: { family: 'JetBrains Mono', size: 10 },
+                            padding: 8,
+                            cornerRadius: 6
                         }
                     },
                     scales: {
@@ -814,8 +996,8 @@
             dock.appendChild(card);
             setTimeout(() => {
                 card.style.opacity = '0';
-                card.style.transform = 'translateY(10px)';
-                card.style.transition = 'all 0.25s ease';
+                card.style.transform = 'translateY(12px) scale(0.95)';
+                card.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
                 setTimeout(() => card.remove(), 250);
             }, 3500);
         }
@@ -862,13 +1044,13 @@
 
                 return `
                     <div class="col-md-4">
-                        <div class="p-2 rounded-2 ${isAttacking ? 'border border-danger border-opacity-75 bg-danger bg-opacity-10' : 'bg-dark bg-opacity-40 border border-secondary border-opacity-15'}">
+                        <div class="node-card ${isAttacking ? 'node-card--attacking' : ''}">
                             <!-- Card Header -->
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <div class="d-flex align-items-center gap-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
                                     <span class="pulse-dot ${isAttacking ? 'pulse-red' : 'pulse-green'}"></span>
-                                    <strong class="text-white small">${node.agent_id}</strong>
-                                    <span class="mono text-muted" style="font-size: 0.7rem;">(${node.ip_address})</span>
+                                    <strong class="text-white small" style="font-weight:700;">${node.agent_id}</strong>
+                                    <span class="mono text-muted" style="font-size: 0.68rem;">(${node.ip_address})</span>
                                 </div>
                                 <span class="badge badge-status status-${node.status}">${node.status}</span>
                             </div>
@@ -877,7 +1059,7 @@
                             <div class="meter-container">
                                 <div class="meter-header">
                                     <span class="meter-title"><i class="fa-solid fa-microchip text-info"></i> CPU ALLOCATION</span>
-                                    <span class="meter-val ${cpuTextColor} mono">${node.cpu_percent}%</span>
+                                    <span class="meter-val ${cpuTextColor}">${node.cpu_percent}%</span>
                                 </div>
                                 <div class="meter-track">
                                     <div class="meter-fill ${cpuColor}" style="width: ${Math.min(node.cpu_percent, 100)}%;"></div>
@@ -888,7 +1070,7 @@
                             <div class="meter-container">
                                 <div class="meter-header">
                                     <span class="meter-title"><i class="fa-solid fa-memory text-warning"></i> RAM ALLOCATION</span>
-                                    <span class="meter-val text-white mono">${node.memory_percent}%</span>
+                                    <span class="meter-val text-white">${node.memory_percent}%</span>
                                 </div>
                                 <div class="meter-track">
                                     <div class="meter-fill ${memColor}" style="width: ${Math.min(node.memory_percent, 100)}%;"></div>
@@ -896,10 +1078,10 @@
                             </div>
 
                             <!-- Sub-Metrics: Bandwidth & Process Threads -->
-                            <div class="d-flex justify-content-between text-muted mono mb-2" style="font-size: 0.72rem;">
-                                <span><i class="fa-solid fa-arrow-up text-primary"></i> ${(node.bytes_sent / 1024 / 1024).toFixed(1)} MB</span>
-                                <span><i class="fa-solid fa-arrow-down text-success"></i> ${(node.bytes_recv / 1024 / 1024).toFixed(1)} MB</span>
-                                <span><i class="fa-solid fa-list-check text-secondary"></i> ${node.processes} procs</span>
+                            <div class="d-flex justify-content-between text-muted mono mb-2 px-1" style="font-size: 0.70rem;">
+                                <span><i class="fa-solid fa-arrow-up text-primary me-1"></i>${(node.bytes_sent / 1024 / 1024).toFixed(1)} MB</span>
+                                <span><i class="fa-solid fa-arrow-down text-success me-1"></i>${(node.bytes_recv / 1024 / 1024).toFixed(1)} MB</span>
+                                <span><i class="fa-solid fa-list-check text-secondary me-1"></i>${node.processes} procs</span>
                             </div>
 
                             <!-- Action Buttons -->
@@ -945,10 +1127,10 @@
                     <tr>
                         <td class="mono text-warning" style="font-size:0.75rem;">${rule.rule_id}</td>
                         <td><strong class="text-white">${srcIp}</strong> <span class="text-muted small">(${rule.agent_id || 'Node'})</span></td>
-                        <td><span class="badge bg-dark border border-secondary text-info mono" style="font-size:0.68rem;">ipv4_src</span></td>
-                        <td><span class="badge bg-danger"><i class="fa-solid fa-ban"></i> DROP</span></td>
+                        <td><span class="badge bg-dark border border-secondary border-opacity-50 text-info mono" style="font-size:0.68rem;">ipv4_src</span></td>
+                        <td><span class="badge bg-danger"><i class="fa-solid fa-ban me-1"></i>DROP</span></td>
                         <td class="text-end">
-                            <button class="btn btn-compact btn-success-compact py-0 px-2" onclick="sdnUnblock('${srcIp}')">
+                            <button class="btn btn-compact btn-success-compact py-0 px-2" onclick="sdnUnblock('${srcIp}')" title="Revoke OpenFlow Rule">
                                 <i class="fa-solid fa-lock-open"></i>
                             </button>
                         </td>
@@ -1055,11 +1237,12 @@
                     label: `${id} KB/s`,
                     data: agentNetHistory[id],
                     borderColor: colors[i % colors.length],
-                    backgroundColor: colors[i % colors.length] + '18',
+                    backgroundColor: colors[i % colors.length] + '14',
                     fill: true,
-                    tension: 0.3,
-                    borderWidth: 1.8,
-                    pointRadius: 2
+                    tension: 0.35,
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
                 }));
                 activeChart.options.scales.y.title = { display: false };
                 activeChart.update('none');
@@ -1069,10 +1252,10 @@
                     label: `${id} CPU %`,
                     data: agentCpuHistory[id],
                     borderColor: colors[i % colors.length],
-                    borderDash: [3, 3],
-                    tension: 0.2,
-                    borderWidth: 1.6,
-                    pointRadius: 2
+                    borderDash: [4, 4],
+                    tension: 0.25,
+                    borderWidth: 1.8,
+                    pointRadius: 2.5
                 }));
                 activeChart.options.scales.y.title = { display: false };
                 activeChart.update('none');
