@@ -15,7 +15,6 @@ app = Flask(__name__, template_folder=os.path.abspath(os.path.join(os.path.dirna
 
 # Server Configuration
 UDP_TELEMETRY_PORT = 5000
-SDN_CONTROLLER_URL = "http://127.0.0.1:8080"
 NODE_TIMEOUT = 12
 C2_SHARED_SECRET = os.getenv("C2_SECRET_TOKEN", "sdn_cn_c2_token_secret_2026")
 
@@ -25,6 +24,28 @@ node_lock = threading.Lock()
 
 # Initialize DB Schema
 db.create_database()
+
+
+def get_sdn_controller_url():
+    """
+    Dynamically discovers the SDN controller endpoint.
+    Probes Mininet bridge IP (10.0.0.254:8080) and local loopback (127.0.0.1:8080).
+    """
+    candidates = [
+        os.getenv("SDN_CONTROLLER_URL"),
+        "http://10.0.0.254:8080",
+        "http://127.0.0.1:8080"
+    ]
+    for url in candidates:
+        if not url:
+            continue
+        try:
+            req = urllib.request.Request(f"{url}/api/v1/sdn/stats")
+            with urllib.request.urlopen(req, timeout=0.6) as resp:
+                return url
+        except Exception:
+            pass
+    return os.getenv("SDN_CONTROLLER_URL", "http://127.0.0.1:8080")
 
 
 def send_c2_command(agent_ip, c2_port, payload):
@@ -43,10 +64,11 @@ def send_c2_command(agent_ip, c2_port, payload):
 
 
 def sdn_mitigate_api(src_ip, agent_id="Unknown"):
+    controller_url = get_sdn_controller_url()
     try:
         req_data = json.dumps({"src_ip": src_ip, "agent_id": agent_id}).encode('utf-8')
         req = urllib.request.Request(
-            f"{SDN_CONTROLLER_URL}/api/v1/sdn/mitigate",
+            f"{controller_url}/api/v1/sdn/mitigate",
             data=req_data,
             headers={'Content-Type': 'application/json'}
         )
@@ -61,8 +83,8 @@ def sdn_mitigate_api(src_ip, agent_id="Unknown"):
             )
             return res
     except Exception as e:
-        print(f"[SDN Integration Error] Could not connect to SDN controller: {e}")
-        return {"status": "WARNING", "message": "SDN Controller unreachable"}
+        print(f"[SDN Integration Error] Could not connect to SDN controller at {controller_url}: {e}")
+        return {"status": "WARNING", "message": f"SDN Controller unreachable at {controller_url}"}
 
 
 def udp_telemetry_listener():
@@ -137,8 +159,9 @@ def get_metrics():
     
     # Query SDN Controller Stats
     sdn_stats = {"status": "OFFLINE", "active_rules": []}
+    controller_url = get_sdn_controller_url()
     try:
-        with urllib.request.urlopen(f"{SDN_CONTROLLER_URL}/api/v1/sdn/stats", timeout=1) as resp:
+        with urllib.request.urlopen(f"{controller_url}/api/v1/sdn/stats", timeout=1) as resp:
             sdn_stats = json.loads(resp.read().decode('utf-8'))
     except Exception:
         pass
@@ -280,10 +303,11 @@ def manual_sdn_mitigate():
 def manual_sdn_unblock():
     req = request.json or {}
     src_ip = req.get("src_ip")
+    controller_url = get_sdn_controller_url()
     try:
         req_data = json.dumps({"src_ip": src_ip}).encode('utf-8')
         req = urllib.request.Request(
-            f"{SDN_CONTROLLER_URL}/api/v1/sdn/unblock",
+            f"{controller_url}/api/v1/sdn/unblock",
             data=req_data,
             headers={'Content-Type': 'application/json'}
         )

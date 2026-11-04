@@ -64,6 +64,10 @@ def build_sdn_topology():
     os.system('ovs-ofctl add-flow s1 "priority=0,actions=NORMAL" 2>/dev/null || ovs-ofctl -O OpenFlow13 add-flow s1 "priority=0,actions=NORMAL" 2>/dev/null || true')
     os.system('ovs-vsctl set-fail-mode s1 standalone 2>/dev/null || true')
 
+    # Assign IP to switch interface s1 in root namespace so hosts (h1-h4) can route to host services (SDN controller 10.0.0.254:8080)
+    os.system('ip addr add 10.0.0.254/24 dev s1 2>/dev/null || true')
+    os.system('ip link set s1 up 2>/dev/null || true')
+
     # Allow controller handshake & switch flow table setup
     time.sleep(2)
 
@@ -74,7 +78,7 @@ def build_sdn_topology():
     # 1. Launch Central Monitoring & C2 Server inside Host h4's namespace
     info('*** Launching Central Server & Flask Dashboard on Host h4 (10.0.0.4:5050) ***\n')
     if os.path.exists(server_script):
-        h4.cmd(f'python3 {server_script} > /tmp/server_h4.log 2>&1 &')
+        h4.cmd(f'SDN_CONTROLLER_URL=http://10.0.0.254:8080 python3 {server_script} > /tmp/server_h4.log 2>&1 &')
         info('    -> Server launched on h4 (Logs: /tmp/server_h4.log)\n')
         time.sleep(2)  # Give Flask and UDP listener time to bind to 0.0.0.0
     else:
