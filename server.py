@@ -219,6 +219,54 @@ def start_sequential_campaign():
     return jsonify({"status": "SUCCESS", "message": "Sequential Attack Campaign launched across nodes."})
 
 
+@app.route("/api/campaign/multi_vector", methods=["POST"])
+def start_multi_vector_campaign():
+    """
+    Challenging Scenario: Multi-Node Distributed Botnet (Simultaneous Attack).
+    Triggers simultaneous UDP flood attacks from multiple compromised agents
+    (e.g. Node-1 and Node-2) to test SDN controller multi-flow drop concurrency.
+    """
+    req = request.json or {}
+    duration = req.get("duration", 15)
+
+    def multi_attack_worker():
+        with node_lock:
+            nodes = list(active_nodes.values())
+
+        if len(nodes) < 2:
+            print("[MULTI-ATTACK] Need at least 2 nodes for multi-vector DDoS test.")
+            target_nodes = nodes
+        else:
+            # Pick first 2 nodes as the botnet attackers
+            target_nodes = nodes[:2]
+
+        print(f"[MULTI-ATTACK] 🚀 Launching SIMULTANEOUS Multi-Vector Attack from {len(target_nodes)} nodes...")
+        threads = []
+        for node in target_nodes:
+            agent_id = node.get("agent_id")
+            c2_port = node.get("c2_port", 5001)
+            agent_ip = node.get("ip_address", "127.0.0.1")
+
+            t = threading.Thread(
+                target=send_c2_command,
+                args=(agent_ip, c2_port, {
+                    "command": "START_ATTACK",
+                    "target_ip": "10.0.0.4",
+                    "target_port": 8080,
+                    "duration": duration
+                })
+            )
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+        print("[MULTI-ATTACK] ✅ Multi-Vector DDoS Attack completed.")
+
+    threading.Thread(target=multi_attack_worker, daemon=True).start()
+    return jsonify({"status": "SUCCESS", "message": f"Simultaneous Multi-Vector DDoS launched for {duration}s."})
+
+
 @app.route("/api/sdn/mitigate", methods=["POST"])
 def manual_sdn_mitigate():
     req = request.json or {}
@@ -240,7 +288,19 @@ def manual_sdn_unblock():
             headers={'Content-Type': 'application/json'}
         )
         with urllib.request.urlopen(req, timeout=3) as resp:
-            return jsonify(json.loads(resp.read().decode('utf-8')))
+            res = json.loads(resp.read().decode('utf-8'))
+            with node_lock:
+                for node in active_nodes.values():
+                    if node.get("ip_address") == src_ip:
+                        node["sdn_mitigated"] = False
+            db.log_sdn_event(
+                time.strftime("%Y-%m-%d %H:%M:%S"),
+                "SDN-Controller",
+                "FLOW_UNBLOCKED",
+                f"Removed OpenFlow DROP rule for src_ip {src_ip}",
+                "REMOVED"
+            )
+            return jsonify(res)
     except Exception as e:
         return jsonify({"status": "ERROR", "message": str(e)})
 

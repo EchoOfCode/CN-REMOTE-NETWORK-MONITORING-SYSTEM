@@ -48,19 +48,21 @@ echo   [1] Start Local Simulation (Controller + Server + 3 Agents + UI)
 echo   [2] Run Automated Verification Suite (demo_runner.py)
 echo   [3] Open Web Dashboard in Browser (http://127.0.0.1:5050)
 echo   [4] Launch Mininet Topology in WSL (Linux: topology.py)
-echo   [5] Stop All Running Components
+echo   [5] Run Performance Evaluation & Benchmark (performance_eval.py)
+echo   [6] Stop All Running Components
 echo   [Q] Quit
 echo.
 echo ========================================================================
 set "CHOICE="
-set /p CHOICE="Select an option [1-5, Q] (Default: 1): "
+set /p CHOICE="Select an option [1-6, Q] (Default: 1): "
 
 if not defined CHOICE set CHOICE=1
 if "%CHOICE%"=="1" goto START_SIMULATION
 if "%CHOICE%"=="2" goto RUN_TESTS
 if "%CHOICE%"=="3" goto OPEN_BROWSER
 if "%CHOICE%"=="4" goto LAUNCH_WSL
-if "%CHOICE%"=="5" goto STOP_ALL
+if "%CHOICE%"=="5" goto RUN_PERF
+if "%CHOICE%"=="6" goto STOP_ALL
 if /i "%CHOICE%"=="Q" goto QUIT
 goto MENU
 
@@ -176,6 +178,16 @@ echo Mininet requires Linux or WSL to run kernel network namespaces and Open vSw
 echo.
 echo TIP: To run the system on Windows without WSL:
 echo   --^> Select Option [1] "Start Local Simulation" from the menu!
+echo.
+pause
+goto MENU
+
+:RUN_PERF
+cls
+echo ========================================================================
+echo   RUNNING PERFORMANCE EVALUATION & BENCHMARK SUITE
+echo ========================================================================
+%PY_CMD% performance_eval.py --server-url http://127.0.0.1:5050
 echo.
 pause
 goto MENU

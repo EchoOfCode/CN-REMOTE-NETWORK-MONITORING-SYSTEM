@@ -15,6 +15,7 @@ import sys
 import json
 import time
 import threading
+import subprocess
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Attempt importing Ryu controller classes for ryu-manager
@@ -33,6 +34,40 @@ switch_stats = {
     "blocked_ips": []
 }
 lock = threading.Lock()
+
+
+def push_ovs_flow(src_ip):
+    """Programs OpenFlow 1.3 DROP flow into Open vSwitch s1 if OVS is present."""
+    cmds = [
+        f'ovs-ofctl -O OpenFlow13 add-flow s1 "priority=1000,ip,nw_src={src_ip},actions=drop"',
+        f'sudo ovs-ofctl -O OpenFlow13 add-flow s1 "priority=1000,ip,nw_src={src_ip},actions=drop"'
+    ]
+    for cmd in cmds:
+        try:
+            res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode == 0:
+                print(f"[SDN CONTROLLER] ⚡ Open vSwitch s1 programmed: DROP rule installed for {src_ip}")
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def remove_ovs_flow(src_ip):
+    """Deletes OpenFlow flow from Open vSwitch s1 if OVS is present."""
+    cmds = [
+        f'ovs-ofctl -O OpenFlow13 del-flows s1 "ip,nw_src={src_ip}"',
+        f'sudo ovs-ofctl -O OpenFlow13 del-flows s1 "ip,nw_src={src_ip}"'
+    ]
+    for cmd in cmds:
+        try:
+            res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode == 0:
+                print(f"[SDN CONTROLLER] ⚡ Open vSwitch s1 programmed: DROP rule removed for {src_ip}")
+                return True
+        except Exception:
+            pass
+    return False
 
 
 class SDNRESTHandler(BaseHTTPRequestHandler):
@@ -91,6 +126,9 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
                 flow_rules.append(rule)
                 switch_stats["active_flows"] = len(flow_rules)
 
+            # Program Open vSwitch directly if present
+            push_ovs_flow(src_ip)
+
             print(f"[SDN CONTROLLER] 🔴 OpenFlow FlowMod Installed: DROP traffic from {src_ip} ({agent_id})")
             self._send_response(200, {"status": "SUCCESS", "action": "FLOWMOD_DROP_INSTALLED", "rule": rule})
         elif self.path == '/api/v1/sdn/unblock':
@@ -100,6 +138,10 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
                     switch_stats["blocked_ips"].remove(src_ip)
                 flow_rules = [r for r in flow_rules if r["match"].get("ipv4_src") != src_ip]
                 switch_stats["active_flows"] = len(flow_rules)
+
+            # Delete Open vSwitch flow directly if present
+            remove_ovs_flow(src_ip)
+
             print(f"[SDN CONTROLLER] 🟢 OpenFlow FlowMod Removed: Restored traffic for {src_ip}")
             self._send_response(200, {"status": "SUCCESS", "action": "FLOWMOD_REMOVED", "src_ip": src_ip})
         else:

@@ -425,6 +425,10 @@
                 <i class="fa-solid fa-rotate" id="refresh-icon"></i>
             </button>
 
+            <button class="btn btn-compact btn-warning-compact" onclick="triggerMultiVectorCampaign()" title="Challenging Scenario: Simultaneous Multi-Node Flood">
+                <i class="fa-solid fa-burst"></i> Multi-Node DDoS
+            </button>
+
             <button class="btn btn-compact btn-danger-compact" onclick="triggerSequentialCampaign()">
                 <i class="fa-solid fa-bolt"></i> Sequential Campaign
             </button>
@@ -1134,6 +1138,22 @@
                 logTerminal(`Campaign: ${data.message}`, "INFO");
             } catch (err) {
                 logTerminal(`Campaign error: ${err}`, "WARN");
+            }
+        }
+
+        async function triggerMultiVectorCampaign() {
+            logTerminal("Initiating Simultaneous Multi-Node Botnet DDoS Attack...", "ATTACK");
+            showToast("Multi-Node DDoS", "Simultaneous flood from multiple agents (Node-1 & Node-2)", "danger");
+            try {
+                const res = await fetch('/api/campaign/multi_vector', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ duration: 15 })
+                });
+                const data = await res.json();
+                logTerminal(`Multi-Vector ACK: ${data.message}`, "ATTACK");
+            } catch (err) {
+                logTerminal(`Multi-Vector error: ${err}`, "WARN");
             }
         }
 

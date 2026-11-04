@@ -177,6 +177,15 @@ run_tests() {
     fi
 }
 
+run_perf() {
+    echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
+    echo -e "${BOLD}${CYAN}   RUNNING PERFORMANCE EVALUATION & BENCHMARK SUITE${RESET}"
+    echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
+    $PY_BIN performance_eval.py
+    echo ""
+    read -rp "Press Enter to return to menu..."
+}
+
 # Interactive CLI Menu
 show_menu() {
     clear
@@ -187,18 +196,20 @@ show_menu() {
     echo -e "  [1] Launch Mininet + Ryu SDN Pipeline (sudo python3 topology.py)"
     echo -e "  [2] Start Local Simulation (Controller + Server + 3 Agents + UI)"
     echo -e "  [3] Run Automated Verification Suite (python3 demo_runner.py)"
-    echo -e "  [4] Stop All Background Processes & Clean Mininet"
+    echo -e "  [4] Run Performance Benchmark (python3 performance_eval.py)"
+    echo -e "  [5] Stop All Background Processes & Clean Mininet"
     echo -e "  [Q] Quit"
     echo ""
     echo -e "========================================================================"
-    read -rp "Select an option [1-4, Q] (Default: 1): " choice
+    read -rp "Select an option [1-5, Q] (Default: 1): " choice
     choice="${choice:-1}"
 
     case "$choice" in
         1) start_mininet_pipeline ;;
         2) start_local_simulation ;;
         3) run_tests ;;
-        4) stop_all ;;
+        4) run_perf ;;
+        5) stop_all ;;
         [qQ]) exit 0 ;;
         *) echo "Invalid option"; sleep 1; show_menu ;;
     esac
@@ -209,6 +220,7 @@ case "$1" in
     mininet|prod) start_mininet_pipeline ;;
     local|sim)   start_local_simulation ;;
     test|eval)   run_tests ;;
+    perf|bench)  run_perf ;;
     stop|clean)  stop_all ;;
     *)           show_menu ;;
 esac
