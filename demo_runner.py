@@ -157,7 +157,7 @@ def main():
     target_agent = "Node-1"
     # Dynamically find target_agent's actual IP address from telemetry
     target_node = next((n for n in nodes if n.get("agent_id") == target_agent), None)
-    target_ip = target_node.get("ip_address", "10.0.0.1") if target_node else "10.0.0.1"
+    target_ip = target_node.get("ip_address", "10.0.1.11") if target_node else "10.0.1.11"
     target_c2_port = target_node.get("c2_port", 5001) if target_node else 5001
 
     print(f"\n{BOLD}[CHECK 2/5] Dispatching Authenticated TCP C2 Attack Command to {target_agent} ({target_ip}:{target_c2_port})...{RESET}")
