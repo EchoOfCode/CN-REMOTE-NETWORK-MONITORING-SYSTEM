@@ -46,6 +46,35 @@ class TestLoadBalancer(unittest.TestCase):
         self.assertEqual(counts["b1"], 2)
         self.assertEqual(counts["b3"], 2)
 
+    def test_power_off_and_traffic_shares(self):
+        cfg = LoadBalancerConfig()
+        cfg.add_backend("b1", "10.0.2.11", 8001, weight=1)
+        cfg.add_backend("b2", "10.0.2.12", 8002, weight=1)
+        cfg.add_backend("b3", "10.0.2.13", 8003, weight=1)
+
+        # Baseline: 3 healthy backends -> 33.3% each
+        shares = cfg.get_traffic_shares()
+        self.assertEqual(shares["b1"], 33.3)
+        self.assertEqual(shares["b2"], 33.3)
+        self.assertEqual(shares["b3"], 33.3)
+
+        # Power OFF b2 -> b2 is excluded, b1 and b3 get 50% each!
+        cfg.backends["b2"].power_off()
+        self.assertEqual(cfg.backends["b2"].power_state, "OFF")
+        self.assertEqual(cfg.backends["b2"].status, "offline")
+
+        shares_after = cfg.get_traffic_shares()
+        self.assertEqual(shares_after["b2"], 0.0)
+        self.assertEqual(shares_after["b1"], 50.0)
+        self.assertEqual(shares_after["b3"], 50.0)
+
+        # Power ON b2 -> restored to 33.3%
+        cfg.backends["b2"].power_on()
+        self.assertEqual(cfg.backends["b2"].power_state, "ON")
+        self.assertEqual(cfg.backends["b2"].status, "healthy")
+        shares_restored = cfg.get_traffic_shares()
+        self.assertEqual(shares_restored["b2"], 33.3)
+
 if __name__ == '__main__':
     unittest.main()
 
