@@ -5,12 +5,12 @@ Provides the Ryu OpenFlow 1.3 Controller application with REST mitigation API.
 
 Run with Ryu Manager (Production/Mininet):
     ryu-manager ryu_sdn_controller.py --wsapi-port 8080
-    (or: ryu-manager sdn_controller.py --wsapi-port 8080)
 
-Run standalone (Local Windows Simulation / Testing):
-    python sdn_controller.py
+Run standalone (Zero-Dependency OpenFlow 1.3 / Linux OVS Manager):
+    python3 sdn_controller.py
 """
 
+import os
 import sys
 import json
 import time
@@ -27,47 +27,78 @@ except ImportError:
     HAS_RYU = False
 
 flow_rules = []
+managed_switches = ["s1", "s2"]
 switch_stats = {
-    "switch_id": "s1",
+    "switch_id": "s1,s2",
     "dpid": "0000000000000001",
     "active_flows": 0,
-    "blocked_ips": []
+    "blocked_ips": [],
+    "switches": managed_switches
 }
 lock = threading.Lock()
 
 
-def push_ovs_flow(src_ip):
-    """Programs OpenFlow 1.3 DROP flow into Open vSwitch s1 if OVS is present."""
-    cmds = [
-        f'ovs-ofctl -O OpenFlow13 add-flow s1 "priority=1000,ip,nw_src={src_ip},actions=drop"',
-        f'sudo ovs-ofctl -O OpenFlow13 add-flow s1 "priority=1000,ip,nw_src={src_ip},actions=drop"'
-    ]
-    for cmd in cmds:
-        try:
-            res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if res.returncode == 0:
-                print(f"[SDN CONTROLLER] ⚡ Open vSwitch s1 programmed: DROP rule installed for {src_ip}")
-                return True
-        except Exception:
-            pass
-    return False
+def push_ovs_flow(src_ip, switches=None):
+    """Programs OpenFlow 1.3 DROP flow into Open vSwitch datapaths."""
+    target_switches = switches or managed_switches
+    success = False
+    for sw in target_switches:
+        cmds = [
+            f'ovs-ofctl -O OpenFlow13 add-flow {sw} "priority=1000,ip,nw_src={src_ip},actions=drop"',
+            f'sudo ovs-ofctl -O OpenFlow13 add-flow {sw} "priority=1000,ip,nw_src={src_ip},actions=drop"'
+        ]
+        for cmd in cmds:
+            try:
+                res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if res.returncode == 0:
+                    print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule installed for {src_ip}")
+                    success = True
+                    break
+            except Exception:
+                pass
+    return success
 
 
-def remove_ovs_flow(src_ip):
-    """Deletes OpenFlow flow from Open vSwitch s1 if OVS is present."""
-    cmds = [
-        f'ovs-ofctl -O OpenFlow13 del-flows s1 "ip,nw_src={src_ip}"',
-        f'sudo ovs-ofctl -O OpenFlow13 del-flows s1 "ip,nw_src={src_ip}"'
-    ]
-    for cmd in cmds:
+def remove_ovs_flow(src_ip, switches=None):
+    """Deletes OpenFlow flow from Open vSwitch datapaths."""
+    target_switches = switches or managed_switches
+    success = False
+    for sw in target_switches:
+        cmds = [
+            f'ovs-ofctl -O OpenFlow13 del-flows {sw} "ip,nw_src={src_ip}"',
+            f'sudo ovs-ofctl -O OpenFlow13 del-flows {sw} "ip,nw_src={src_ip}"'
+        ]
+        for cmd in cmds:
+            try:
+                res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if res.returncode == 0:
+                    print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule removed for {src_ip}")
+                    success = True
+                    break
+            except Exception:
+                pass
+    return success
+
+
+def query_ovs_flows():
+    """Queries live OVS flow statistics across managed switches."""
+    stats = []
+    for sw in managed_switches:
+        cmd = f'sudo ovs-ofctl -O OpenFlow13 dump-flows {sw} 2>/dev/null || ovs-ofctl -O OpenFlow13 dump-flows {sw} 2>/dev/null'
         try:
             res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if res.returncode == 0:
-                print(f"[SDN CONTROLLER] ⚡ Open vSwitch s1 programmed: DROP rule removed for {src_ip}")
-                return True
+            if res.returncode == 0 and res.stdout:
+                for line in res.stdout.splitlines():
+                    if "actions=drop" in line or "drop" in line.lower():
+                        stats.append({"switch": sw, "flow": line.strip()})
         except Exception:
             pass
-    return False
+    return stats
+
+
+class SDNServer(HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
 
 
 class SDNRESTHandler(BaseHTTPRequestHandler):
@@ -81,14 +112,18 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode('utf-8'))
 
     def do_GET(self):
-        if self.path == '/api/v1/sdn/stats':
+        if self.path == '/api/v1/sdn/stats' or self.path == '/api/sdn/stats':
+            live_flows = query_ovs_flows()
             with lock:
                 response = {
                     "status": "ONLINE",
                     "switch": switch_stats,
-                    "active_rules": flow_rules
+                    "active_rules": flow_rules,
+                    "live_ovs_drops": live_flows
                 }
             self._send_response(200, response)
+        elif self.path == '/health':
+            self._send_response(200, {"status": "HEALTHY", "service": "SDN_CONTROLLER"})
         else:
             self._send_response(404, {"error": "Not Found"})
 
@@ -102,7 +137,7 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
             self._send_response(400, {"error": "Invalid JSON"})
             return
 
-        if self.path == '/api/v1/sdn/mitigate':
+        if self.path == '/api/v1/sdn/mitigate' or self.path == '/api/sdn/mitigate':
             src_ip = payload.get('src_ip')
             agent_id = payload.get('agent_id', 'Unknown')
             target_ip = payload.get('target_ip', 'ALL')
@@ -118,7 +153,8 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
                 "action": "DROP",
                 "installed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "agent_id": agent_id,
-                "target_ip": target_ip
+                "target_ip": target_ip,
+                "switches": managed_switches
             }
             with lock:
                 if src_ip not in switch_stats["blocked_ips"]:
@@ -126,12 +162,13 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
                 flow_rules.append(rule)
                 switch_stats["active_flows"] = len(flow_rules)
 
-            # Program Open vSwitch directly if present
+            # Program Open vSwitch directly if present on s1 and s2
             push_ovs_flow(src_ip)
 
             print(f"[SDN CONTROLLER] 🔴 OpenFlow FlowMod Installed: DROP traffic from {src_ip} ({agent_id})")
             self._send_response(200, {"status": "SUCCESS", "action": "FLOWMOD_DROP_INSTALLED", "rule": rule})
-        elif self.path == '/api/v1/sdn/unblock':
+
+        elif self.path == '/api/v1/sdn/unblock' or self.path == '/api/sdn/unblock':
             src_ip = payload.get('src_ip')
             with lock:
                 if src_ip in switch_stats["blocked_ips"]:
@@ -139,29 +176,32 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
                 flow_rules = [r for r in flow_rules if r["match"].get("ipv4_src") != src_ip]
                 switch_stats["active_flows"] = len(flow_rules)
 
-            # Delete Open vSwitch flow directly if present
+            # Delete Open vSwitch flow from switches
             remove_ovs_flow(src_ip)
 
             print(f"[SDN CONTROLLER] 🟢 OpenFlow FlowMod Removed: Restored traffic for {src_ip}")
             self._send_response(200, {"status": "SUCCESS", "action": "FLOWMOD_REMOVED", "src_ip": src_ip})
+
         else:
             self._send_response(404, {"error": "Endpoint not found"})
 
 
-class SDNServer(HTTPServer):
-    allow_reuse_address = True
-
-
-def run_sdn_controller(port=8080):
+def run_standalone_controller(host='0.0.0.0', port=8080):
     print("========================================")
-    print("   SDN CONTROLLER REST API (STANDALONE) ")
+    print("  STANDALONE SDN REST CONTROLLER (OVS)  ")
     print("========================================")
-    print(f"Controller listening on http://0.0.0.0:{port}")
-    print("OpenFlow Switch: s1 (DPID: 0000000000000001)")
+    print(f"Listening on: http://{host}:{port}")
+    print(f"Managed Switches: {', '.join(managed_switches)}")
+    print("Direct OpenFlow 1.3 Kernel FlowMod Injection: ACTIVE")
     print("========================================\n")
-    server = SDNServer(('0.0.0.0', port), SDNRESTHandler)
-    server.serve_forever()
+
+    httpd = SDNServer((host, port), SDNRESTHandler)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[SDN CONTROLLER] Shutting down controller server...")
+        httpd.server_close()
 
 
 if __name__ == '__main__':
-    run_sdn_controller()
+    run_standalone_controller()

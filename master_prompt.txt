@@ -1,0 +1,1738 @@
+<USER_REQUEST>
+# MASTER ENGINEERING PROMPT
+# Remote Network Health Monitor — Industry-Grade Network Monitoring, Traffic Management & SDN Platform
+
+## 1. ROLE AND EXPECTATIONS
+
+Act as a Principal Network Software Architect, Senior Backend Engineer, Network Automation Engineer, Site Reliability Engineer (SRE), and Senior Frontend Engineer.
+
+You are responsible for taking an existing project named **Remote Network Health Monitor** and evolving it into a professional, reliable, modular, and fully demonstrable network monitoring and management platform.
+
+This is an existing codebase. You are NOT starting a new project.
+
+Your primary responsibility is to understand the existing implementation, preserve its working functionality, identify architectural weaknesses, and progressively improve it.
+
+Treat this as a serious engineering project with the quality expectations of an industry-developed network operations platform.
+
+Do not simply generate code that appears functional. Every implemented feature must have:
+- A clearly defined purpose.
+- A well-defined interface.
+- Proper error handling.
+- Observable behaviour.
+- Measurable results.
+- Automated or reproducible tests.
+- Documentation.
+
+**Primary engineering principle: No simulated success, no fabricated metrics, no placeholder functionality presented as completed functionality.**
+
+If something is simulated, explicitly identify it as simulated. If something is actually measured from the network, display its real measurements.
+
+---
+
+# 2. PROJECT CONTEXT — EXISTING IMPLEMENTATION
+
+The existing project has four functional planes:
+
+1. Telemetry and attack plane.
+2. Central ingestion and web control plane.
+3. SDN controller and data plane.
+4. Verification and performance benchmark suite.
+
+The existing implementation includes the following files.
+
+| File | Existing responsibility |
+|---|---|
+| agent.py | Host telemetry and command agent |
+| server.py | Central Flask server, telemetry ingestion, alerts and orchestration |
+| db.py | SQLite persistence with WAL mode |
+| sdn_controller.py | Standalone OpenFlow management implementation |
+| ryu_sdn_controller.py | Ryu-based OpenFlow 1.3 controller |
+| topology.py | Mininet topology creation |
+| demo_runner.py | Automated demonstration tests |
+| performance_eval.py | Performance benchmarking |
+| templates/index.html | Existing web dashboard |
+
+### Existing implementation details
+
+The current agents:
+- Use psutil for CPU and memory monitoring.
+- Collect network byte counters.
+- Transmit telemetry using UDP.
+- Receive authenticated administrative commands through TCP.
+- Support START_ATTACK, STOP_ATTACK and STATUS operations.
+- Run controlled network traffic-generation functionality.
+
+The central server:
+- Receives telemetry.
+- Stores metrics.
+- Detects traffic surges.
+- Checks node availability.
+- Communicates with the SDN controller.
+- Exposes REST endpoints.
+- Controls agents and simulation campaigns.
+
+The SDN implementation:
+- Supports OpenFlow 1.3.
+- Can install and remove IP-based DROP rules.
+- Exposes a REST interface.
+- Has both a standalone implementation and a Ryu implementation.
+
+The existing Mininet topology contains:
+- h1
+- h2
+- h3
+- h4
+- s1
+- c0
+
+The existing dashboard already provides basic telemetry cards, charts, topology visualisation, OpenFlow rule information and administrative controls.
+
+**Preserve these existing capabilities. Do not remove working functionality without a documented technical reason and an approved migration plan.**
+
+---
+
+# 3. FINAL PROJECT OBJECTIVE
+
+Evolve the existing system into:
+
+**Remote Network Health Monitor — A Centralized Network Intelligence, Monitoring, Traffic Management and Automated Recovery Platform.**
+
+The platform must provide centralized visibility and operational control over a virtual network infrastructure.
+
+The system must be capable of:
+
+1. Monitoring distributed network nodes.
+2. Monitoring CPU, RAM, network throughput and interface statistics.
+3. Monitoring router health and connectivity.
+4. Visualising network topology and link status.
+5. Detecting abnormal resource utilisation.
+6. Generating controlled CPU and network traffic spikes.
+7. Implementing custom application-level load balancing.
+8. Detecting backend failures.
+9. Automatically redistributing incoming traffic.
+10. Managing network flows using SDN.
+11. Executing controlled failure simulations.
+12. Recording events and recovery operations.
+13. Producing quantitative performance reports.
+
+The final platform must demonstrate both monitoring and active network management.
+
+---
+
+# 4. FINAL ARCHITECTURAL DECISIONS
+
+These decisions are final and must be followed unless a genuine technical incompatibility is discovered.
+
+| Decision | Selected implementation |
+|---|---|
+| Network simulation | Mininet |
+| Virtual switching | Open vSwitch |
+| SDN protocol | OpenFlow 1.3 |
+| Primary SDN controller | Ryu |
+| Router | Linux Layer 3 router |
+| Advanced routing | FRRouting, only if necessary |
+| Load balancing | Custom Python HTTP reverse proxy |
+| Load-balancing runtime | Python asyncio + aiohttp |
+| Backend services | Lightweight Python HTTP services |
+| Monitoring agents | Python + psutil |
+| Central backend | Existing Flask application |
+| Database | SQLite with WAL |
+| Frontend | HTML, CSS, Bootstrap and Chart.js |
+| Network testing | iperf3 |
+| CPU testing | stress-ng or bounded Python workload |
+| Application testing | wrk or controlled HTTP generator |
+| Automated testing | pytest |
+| Performance evaluation | Existing performance_eval.py, upgraded |
+
+Do not introduce unnecessary infrastructure or paid external dependencies.
+
+Do not introduce Kubernetes, cloud dependencies, Redis, Kafka, Prometheus or Grafana unless there is a clearly justified requirement.
+
+The current project must remain easy to deploy locally.
+
+---
+
+# 5. NETWORK TOPOLOGY IMPLEMENTATION
+
+## 5.1 Required expanded topology
+
+Expand the existing Mininet topology while preserving the original node identities.
+
+The proposed infrastructure:
+
+### Client nodes
+- h1 — Client 1
+- h2 — Client 2
+- h3 — Client 3
+
+### Monitoring
+- h4 — Central monitoring and orchestration server
+
+### Backend nodes
+- h5 — Backend server 1
+- h6 — Backend server 2
+- h7 — Backend server 3
+
+### Traffic management
+- h8 — Custom load balancer
+
+### Network infrastructure
+- r1 — Layer 3 router
+- s1 — Client-side Open vSwitch
+- s2 — Backend-side Open vSwitch
+- c0 — Ryu SDN controller
+
+## 5.2 IP addressing
+
+Use the following proposed addressing plan, subject to verification against the existing topology:
+
+| Component | IP |
+|---|---|
+| h1 | 10.0.1.11 |
+| h2 | 10.0.1.12 |
+| h3 | 10.0.1.13 |
+| h4 | 10.0.1.20 |
+| h8 | 10.0.1.30 |
+| r1 client interface | 10.0.1.1 |
+| r1 backend interface | 10.0.2.1 |
+| h5 | 10.0.2.11 |
+| h6 | 10.0.2.12 |
+| h7 | 10.0.2.13 |
+
+Subnet 1: 10.0.1.0/24
+
+Subnet 2: 10.0.2.0/24
+
+Configure:
+- Appropriate default gateways.
+- IP forwarding on r1.
+- Static routing where required.
+- Correct interface assignments.
+- OpenFlow 1.3 support.
+- Management and controller connectivity.
+
+Ensure h4 can receive telemetry from every node, including nodes on the backend subnet.
+
+Do not assume that a management IP assigned to a switch automatically provides the correct connectivity.
+
+## 5.3 Topology requirements
+
+Implement the topology in topology.py.
+
+Requirements:
+
+- Preserve existing host functionality.
+- Implement the new hosts and switches.
+- Configure the router and interfaces.
+- Configure routing.
+- Configure Open vSwitch.
+- Connect switches to the selected Ryu controller.
+- Start monitoring agents.
+- Start backend services.
+- Start the custom load balancer.
+- Handle process termination.
+- Provide deterministic startup and shutdown.
+- Include topology validation.
+
+Implement a proper cleanup mechanism so repeated starts do not leave orphaned processes, stale interfaces or occupied ports.
+
+### Topology acceptance criteria
+
+- All intended nodes start successfully.
+- All intended IP addresses are assigned.
+- Client-to-backend connectivity works through the router.
+- Backend-to-monitoring telemetry works.
+- Load balancer can reach all healthy backends.
+- Both switches connect to the intended controller.
+- The topology can be stopped and restarted cleanly.
+
+---
+
+# 6. TELEMETRY ENGINE — REAL-TIME MONITORING
+
+Existing files:
+- agent.py
+- server.py
+
+New files:
+- monitoring/telemetry.py
+- monitoring/network_metrics.py
+
+## 6.1 Agent improvements
+
+Extend the existing agent rather than replacing its working architecture.
+
+Collect the following:
+
+### System metrics
+- CPU utilisation.
+- CPU core information where available.
+- Memory utilisation.
+- Memory used and available.
+- Process count.
+- Agent uptime.
+
+### Network metrics
+- Bytes sent.
+- Bytes received.
+- Packets sent.
+- Packets received.
+- Packet errors.
+- Packet drops.
+- Interface status.
+- Upload throughput.
+- Download throughput.
+
+### Network throughput calculation
+
+Do not use cumulative byte counters directly as bandwidth.
+
+Calculate throughput using successive measurements:
+
+Upload Mbps = (Current bytes sent - Previous bytes sent) × 8 / Elapsed seconds / 1,000,000
+
+Download Mbps = (Current bytes received - Previous bytes received) × 8 / Elapsed seconds / 1,000,000
+
+Handle:
+- Counter resets.
+- Interface changes.
+- Missing samples.
+- Zero or invalid time intervals.
+- Negative counter differences.
+
+## 6.2 Telemetry protocol
+
+Preserve UDP telemetry initially.
+
+Add:
+- Agent identifier.
+- Sequence number.
+- Timestamp.
+- Interface identifier.
+- CPU percentage.
+- Memory percentage.
+- Upload Mbps.
+- Download Mbps.
+- Packet counters.
+- Error counters.
+- Drop counters.
+- Agent status.
+
+Example:
+
+{
+  "agent_id": "Node-1",
+  "sequence_number": 1052,
+  "timestamp": "2026-11-05T09:35:00",
+  "cpu_percent": 91.4,
+  "memory_percent": 62.1,
+  "upload_mbps": 84.6,
+  "download_mbps": 21.3,
+  "status": "HEALTHY"
+}
+
+Values are illustrative.
+
+## 6.3 Sampling requirements
+
+- Default sampling interval: 1 second.
+- Configurable sampling interval.
+- Dashboard refresh approximately every second.
+- Configurable telemetry timeout.
+- Sequence-number tracking.
+- Stale-data detection.
+
+Never treat missing telemetry as zero utilisation.
+
+Differentiate:
+- HEALTHY
+- DEGRADED
+- CRITICAL
+- OFFLINE
+- UNKNOWN
+
+## 6.4 Historical telemetry
+
+Maintain historical metrics with timestamps.
+
+The system must support:
+- Current values.
+- Minimum values.
+- Maximum values.
+- Average values.
+- Historical trends.
+- Event-correlated measurements.
+
+The graph must display the actual collected measurements.
+
+Do not generate fake chart values to make the interface appear active.
+
+---
+
+# 7. ROUTER HEALTH MONITORING
+
+New file:
+
+monitoring/router_monitor.py
+
+The router must be monitored as an independent network device.
+
+Collect:
+
+### System health
+- CPU.
+- Memory.
+- Uptime.
+- Router availability.
+
+### Interface health
+- Interface name.
+- Interface state.
+- Upload traffic.
+- Download traffic.
+- Packet counts.
+- Packet drops.
+- Packet errors.
+
+### Connectivity
+- ICMP reachability.
+- Round-trip latency.
+- Packet loss.
+- Gateway reachability.
+
+### Routing
+- Routing table.
+- Active routes.
+- Interface-to-subnet mapping.
+
+Use appropriate Linux networking interfaces and tools, including psutil, /proc/net/dev and iproute2.
+
+Do not assume that a successful process check means the router is forwarding packets correctly.
+
+Implement independent connectivity verification.
+
+### Router health classification
+
+Implement configurable thresholds.
+
+Initial demonstration defaults:
+
+| Condition | Status |
+|---|---|
+| CPU below 70% | HEALTHY |
+| CPU 70–85% | DEGRADED |
+| CPU above 85% | CRITICAL |
+| Interface down | CRITICAL |
+| Packet loss above 2% | DEGRADED |
+| Packet loss above 5% | CRITICAL |
+| No reliable measurements | UNKNOWN |
+
+Use separate warning and recovery thresholds to avoid status oscillation.
+
+Display router information in the dashboard.
+
+---
+
+# 8. CUSTOM PYTHON LOAD BALANCER
+
+New directory:
+
+load_balancer/
+
+Required files:
+
+- proxy.py
+- algorithms.py
+- health_checker.py
+- metrics.py
+- config.py
+
+## 8.1 Core implementation
+
+Build an actual HTTP reverse proxy using Python asyncio and aiohttp.
+
+It must receive incoming HTTP requests and forward them to selected backend servers.
+
+Do not implement this as a random backend selector or a simulated traffic distribution function.
+
+The backend must genuinely receive and process requests.
+
+## 8.2 Algorithms
+
+Implement:
+
+### Round Robin
+
+Sequentially select the next healthy backend.
+
+### Least Connections
+
+Select the eligible backend with the fewest active requests or connections, using a consistent definition of concurrency.
+
+### Weighted Round Robin
+
+Distribute traffic according to configured backend weights.
+
+Support runtime algorithm selection through an authenticated API.
+
+## 8.3 Backend health checking
+
+Each backend exposes:
+
+GET /health
+
+The health checker must:
+
+- Perform periodic health checks.
+- Support connection and response timeouts.
+- Track consecutive failures.
+- Mark failing backends unhealthy.
+- Remove unhealthy backends from selection.
+- Verify recovery.
+- Reintroduce recovered backends.
+- Record status transitions.
+
+Do not immediately reintroduce a backend after one unreliable response.
+
+Implement configurable recovery requirements.
+
+## 8.4 Backend management
+
+Support:
+
+- Register backend.
+- Remove backend.
+- Enable backend.
+- Disable backend.
+- Drain backend.
+- Restore backend.
+- Change backend weight.
+- Inspect backend health.
+
+A drained backend must stop receiving new requests while existing requests are allowed to complete where possible.
+
+## 8.5 Reverse proxy requirements
+
+Implement:
+
+- Request forwarding.
+- Response forwarding.
+- Request timeout.
+- Upstream timeout.
+- Connection pooling.
+- Concurrency limits.
+- Graceful shutdown.
+- Upstream error handling.
+- Request identifiers.
+- Structured access logs.
+- Backend identification headers.
+
+Avoid forwarding hop-by-hop HTTP headers incorrectly.
+
+Do not silently retry non-idempotent requests in ways that could duplicate application actions.
+
+## 8.6 Load balancer metrics
+
+Collect:
+
+- Total requests.
+- Requests per second.
+- Successful requests.
+- Failed requests.
+- Active requests.
+- Requests per backend.
+- Backend response time.
+- Average response time.
+- p95 response time.
+- p99 response time.
+- Backend health.
+- Backend failover events.
+- Current algorithm.
+
+The dashboard must show the actual backend that served each request.
+
+---
+
+# 9. BACKEND SERVICES
+
+New file:
+
+backend/app.py
+
+Create three independent backend instances.
+
+Each backend must expose:
+
+GET /
+GET /health
+GET /metrics
+GET /simulate-work
+
+Every backend must return its identity.
+
+Example:
+
+{
+  "backend_id": "backend-2",
+  "hostname": "h6",
+  "status": "healthy",
+  "request_count": 1250
+}
+
+Use a separate process and port or namespace configuration as appropriate.
+
+The backend must maintain its own request statistics.
+
+The /simulate-work endpoint should support bounded workloads for application performance testing.
+
+The backend must never claim to be healthy if it cannot actually serve requests.
+
+---
+
+# 10. ANOMALY DETECTION AND EVENT ENGINE
+
+New files:
+
+monitoring/anomaly_detector.py
+services/event_manager.py
+
+Implement a deterministic, explainable anomaly detection engine.
+
+Initially use:
+- Configurable thresholds.
+- Rolling baselines.
+- Consecutive-sample requirements.
+- Hysteresis.
+- Alert deduplication.
+- Recovery detection.
+
+Monitor:
+
+- CPU utilisation.
+- RAM utilisation.
+- Network throughput.
+- Packet loss.
+- Latency.
+- Node availability.
+- Router availability.
+- Backend health.
+- Backend response time.
+
+Do not immediately introduce machine learning.
+
+## 10.1 Alert structure
+
+Each event must contain:
+
+- Event ID.
+- Event type.
+- Severity.
+- Affected component.
+- Timestamp.
+- Observed metric.
+- Expected threshold.
+- Description.
+- Detection method.
+- Action taken.
+- Recovery status.
+- Recovery timestamp.
+
+## 10.2 Alert lifecycle
+
+Support:
+
+DETECTED → ACKNOWLEDGED → MITIGATING → RECOVERED
+
+Not every event requires mitigation.
+
+Maintain the distinction between detected conditions and completed remediation.
+
+## 10.3 Threshold behaviour
+
+Use separate warning and critical thresholds.
+
+Example:
+
+CPU greater than 85% for three consecutive samples → CRITICAL.
+
+CPU below 75% for three consecutive samples → RECOVERED.
+
+Thresholds must be configurable.
+
+---
+
+# 11. SIMULATION ENGINE
+
+New directory:
+
+simulation/
+
+Required files:
+
+- cpu_stress.py
+- network_stress.py
+- node_failure.py
+- router_failure.py
+- scenarios.py
+
+This module is essential for the live demonstration.
+
+Every simulation must run inside the isolated Mininet laboratory environment.
+
+## 11.1 CPU spike
+
+Use stress-ng or a bounded CPU workload.
+
+Requirements:
+- Select target node.
+- Configure workload intensity.
+- Configure duration.
+- Start workload.
+- Stop workload.
+- Monitor actual CPU.
+- Record simulation start and stop.
+- Clean up automatically.
+
+## 11.2 Network spike
+
+Use iperf3 to generate controlled network traffic.
+
+Requirements:
+- Select source.
+- Select destination.
+- Configure target bandwidth.
+- Configure duration.
+- Start test.
+- Stop test.
+- Record actual throughput.
+- Monitor interface counters.
+- Record test results.
+
+The test traffic must traverse the intended Mininet network path.
+
+## 11.3 Combined stress
+
+Support simultaneous CPU and network stress.
+
+Display both metrics using synchronized timestamps.
+
+## 11.4 Backend failure
+
+Stop or disable a backend service in a controlled manner.
+
+Verify:
+- Health check failure.
+- Backend removal.
+- Traffic redistribution.
+- No new requests routed to the failed backend.
+- Recovery after restart.
+
+## 11.5 Router failure
+
+Temporarily disable a selected router interface.
+
+Verify:
+- Interface status change.
+- Connectivity degradation.
+- Packet loss.
+- Event detection.
+- Connectivity restoration.
+
+## 11.6 Safety
+
+Every simulation must have:
+- Maximum duration.
+- Maximum resource limits.
+- Administrator authorization.
+- Start and stop tracking.
+- Automatic cleanup.
+- Process supervision.
+- A global emergency-stop mechanism.
+
+Never allow arbitrary command execution from the dashboard.
+
+---
+
+# 12. SDN CONTROLLER INTEGRATION
+
+Existing files:
+
+- sdn_controller.py
+- ryu_sdn_controller.py
+
+Retain the existing OpenFlow 1.3 implementation.
+
+Use Ryu as the primary controller.
+
+The standalone controller must not compete with Ryu for control of the same switch.
+
+Implement:
+
+- Switch connection monitoring.
+- Flow table inspection.
+- Flow statistics.
+- DROP rules.
+- Rule removal.
+- Traffic redirection.
+- IP-based mitigation.
+- Rule verification.
+- Event logging.
+
+Every SDN operation must be confirmed by the controller and, where possible, verified against actual switch flow statistics.
+
+The system must distinguish between:
+- API request accepted.
+- Controller operation successful.
+- Flow rule actually installed.
+- Traffic behaviour successfully changed.
+
+Never report mitigation as successful solely because an HTTP request returned successfully.
+
+---
+
+# 13. CENTRAL BACKEND AND API DESIGN
+
+Preserve server.py as the central Flask application.
+
+Separate responsibilities into service modules.
+
+Avoid a large monolithic server.py.
+
+## Required API groups
+
+### General monitoring
+
+GET /api/health
+
+GET /api/metrics
+
+GET /api/nodes
+
+GET /api/nodes/<id>
+
+GET /api/history
+
+GET /api/topology
+
+### Router
+
+GET /api/router
+
+GET /api/router/interfaces
+
+GET /api/router/routes
+
+### Load balancer
+
+GET /api/lb/status
+
+GET /api/lb/backends
+
+GET /api/lb/metrics
+
+POST /api/lb/algorithm
+
+POST /api/lb/backend/<id>/enable
+
+POST /api/lb/backend/<id>/drain
+
+POST /api/lb/backend/<id>/restore
+
+### Simulation
+
+POST /api/simulation/cpu/start
+
+POST /api/simulation/network/start
+
+POST /api/simulation/scenario/start
+
+POST /api/simulation/stop
+
+POST /api/simulation/reset
+
+### SDN
+
+GET /api/sdn/stats
+
+POST /api/sdn/mitigate
+
+POST /api/sdn/unblock
+
+### Events
+
+GET /api/events
+
+GET /api/alerts
+
+POST /api/alerts/<id>/acknowledge
+
+Maintain existing API compatibility where practical.
+
+Use consistent JSON responses.
+
+Example:
+
+{
+  "success": true,
+  "timestamp": "2026-11-05T09:35:00",
+  "data": {},
+  "error": null
+}
+
+Use appropriate HTTP status codes.
+
+Implement:
+- Input validation.
+- Authentication.
+- Authorization.
+- Rate limiting for sensitive controls.
+- Request timeouts.
+- Structured logging.
+- Consistent error handling.
+
+All privileged operations must be protected.
+
+---
+
+# 14. DATABASE ENGINEERING
+
+Preserve SQLite and WAL mode.
+
+Existing tables:
+- health_data
+- sdn_events
+
+Add appropriate tables for:
+
+- nodes
+- node_heartbeats
+- routers
+- router_interfaces
+- backend_nodes
+- load_balancer_config
+- lb_metrics
+- system_events
+- simulation_events
+- audit_logs
+
+Use proper primary keys, foreign keys, indexes and timestamps.
+
+Requirements:
+
+- Parameterized SQL.
+- Controlled transactions.
+- Thread-safe connection management.
+- Efficient batch writes.
+- Database migration scripts.
+- Historical data retention.
+- Protection against duplicate event records.
+- No unnecessary writes from dashboard polling.
+
+Do not introduce another database without a documented technical reason.
+
+---
+
+# 15. PROFESSIONAL NOC DASHBOARD REDESIGN
+
+Existing files:
+
+templates/index.html
+
+New frontend files:
+
+static/css/dashboard.css
+
+static/js/dashboard.js
+
+static/js/charts.js
+
+static/js/topology.js
+
+static/js/load_balancer.js
+
+static/js/simulation.js
+
+Use the existing frontend stack initially.
+
+The dashboard should be redesigned as a professional Network Operations Center interface.
+
+## 15.1 Design direction
+
+Design characteristics:
+
+- Professional enterprise NOC interface.
+- Dark theme with strong contrast.
+- Consistent spacing and typography.
+- Clear visual hierarchy.
+- Responsive layout.
+- Minimal decorative elements.
+- No excessive gradients.
+- No unnecessary animations.
+- Clear operational status indicators.
+- Accessible colour contrast.
+- Consistent chart presentation.
+
+Do not sacrifice readability for visual effects.
+
+## 15.2 Navigation structure
+
+Create these sections:
+
+1. Overview.
+2. Network Topology.
+3. Live Telemetry.
+4. Router Health.
+5. Load Balancer.
+6. SDN and Security.
+7. Simulation Lab.
+8. Alerts and Events.
+9. Performance Analytics.
+10. System Settings.
+
+## 15.3 Overview dashboard
+
+Display:
+
+- Total nodes.
+- Active nodes.
+- Offline nodes.
+- Router health.
+- Active backends.
+- Load balancer status.
+- Average CPU.
+- Average RAM.
+- Upload bandwidth.
+- Download bandwidth.
+- Active alerts.
+- Latest events.
+
+## 15.4 Live telemetry
+
+Create separate charts for:
+
+- CPU.
+- RAM.
+- Upload bandwidth.
+- Download bandwidth.
+- Latency.
+- Packet loss.
+
+Support:
+- Node selection.
+- Historical ranges.
+- Live updates.
+- Pause/resume.
+- Current value.
+- Peak value.
+- Threshold lines.
+- Event annotations.
+
+The CPU and network spikes must be visually clear.
+
+Add event markers such as:
+
+CPU STRESS STARTED
+
+NETWORK TEST STARTED
+
+CRITICAL THRESHOLD CROSSED
+
+STRESS STOPPED
+
+SYSTEM RECOVERED
+
+Charts must use actual telemetry data.
+
+## 15.5 Network topology
+
+Provide an interactive network diagram.
+
+Display:
+- Clients.
+- Router.
+- Switches.
+- Load balancer.
+- Backend nodes.
+- Monitoring server.
+- Network links.
+
+Show:
+- Device status.
+- Link status.
+- Traffic direction.
+- Interface throughput.
+- Failure indicators.
+
+Clicking a device must open a detailed information panel.
+
+## 15.6 Load balancer dashboard
+
+Display:
+
+- Current algorithm.
+- Requests per second.
+- Total requests.
+- Active requests.
+- Failed requests.
+- Backend response time.
+- Traffic distribution.
+- Backend health.
+- Failover events.
+
+Provide controls to change algorithms and manage backends.
+
+## 15.7 Router dashboard
+
+Display:
+
+- CPU.
+- Memory.
+- Uptime.
+- Interface status.
+- Upload and download.
+- Packet errors.
+- Packet drops.
+- Latency.
+- Packet loss.
+- Routing table.
+
+## 15.8 Simulation interface
+
+Provide clear controls for:
+
+- CPU stress.
+- Network stress.
+- Combined stress.
+- Backend failure.
+- Router failure.
+- Recovery.
+- Stop all simulations.
+
+Display:
+- Target.
+- Duration.
+- Current state.
+- Elapsed time.
+- Peak metrics.
+- Event history.
+- Cleanup status.
+
+Every button must be connected to a real backend operation.
+
+Do not create decorative buttons or simulated success states.
+
+## 15.9 Events and logs
+
+Display a chronological event stream.
+
+Each event must have:
+- Timestamp.
+- Component.
+- Severity.
+- Description.
+- Action.
+- Current status.
+
+Provide filtering and search.
+
+---
+
+# 16. PERFORMANCE EVALUATION
+
+Existing file:
+
+performance_eval.py
+
+Upgrade the benchmarking system.
+
+Create the following evaluation phases:
+
+PHASE 1 — Baseline network performance.
+
+PHASE 2 — CPU stress.
+
+PHASE 3 — Network stress.
+
+PHASE 4 — Combined stress.
+
+PHASE 5 — Load balancing.
+
+PHASE 6 — Backend failure and automatic failover.
+
+PHASE 7 — Router interface failure.
+
+PHASE 8 — SDN mitigation.
+
+PHASE 9 — Full recovery.
+
+Measure:
+
+- CPU peak.
+- Memory peak.
+- Network throughput.
+- Packet loss.
+- Latency.
+- Average response time.
+- p95 latency.
+- p99 latency.
+- Requests per second.
+- Traffic distribution.
+- Failure detection time.
+- Failover time.
+- Recovery time.
+
+Use reproducible test conditions.
+
+Export:
+- performance_results.json
+- performance_results.csv
+
+Clearly separate measured values from calculated metrics.
+
+Do not invent expected benchmark results.
+
+---
+
+# 17. RELIABILITY, SECURITY AND ENGINEERING QUALITY
+
+This section is mandatory.
+
+The system must be engineered with production-oriented practices, even though its deployment target is a local demonstration environment.
+
+## Reliability
+
+Implement:
+- Graceful startup and shutdown.
+- Process supervision.
+- Agent reconnect handling.
+- Backend health checks.
+- Stale telemetry detection.
+- Automatic recovery.
+- Timeouts.
+- Resource limits.
+- Exception handling.
+- Consistent logging.
+
+## Security
+
+Implement:
+- Authenticated administrative controls.
+- Protected credentials.
+- Role-based permissions where appropriate.
+- Input validation.
+- Command allowlisting.
+- Safe subprocess execution.
+- API access controls.
+- Audit logging.
+- Network isolation.
+- Restricted simulation operations.
+
+Never use unrestricted shell commands derived from user input.
+
+Do not expose secrets in logs or frontend code.
+
+## Performance
+
+Implement:
+- Non-blocking I/O where appropriate.
+- Bounded concurrency.
+- Efficient database access.
+- Incremental chart updates.
+- Controlled telemetry ingestion.
+- Request timeouts.
+- Connection pooling.
+
+## Observability
+
+Provide:
+- Structured application logs.
+- Event correlation.
+- Error identifiers.
+- Operation durations.
+- Backend request metrics.
+- Telemetry freshness information.
+
+## Testing
+
+Implement unit, integration and end-to-end tests.
+
+Every critical operation must have a verification procedure.
+
+---
+
+# 18. PROJECT STRUCTURE
+
+Preserve existing modules and introduce new modules incrementally.
+
+Target structure:
+
+remote-network-monitor/
+
+├── agent.py
+├── server.py
+├── db.py
+├── topology.py
+│
+├── sdn_controller.py
+├── ryu_sdn_controller.py
+│
+├── load_balancer/
+│   ├── __init__.py
+│   ├── proxy.py
+│   ├── algorithms.py
+│   ├── health_checker.py
+│   ├── metrics.py
+│   └── config.py
+│
+├── monitoring/
+│   ├── __init__.py
+│   ├── telemetry.py
+│   ├── network_metrics.py
+│   ├── router_monitor.py
+│   └── anomaly_detector.py
+│
+├── simulation/
+│   ├── __init__.py
+│   ├── cpu_stress.py
+│   ├── network_stress.py
+│   ├── node_failure.py
+│   ├── router_failure.py
+│   └── scenarios.py
+│
+├── services/
+│   ├── __init__.py
+│   ├── orchestration.py
+│   ├── event_manager.py
+│   └── recovery.py
+│
+├── backend/
+│   ├── __init__.py
+│   └── app.py
+│
+├── templates/
+│   └── index.html
+│
+├── static/
+│   ├── css/
+│   │   └── dashboard.css
+│   └── js/
+│       ├── dashboard.js
+│       ├── charts.js
+│       ├── topology.js
+│       ├── load_balancer.js
+│       └── simulation.js
+│
+├── tests/
+│   ├── test_telemetry.py
+│   ├── test_router.py
+│   ├── test_load_balancer.py
+│   ├── test_anomaly.py
+│   ├── test_sdn.py
+│   └── test_integration.py
+│
+├── demo_runner.py
+├── performance_eval.py
+├── requirements.txt
+├── README.md
+├── PROJECT_STATE.md
+└── ARCHITECTURE.md
+
+Do not create empty files simply to match this structure.
+
+Create modules when they have a real implementation and responsibility.
+
+---
+
+# 19. IMPLEMENTATION MILESTONES
+
+Execute the project in the following order.
+
+Do not skip milestones.
+
+## MILESTONE 0 — Existing codebase audit
+
+Before editing:
+
+1. Inspect every existing Python file.
+2. Inspect frontend files.
+3. Inspect requirements.txt.
+4. Inspect database schema.
+5. Inspect existing APIs.
+6. Inspect topology configuration.
+7. Inspect startup and shutdown procedures.
+8. Identify existing port allocations.
+9. Identify dependencies.
+10. Identify architectural weaknesses.
+
+Produce:
+
+- CODEBASE_AUDIT.md
+- ARCHITECTURE.md
+- PROJECT_STATE.md
+
+Document:
+- Working features.
+- Broken features.
+- Existing bugs.
+- Port conflicts.
+- Missing functionality.
+- Dependency problems.
+- Required migrations.
+
+Do not start a major rewrite before completing the audit.
+
+## MILESTONE 1 — Infrastructure
+
+Implement and test expanded Mininet topology.
+
+Completion requires successful network connectivity and controller integration.
+
+## MILESTONE 2 — Monitoring
+
+Implement accurate telemetry, network rates, router monitoring and heartbeat detection.
+
+Completion requires actual measurable metrics.
+
+## MILESTONE 3 — Load balancing
+
+Implement the custom reverse proxy, algorithms, backend health checks and automatic failover.
+
+Completion requires real HTTP traffic distribution.
+
+## MILESTONE 4 — Orchestration
+
+Integrate monitoring, simulation, alerts, SDN and backend controls.
+
+Completion requires actual operations and verified results.
+
+## MILESTONE 5 — Dashboard
+
+Implement the complete NOC interface.
+
+Completion requires every displayed metric and control to be connected to actual backend functionality.
+
+## MILESTONE 6 — Verification
+
+Run automated tests, complete simulations and performance evaluation.
+
+Completion requires reproducible test results.
+
+---
+
+# 20. DEMONSTRATION REQUIREMENTS
+
+The system must support a complete demonstration lasting approximately 5–7 minutes.
+
+The demonstration sequence:
+
+### Stage 1 — Normal operation
+
+Show:
+- All nodes online.
+- Router healthy.
+- All backends healthy.
+- Load balancer active.
+- Normal network traffic.
+
+### Stage 2 — CPU spike
+
+Trigger CPU stress on Node 1.
+
+Show:
+- CPU rising.
+- Actual telemetry.
+- Threshold crossing.
+- Alert generation.
+- Recovery after stopping the workload.
+
+### Stage 3 — Network spike
+
+Generate controlled network traffic.
+
+Show:
+- Upload/download throughput increasing.
+- Packet counters changing.
+- Bandwidth graph spike.
+- Network event.
+- Recovery.
+
+### Stage 4 — Load balancing
+
+Generate multiple HTTP requests.
+
+Show:
+- Round Robin.
+- Least Connections.
+- Weighted Round Robin.
+- Backend request counts.
+- Actual traffic distribution.
+
+### Stage 5 — Backend failure
+
+Stop Backend 2.
+
+Show:
+- Health-check failure.
+- Backend marked unhealthy.
+- Traffic redistributed.
+- No new requests routed to Backend 2.
+- Backend recovery after restart.
+
+### Stage 6 — Router failure
+
+Disable a router interface.
+
+Show:
+- Interface state change.
+- Connectivity degradation.
+- Packet loss.
+- Alert.
+- Restoration of connectivity.
+
+### Stage 7 — SDN mitigation
+
+Trigger a controlled test flow.
+
+Show:
+- Detection.
+- Mitigation request.
+- OpenFlow rule installation.
+- Flow table verification.
+- Traffic effect.
+- Rule removal.
+
+### Stage 8 — Final recovery
+
+Restore normal conditions.
+
+Show:
+- All components healthy.
+- No active simulations.
+- Metrics returning to baseline.
+- Complete event history.
+
+All stages must operate on the actual network environment.
+
+---
+
+# 21. FINAL ACCEPTANCE CRITERIA
+
+The project is not considered complete until the following tests pass.
+
+| ID | Requirement |
+|---|---|
+| AC01 | Existing functionality remains operational |
+| AC02 | Expanded Mininet topology starts correctly |
+| AC03 | Routing between client and backend subnets works |
+| AC04 | All nodes transmit telemetry |
+| AC05 | Actual CPU spikes are visible |
+| AC06 | Actual network throughput spikes are visible |
+| AC07 | Historical telemetry is stored correctly |
+| AC08 | Router health is monitored |
+| AC09 | Interface failures are detected |
+| AC10 | Custom load balancer forwards real HTTP requests |
+| AC11 | All three balancing algorithms work |
+| AC12 | Backend health checks operate correctly |
+| AC13 | Failed backends are removed automatically |
+| AC14 | Recovered backends re-enter service |
+| AC15 | Traffic distribution is measurable |
+| AC16 | SDN rules are verified |
+| AC17 | Alerts and events are recorded |
+| AC18 | Dashboard displays actual system state |
+| AC19 | Simulation controls perform actual operations |
+| AC20 | Full demo scenario executes successfully |
+| AC21 | Performance reports are generated |
+| AC22 | Shutdown and restart work cleanly |
+
+A feature must not be marked complete merely because its code exists.
+
+---
+
+# 22. DEVELOPMENT RULES — STRICT
+
+Follow these instructions throughout implementation.
+
+### Rule 1: Inspect before modifying
+
+Always read the existing file and understand its dependencies before changing it.
+
+### Rule 2: Preserve functionality
+
+Do not remove existing APIs, agent functionality or SDN capabilities without a justified migration.
+
+### Rule 3: Work incrementally
+
+Implement one module at a time.
+
+### Rule 4: Test immediately
+
+After each significant change, run the relevant tests.
+
+### Rule 5: No fabricated results
+
+Never create fake metrics or pretend a network operation succeeded.
+
+### Rule 6: Maintain documentation
+
+Update PROJECT_STATE.md after every completed milestone.
+
+### Rule 7: Keep the architecture modular
+
+Avoid monolithic files, duplicate implementations and unnecessary coupling.
+
+### Rule 8: Avoid unnecessary dependencies
+
+Use the existing stack unless a dependency provides clear technical value.
+
+### Rule 9: Report failures honestly
+
+If a test fails, document the failure and investigate it.
+
+Do not hide errors or bypass verification.
+
+### Rule 10: Do not overengineer
+
+Build the strongest implementation within the defined demonstration scope.
+
+Do not introduce enterprise infrastructure that is not needed to demonstrate the project's capabilities.
+
+### Rule 11: Preserve reproducibility
+
+Document exact installation, startup, shutdown and testing procedures.
+
+### Rule 12: No destructive changes without approval
+
+Back up important configuration and database files before migration.
+
+Do not overwrite working implementations blindly.
+
+---
+
+# 23. REQUIRED DOCUMENTATION
+
+Maintain these documents:
+
+## README.md
+
+Include:
+- Project overview.
+- Features.
+- Architecture.
+- Requirements.
+- Installation.
+- Configuration.
+- Startup instructions.
+- Shutdown instructions.
+- Troubleshooting.
+
+## ARCHITECTURE.md
+
+Include:
+- Component architecture.
+- Network topology.
+- IP addressing.
+- Data flow.
+- API architecture.
+- Database relationships.
+- Load-balancer workflow.
+- SDN integration.
+
+## PROJECT_STATE.md
+
+Maintain:
+- Completed milestones.
+- In-progress milestones.
+- Pending tasks.
+- Known issues.
+- Test results.
+- Latest working configuration.
+
+## DEMO_GUIDE.md
+
+Include:
+- Exact startup sequence.
+- Demonstration scenarios.
+- Commands and controls.
+- Expected observations.
+- Recovery procedures.
+- Troubleshooting.
+
+## API_DOCUMENTATION.md
+
+Document all REST endpoints, request bodies, responses and error codes.
+
+---
+
+# 24. HOW TO BEGIN
+
+Do not immediately start writing code.
+
+First, inspect the repository and establish the actual state of the project.
+
+Your first response must contain:
+
+1. Existing project structure.
+2. Current architecture.
+3. Working components.
+4. Broken or incomplete components.
+5. Identified architectural risks.
+6. Existing port conflicts.
+7. Required new modules.
+8. Recommended implementation sequence.
+9. First milestone's exact implementation plan.
+
+Then begin Milestone 1.
+
+Do not stop after producing a theoretical architecture document. You are expected to implement the project progressively, run tests, correct issues and maintain documentation.
+
+If the repository is accessible and the environment permits modifications, perform the work directly.
+
+If something requires a running Mininet environment that is unavailable, implement the code, write the relevant tests, clearly identify what could not be executed, and provide the exact verification commands.
+
+Do not claim that unexecuted tests passed.
+
+---
+
+# FINAL ENGINEERING OBJECTIVE
+
+Deliver a reliable, modular, fully integrated Remote Network Health Monitor that combines:
+
+- Real-time distributed monitoring.
+- Network and router health analysis.
+- Custom application-level load balancing.
+- Intelligent traffic distribution.
+- Automatic backend failover.
+- SDN-based traffic control.
+- Controlled CPU and network stress simulation.
+- Event-driven anomaly detection.
+- Historical analytics.
+- Professional NOC dashboard.
+- Automated testing and performance evaluation.
+
+The final product must be technically defensible.
+
+A person viewing the demonstration must be able to understand:
+
+1. What is happening in the network?
+2. Which component is experiencing a problem?
+3. What caused the problem?
+4. How did the monitoring system detect it?
+5. What action did the system take?
+6. Did that action actually work?
+7. How long did recovery take?
+
+**Build a system that measures, explains, controls and verifies network behaviour — not merely a dashboard that displays network statistics.**
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-05T09:39:32+05:30.
+
+The user's current state is as follows:
+Active Document: d:\CN\topology.py (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+Other open documents:
+- d:\CN\architecture.md (LANGUAGE_UNSPECIFIED)
+- d:\CN\templates\index.html (LANGUAGE_UNSPECIFIED)
+- d:\CN\sdn_controller.py (LANGUAGE_UNSPECIFIED)
+- d:\CN\performance_eval.py (LANGUAGE_UNSPECIFIED)
+- d:\CN\server.py (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>
