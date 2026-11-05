@@ -333,24 +333,66 @@ def main():
     print(f"{BOLD}{CYAN}========================================================================================================{RESET}\n")
 
     # Export to JSON
-    with open("performance_results.json", "w", encoding="utf-8") as f:
-        json.dump(benchmark_data, f, indent=2)
-    print(f"{GREEN}✔ Exported structured JSON benchmark: performance_results.json{RESET}")
+    try:
+        with open("performance_results.json", "w", encoding="utf-8") as f:
+            json.dump(benchmark_data, f, indent=2)
+        print(f"{GREEN}✔ Exported structured JSON benchmark: performance_results.json{RESET}")
+    except PermissionError:
+        try:
+            subprocess.run("sudo rm -f performance_results.json 2>/dev/null", shell=True)
+            with open("performance_results.json", "w", encoding="utf-8") as f:
+                json.dump(benchmark_data, f, indent=2)
+            print(f"{GREEN}✔ Exported structured JSON benchmark: performance_results.json{RESET}")
+        except Exception:
+            with open("/tmp/performance_results.json", "w", encoding="utf-8") as f:
+                json.dump(benchmark_data, f, indent=2)
+            print(f"{YELLOW}⚠ performance_results.json owned by root; exported to /tmp/performance_results.json{RESET}")
 
     # Export to CSV
-    with open("performance_results.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Phase", "Target_CPU_Percent", "Ingress_Throughput_Mbps", "Client_Latency_RTT_ms", "Packet_Loss_Percent", "SDN_Drop_Rules"])
-        for phase, stats in benchmark_data.items():
-            writer.writerow([
-                phase,
-                stats["Target CPU (%)"],
-                stats["Ingress Throughput (Mbps)"],
-                stats["Client Latency RTT (ms)"],
-                stats["Packet Loss (%)"],
-                stats["SDN Drop Rules"]
-            ])
-    print(f"{GREEN}✔ Exported CSV evaluation report: performance_results.csv{RESET}\n")
+    try:
+        with open("performance_results.csv", "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Phase", "Target_CPU_Percent", "Ingress_Throughput_Mbps", "Client_Latency_RTT_ms", "Packet_Loss_Percent", "SDN_Drop_Rules"])
+            for phase, stats in benchmark_data.items():
+                writer.writerow([
+                    phase,
+                    stats["Target CPU (%)"],
+                    stats["Ingress Throughput (Mbps)"],
+                    stats["Client Latency RTT (ms)"],
+                    stats["Packet Loss (%)"],
+                    stats["SDN Drop Rules"]
+                ])
+        print(f"{GREEN}✔ Exported CSV evaluation report: performance_results.csv{RESET}\n")
+    except PermissionError:
+        try:
+            subprocess.run("sudo rm -f performance_results.csv 2>/dev/null", shell=True)
+            with open("performance_results.csv", "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["Phase", "Target_CPU_Percent", "Ingress_Throughput_Mbps", "Client_Latency_RTT_ms", "Packet_Loss_Percent", "SDN_Drop_Rules"])
+                for phase, stats in benchmark_data.items():
+                    writer.writerow([
+                        phase,
+                        stats["Target CPU (%)"],
+                        stats["Ingress Throughput (Mbps)"],
+                        stats["Client Latency RTT (ms)"],
+                        stats["Packet Loss (%)"],
+                        stats["SDN Drop Rules"]
+                    ])
+            print(f"{GREEN}✔ Exported CSV evaluation report: performance_results.csv{RESET}\n")
+        except Exception:
+            with open("/tmp/performance_results.csv", "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["Phase", "Target_CPU_Percent", "Ingress_Throughput_Mbps", "Client_Latency_RTT_ms", "Packet_Loss_Percent", "SDN_Drop_Rules"])
+                for phase, stats in benchmark_data.items():
+                    writer.writerow([
+                        phase,
+                        stats["Target CPU (%)"],
+                        stats["Ingress Throughput (Mbps)"],
+                        stats["Client Latency RTT (ms)"],
+                        stats["Packet Loss (%)"],
+                        stats["SDN Drop Rules"]
+                    ])
+            print(f"{YELLOW}⚠ performance_results.csv owned by root; exported to /tmp/performance_results.csv{RESET}\n")
 
 
 if __name__ == "__main__":
