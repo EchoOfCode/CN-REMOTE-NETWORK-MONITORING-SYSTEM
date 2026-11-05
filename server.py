@@ -359,6 +359,19 @@ def udp_telemetry_listener():
                 data["c2_port"] = c2_port
                 active_nodes[agent_id] = data
 
+            # Record packet in bounded monitor ring buffer
+            packet_monitor.record_packet(
+                src_ip=ip_address,
+                dst_ip="10.0.1.20",
+                src_port=c2_port,
+                dst_port=UDP_TELEMETRY_PORT,
+                protocol="UDP",
+                packet_size=len(raw_data),
+                interface="s1" if not agent_id.startswith("Backend") else "s2",
+                direction="INGRESS",
+                status="DROPPED" if data.get("sdn_mitigated") else "DELIVERED"
+            )
+
             # Save to Database
             db.insert_data(
                 agent_id=data.get("agent_id"),
@@ -476,6 +489,11 @@ def get_metrics():
         "backends": get_all_backends_status(),
         "packet_loss": loss_data,
         "auto_remediation_enabled": auto_remediation_enabled,
+        "operations": operation_manager.get_operations(limit=10),
+        "packet_summary": packet_monitor.get_summary(),
+        "links": link_manager.get_all_links(),
+        "traffic_jobs": traffic_manager.get_jobs(),
+        "system_health": lab_manager.check_system(),
         "events": event_manager.get_recent_events(limit=15),
         "db_history": db.get_recent_telemetry(limit=25)
     })
