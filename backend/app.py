@@ -178,7 +178,7 @@ class BackendRequestHandler(BaseHTTPRequestHandler):
                 body = self.rfile.read(content_len) if content_len > 0 else b'{}'
                 data = json.loads(body.decode('utf-8'))
                 new_status = data.get("status")
-                if new_status in ["healthy", "unhealthy", "draining"]:
+                if new_status in ["healthy", "unhealthy", "draining", "offline"]:
                     with state.lock:
                         state.status = new_status
                     self._send_json(200, {"status": "SUCCESS", "new_status": new_status, "backend_id": state.backend_id})

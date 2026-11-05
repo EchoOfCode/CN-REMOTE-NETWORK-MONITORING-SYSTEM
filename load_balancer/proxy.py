@@ -138,6 +138,10 @@ class ReverseProxy:
                 return await self.handle_metrics(request)
             elif path == "/lb/algorithm":
                 return await self.handle_set_algorithm(request)
+            elif "/power_off" in path:
+                return await self.handle_backend_power_off(request)
+            elif "/power_on" in path:
+                return await self.handle_backend_power_on(request)
             elif "/drain" in path:
                 return await self.handle_backend_drain(request)
             elif "/restore" in path:
