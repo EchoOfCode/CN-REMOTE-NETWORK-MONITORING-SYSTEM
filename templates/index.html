@@ -8,7 +8,7 @@
     <!-- Enterprise Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5.3 & FontAwesome 6 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,36 +19,43 @@
 
     <style>
         :root {
-            /* Restrained Enterprise Dark Theme (Datadog / Cloudflare style) */
-            --bg-app: #0b0f17;
-            --bg-panel: #111827;
-            --bg-panel-header: #151d2f;
-            --bg-subtle: #1a2336;
-            --bg-input: #0e1422;
+            /* Enterprise Production Light Theme (Cloudflare / Datadog / Stripe standard) */
+            --bg-app: #f8fafc;           /* Slate 50: clean, soft off-white canvas */
+            --bg-panel: #ffffff;         /* Pure white surface */
+            --bg-panel-header: #f8fafc;  /* Subtle header tint */
+            --bg-subtle: #f1f5f9;        /* Slate 100: card inner backgrounds */
+            --bg-input: #ffffff;
             
-            --border-subtle: #1f2937;
-            --border-muted: #283548;
-            --border-focus: #3b82f6;
+            --border-subtle: #e2e8f0;    /* Slate 200: crisp clean border */
+            --border-muted: #cbd5e1;     /* Slate 300: interactive element border */
+            --border-focus: #2563eb;     /* Blue focus ring */
             
-            --text-heading: #f9fafb;
-            --text-main: #d1d5db;
-            --text-muted: #8492a6;
-            --text-faint: #4b5563;
+            --text-heading: #0f172a;     /* Slate 900: deep readable dark */
+            --text-main: #334155;        /* Slate 700: primary body text */
+            --text-muted: #64748b;       /* Slate 500: labels, subtitles */
+            --text-faint: #94a3b8;       /* Slate 400: secondary info */
             
-            /* Semantic Functional Colors (strictly applied, no neon) */
+            /* Semantic Functional Colors (crisp, high-contrast accessible) */
             --color-primary: #2563eb;
             --color-primary-hover: #1d4ed8;
-            --color-success: #10b981;
-            --color-success-bg: rgba(16, 185, 129, 0.12);
-            --color-danger: #ef4444;
-            --color-danger-bg: rgba(239, 68, 68, 0.12);
-            --color-warning: #f59e0b;
-            --color-warning-bg: rgba(245, 158, 11, 0.12);
+            --color-success: #059669;
+            --color-success-bg: #ecfdf5;
+            --color-success-border: #a7f3d0;
+            --color-danger: #dc2626;
+            --color-danger-bg: #fef2f2;
+            --color-danger-border: #fecaca;
+            --color-warning: #d97706;
+            --color-warning-bg: #fffbeb;
+            --color-warning-border: #fde68a;
             --color-info: #0284c7;
             
             --radius-sm: 4px;
             --radius-md: 6px;
             --radius-lg: 8px;
+            
+            --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -74,7 +81,7 @@
 
         /* Top Command Navigation Bar */
         .navbar-top {
-            background-color: var(--bg-panel);
+            background-color: #ffffff;
             border-bottom: 1px solid var(--border-subtle);
             padding: 0 1.25rem;
             height: 52px;
@@ -84,35 +91,36 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
         }
 
         .brand-logo {
-            width: 28px;
-            height: 28px;
-            background: #1e293b;
-            border: 1px solid var(--border-muted);
+            width: 30px;
+            height: 30px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             border-radius: var(--radius-sm);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #38bdf8;
-            font-size: 13px;
+            color: #2563eb;
+            font-size: 14px;
         }
 
         .brand-title {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             color: var(--text-heading);
-            letter-spacing: -0.01em;
+            letter-spacing: -0.015em;
         }
 
         .brand-badge {
             font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
-            background: var(--bg-subtle);
+            font-weight: 600;
+            color: #475569;
+            background: #f1f5f9;
             border: 1px solid var(--border-subtle);
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: var(--radius-sm);
         }
 
@@ -121,6 +129,7 @@
             background-color: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -136,7 +145,7 @@
         }
 
         .panel-title {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -157,11 +166,18 @@
             background-color: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
             padding: 12px 14px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--border-muted);
+            box-shadow: var(--shadow-card);
         }
 
         .kpi-label {
@@ -192,7 +208,7 @@
             font-size: 11px;
             font-weight: 600;
             font-family: 'JetBrains Mono', monospace;
-            padding: 2px 7px;
+            padding: 2.5px 8px;
             border-radius: var(--radius-sm);
             letter-spacing: 0.02em;
             display: inline-flex;
@@ -202,48 +218,50 @@
 
         .status-NORMAL {
             background-color: var(--color-success-bg);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: var(--color-success);
+            border: 1px solid var(--color-success-border);
         }
 
         .status-ALERT {
             background-color: var(--color-warning-bg);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning-border);
         }
 
         .status-ATTACKING {
             background-color: var(--color-danger-bg);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.45);
+            color: var(--color-danger);
+            border: 1px solid var(--color-danger-border);
         }
 
         .status-DOWN {
-            background-color: rgba(100, 116, 139, 0.15);
-            color: #94a3b8;
-            border: 1px solid rgba(100, 116, 139, 0.3);
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
         }
 
         /* Node Monitoring Cards */
         .node-card {
-            background-color: var(--bg-subtle);
+            background-color: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
             padding: 12px;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: border-color 0.15s ease;
+            transition: all 0.15s ease;
         }
 
         .node-card:hover {
             border-color: var(--border-muted);
+            box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.05);
         }
 
         .node-card--attacking {
-            border-color: rgba(239, 68, 68, 0.6) !important;
-            background-color: rgba(239, 68, 68, 0.04) !important;
+            border-color: #fca5a5 !important;
+            background-color: #fef2f2 !important;
         }
 
         .node-header {
@@ -289,15 +307,15 @@
         }
 
         .progress-bar-track {
-            height: 5px;
-            background-color: #1e293b;
-            border-radius: 2px;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .progress-bar-fill {
             height: 100%;
-            border-radius: 2px;
+            border-radius: 3px;
             transition: width 0.3s ease;
         }
 
@@ -312,7 +330,7 @@
             padding: 5px 11px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-muted);
-            background-color: var(--bg-panel);
+            background-color: #ffffff;
             color: var(--text-main);
             display: inline-flex;
             align-items: center;
@@ -323,8 +341,8 @@
         }
 
         .btn-action:hover {
-            background-color: var(--bg-subtle);
-            border-color: #3b4b63;
+            background-color: #f8fafc;
+            border-color: #94a3b8;
             color: var(--text-heading);
         }
 
@@ -342,25 +360,26 @@
 
         .btn-action-danger {
             background-color: #dc2626;
-            border-color: #b91c1c;
+            border-color: #dc2626;
             color: #ffffff;
         }
 
         .btn-action-danger:hover {
             background-color: #b91c1c;
-            border-color: #991b1b;
+            border-color: #b91c1c;
             color: #ffffff;
         }
 
         .btn-action-warning {
-            background-color: rgba(245, 158, 11, 0.15);
-            border-color: rgba(245, 158, 11, 0.4);
-            color: #fbbf24;
+            background-color: #fffbeb;
+            border-color: #fde68a;
+            color: #b45309;
         }
 
         .btn-action-warning:hover {
-            background-color: rgba(245, 158, 11, 0.25);
-            color: #ffffff;
+            background-color: #fef3c7;
+            border-color: #fcd34d;
+            color: #92400e;
         }
 
         /* Nav Tab Switcher */
@@ -389,8 +408,8 @@
         }
 
         .tab-btn.active {
-            color: #38bdf8;
-            border-bottom-color: #38bdf8;
+            color: #2563eb;
+            border-bottom-color: #2563eb;
             font-weight: 600;
         }
 
@@ -407,7 +426,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            background-color: rgba(21, 29, 47, 0.4);
+            background-color: #f8fafc;
             border-bottom: 1px solid var(--border-subtle);
             padding: 8px 12px;
             text-align: left;
@@ -415,66 +434,68 @@
 
         .enterprise-table td {
             padding: 9px 12px;
-            border-bottom: 1px solid rgba(31, 41, 55, 0.6);
+            border-bottom: 1px solid #f1f5f9;
             color: var(--text-main);
             vertical-align: middle;
         }
 
         .enterprise-table tr:hover td {
-            background-color: rgba(255, 255, 255, 0.015);
+            background-color: #f8fafc;
         }
 
         /* Console Terminal */
         .console-terminal {
-            background-color: #070b12;
+            background-color: #f8fafc;
+            border: 1px solid var(--border-subtle);
             font-family: 'JetBrains Mono', monospace;
             font-size: 11.5px;
             line-height: 1.6;
-            color: #94a3b8;
+            color: #334155;
             padding: 10px 14px;
             overflow-y: auto;
             border-radius: var(--radius-sm);
         }
 
         .log-entry { margin-bottom: 2px; }
-        .tag-info { color: #38bdf8; font-weight: 600; }
-        .tag-warn { color: #f59e0b; font-weight: 600; }
-        .tag-attack { color: #ef4444; font-weight: 600; }
-        .tag-sdn { color: #10b981; font-weight: 600; }
+        .tag-info { color: #0284c7; font-weight: 600; }
+        .tag-warn { color: #d97706; font-weight: 600; }
+        .tag-attack { color: #dc2626; font-weight: 600; }
+        .tag-sdn { color: #059669; font-weight: 600; }
 
         /* Topology Technical Diagram */
         .topology-canvas {
-            background-color: #080c14;
+            background-color: #f8fafc;
+            border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
             width: 100%;
             height: 190px;
         }
 
         .topo-line {
-            stroke: #2c3a52;
+            stroke: #cbd5e1;
             stroke-width: 1.5;
         }
         .topo-line-active {
-            stroke: #38bdf8;
-            stroke-width: 1.5;
+            stroke: #0284c7;
+            stroke-width: 1.8;
             stroke-dasharray: 4, 3;
             animation: topo-dash 1.5s linear infinite;
         }
         .topo-line-attack {
-            stroke: #ef4444;
+            stroke: #dc2626;
             stroke-width: 2.2;
             stroke-dasharray: 4, 2;
             animation: topo-dash 0.4s linear infinite;
         }
         .topo-line-blocked {
-            stroke: #475569;
+            stroke: #94a3b8;
             stroke-width: 1.5;
             stroke-dasharray: 2, 4;
-            opacity: 0.6;
+            opacity: 0.7;
         }
         @keyframes topo-dash { to { stroke-dashoffset: -20; } }
 
-        /* Pulse dot for status */
+        /* Status Dot */
         .status-dot {
             width: 7px;
             height: 7px;
@@ -498,13 +519,13 @@
         }
 
         .toast-box {
-            background-color: var(--bg-panel);
+            background-color: #ffffff;
             border: 1px solid var(--border-muted);
             border-radius: var(--radius-md);
             padding: 9px 14px;
             font-size: 12px;
             color: var(--text-heading);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow-float);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -528,21 +549,21 @@
 
         <div class="d-flex align-items-center gap-2">
             <!-- Controller Status Pill -->
-            <div class="bg-dark px-3 py-1 border border-secondary border-opacity-25 rounded d-flex align-items-center" style="font-size: 12px;">
+            <div class="bg-white px-3 py-1 border border-secondary border-opacity-25 rounded d-flex align-items-center shadow-sm" style="font-size: 12px;">
                 <span class="status-dot pulse-green" id="sdn-indicator"></span>
-                <span class="text-muted">SDN Controller: <strong class="text-white" id="sdn-status">ONLINE</strong></span>
+                <span class="text-muted">SDN Controller: <strong class="text-dark" id="sdn-status">ONLINE</strong></span>
             </div>
 
             <!-- Action Controls -->
-            <button class="btn-action" onclick="triggerManualPing()" title="Refresh telemetry">
+            <button class="btn-action shadow-sm" onclick="triggerManualPing()" title="Refresh telemetry">
                 <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
             </button>
 
-            <button class="btn-action btn-action-warning" onclick="triggerMultiVectorCampaign()" title="Simultaneous Multi-Node Flood">
+            <button class="btn-action btn-action-warning shadow-sm" onclick="triggerMultiVectorCampaign()" title="Simultaneous Multi-Node Flood">
                 <i class="fa-solid fa-bolt me-1"></i> Multi-Node DDoS
             </button>
 
-            <button class="btn-action btn-action-danger" onclick="triggerSequentialCampaign()" title="Sequential Node Campaign">
+            <button class="btn-action btn-action-danger shadow-sm" onclick="triggerSequentialCampaign()" title="Sequential Node Campaign">
                 <i class="fa-solid fa-play me-1"></i> Sequential Campaign
             </button>
         </div>
@@ -556,7 +577,7 @@
             <div class="col-6 col-md-4 col-xl">
                 <div class="kpi-card">
                     <div class="kpi-label">Active Nodes</div>
-                    <div class="kpi-value" id="total-nodes">0</div>
+                    <div class="kpi-value text-dark" id="total-nodes">0</div>
                     <div class="kpi-subtext">Telemetry: UDP Port 5000</div>
                 </div>
             </div>
@@ -581,7 +602,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="kpi-label mb-0">Cluster Avg CPU</div>
-                        <span class="mono fw-bold text-white" id="cluster-avg-cpu">0%</span>
+                        <span class="mono fw-bold text-dark" id="cluster-avg-cpu">0%</span>
                     </div>
                     <div class="progress-bar-track mt-2 mb-2">
                         <div class="progress-bar-fill fill-green" id="cluster-cpu-bar" style="width: 0%;"></div>
@@ -637,10 +658,10 @@
                         </div>
                     </div>
                     <div class="panel-body p-2">
-                        <!-- Clean Technical SVG Diagram -->
+                        <!-- Clean Technical SVG Diagram (Light Theme) -->
                         <svg class="topology-canvas" viewBox="0 0 880 185">
                             <!-- Background Grid Elements -->
-                            <rect width="880" height="185" fill="#080c14" />
+                            <rect width="880" height="185" fill="#f8fafc" />
                             
                             <!-- Links: Hosts to Switch -->
                             <line id="link-h1" class="topo-line" x1="130" y1="45" x2="440" y2="95" />
@@ -651,46 +672,46 @@
 
                             <!-- SDN Controller (Top Center) -->
                             <g transform="translate(440, 30)">
-                                <rect x="-65" y="-14" width="130" height="28" rx="4" fill="#131c2e" stroke="#2563eb" stroke-width="1.2" />
-                                <text text-anchor="middle" dy="4" fill="#e2e8f0" font-weight="600" font-size="11" font-family="'Inter', sans-serif">SDN Controller (c0)</text>
+                                <rect x="-65" y="-14" width="130" height="28" rx="4" fill="#f5f3ff" stroke="#6366f1" stroke-width="1.2" />
+                                <text text-anchor="middle" dy="4" fill="#4338ca" font-weight="600" font-size="11" font-family="'Inter', sans-serif">SDN Controller (c0)</text>
                             </g>
 
                             <!-- Switch s1 (Center) -->
                             <g transform="translate(440, 95)">
-                                <rect x="-42" y="-22" width="84" height="44" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
-                                <text text-anchor="middle" dy="-3" fill="#ffffff" font-weight="700" font-size="11.5" font-family="'Inter', sans-serif">Switch s1</text>
-                                <text text-anchor="middle" dy="12" fill="#38bdf8" font-size="9" font-family="'JetBrains Mono', monospace">OpenFlow 1.3</text>
+                                <rect x="-42" y="-22" width="84" height="44" rx="4" fill="#eff6ff" stroke="#0284c7" stroke-width="1.5" />
+                                <text text-anchor="middle" dy="-3" fill="#0369a1" font-weight="700" font-size="11.5" font-family="'Inter', sans-serif">Switch s1</text>
+                                <text text-anchor="middle" dy="12" fill="#0284c7" font-size="9" font-family="'JetBrains Mono', monospace">OpenFlow 1.3</text>
                             </g>
 
                             <!-- Host h1 Node (10.0.0.1) -->
                             <g id="node-viz-h1" transform="translate(130, 45)">
-                                <rect x="-55" y="-20" width="110" height="40" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-                                <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10.5">Host h1 (Node-1)</text>
-                                <text text-anchor="middle" dy="8" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.1</text>
-                                <text id="viz-status-h1" text-anchor="middle" dy="16" fill="#10b981" font-size="7.5" font-weight="700">NORMAL</text>
+                                <rect x="-55" y="-20" width="110" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" />
+                                <text text-anchor="middle" dy="-5" fill="#0f172a" font-weight="600" font-size="10.5">Host h1 (Node-1)</text>
+                                <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.1</text>
+                                <text id="viz-status-h1" text-anchor="middle" dy="16" fill="#059669" font-size="7.5" font-weight="700">NORMAL</text>
                             </g>
 
                             <!-- Host h2 Node (10.0.0.2) -->
                             <g id="node-viz-h2" transform="translate(130, 140)">
-                                <rect x="-55" y="-20" width="110" height="40" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-                                <text text-anchor="middle" dy="-5" fill="#f8fafc" font-weight="600" font-size="10.5">Host h2 (Node-2)</text>
-                                <text text-anchor="middle" dy="8" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.2</text>
-                                <text id="viz-status-h2" text-anchor="middle" dy="16" fill="#10b981" font-size="7.5" font-weight="700">NORMAL</text>
+                                <rect x="-55" y="-20" width="110" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" />
+                                <text text-anchor="middle" dy="-5" fill="#0f172a" font-weight="600" font-size="10.5">Host h2 (Node-2)</text>
+                                <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.2</text>
+                                <text id="viz-status-h2" text-anchor="middle" dy="16" fill="#059669" font-size="7.5" font-weight="700">NORMAL</text>
                             </g>
 
                             <!-- Host h3 Node (10.0.0.3) -->
                             <g id="node-viz-h3" transform="translate(280, 150)">
-                                <rect x="-55" y="-18" width="110" height="36" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-                                <text text-anchor="middle" dy="-4" fill="#f8fafc" font-weight="600" font-size="10.5">Host h3 (Node-3)</text>
-                                <text text-anchor="middle" dy="9" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.3</text>
+                                <rect x="-55" y="-18" width="110" height="36" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" />
+                                <text text-anchor="middle" dy="-4" fill="#0f172a" font-weight="600" font-size="10.5">Host h3 (Node-3)</text>
+                                <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8.5">10.0.0.3</text>
                             </g>
 
                             <!-- Host h4 Server/Target (10.0.0.4) -->
                             <g id="node-viz-h4" transform="translate(750, 95)">
-                                <rect x="-65" y="-22" width="130" height="44" rx="4" fill="#1a1c2e" stroke="#6366f1" stroke-width="1.5" />
-                                <text text-anchor="middle" dy="-5" fill="#ffffff" font-weight="600" font-size="11">Host h4 (Target)</text>
-                                <text text-anchor="middle" dy="8" fill="#a5b4fc" font-family="'JetBrains Mono', monospace" font-size="9">10.0.0.4:5050</text>
-                                <text text-anchor="middle" dy="18" fill="#94a3b8" font-size="7.5" font-weight="600">CENTRAL C2 SERVER</text>
+                                <rect x="-65" y="-22" width="130" height="44" rx="4" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" />
+                                <text text-anchor="middle" dy="-5" fill="#15803d" font-weight="700" font-size="11">Host h4 (Target)</text>
+                                <text text-anchor="middle" dy="8" fill="#16a34a" font-family="'JetBrains Mono', monospace" font-size="9">10.0.0.4:5050</text>
+                                <text text-anchor="middle" dy="18" fill="#64748b" font-size="7.5" font-weight="600">CENTRAL C2 SERVER</text>
                             </g>
                         </svg>
                     </div>
@@ -747,7 +768,7 @@
                             </thead>
                             <tbody id="sdn-rules-table">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No active drop rules on switch s1</td>
+                                    <td colspan="5" class="text-center text-muted py-4">No active drop rules on switch s1. All traffic forwarding normally.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -772,12 +793,12 @@
     <!-- Attack Parameter Modal -->
     <div class="modal fade" id="attackModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content" style="background-color: var(--bg-panel); border: 1px solid var(--border-muted); border-radius: var(--radius-md);">
-                <div class="modal-header py-2 px-3 border-bottom border-secondary border-opacity-25">
-                    <h6 class="modal-title fw-semibold text-white" style="font-size: 13px;">
+            <div class="modal-content" style="background-color: #ffffff; border: 1px solid var(--border-muted); border-radius: var(--radius-md); box-shadow: var(--shadow-float);">
+                <div class="modal-header py-2 px-3 border-bottom">
+                    <h6 class="modal-title fw-semibold text-dark" style="font-size: 13px;">
                         <i class="fa-solid fa-burst text-danger me-1"></i> Trigger Attack Simulation
                     </h6>
-                    <button type="button" class="btn-close btn-close-white" style="font-size: 10px;" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" style="font-size: 10px;" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-3">
                     <input type="hidden" id="modal-agent-id">
@@ -785,19 +806,19 @@
 
                     <div class="mb-3">
                         <label class="form-label text-muted mb-1" style="font-size: 11px;">Target Endpoint:</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary mono" value="10.0.0.4:8080" readonly>
+                        <input type="text" class="form-control form-control-sm bg-light text-dark border mono" value="10.0.0.4:8080" readonly>
                     </div>
 
                     <div class="mb-1">
                         <label class="form-label text-muted mb-1" style="font-size: 11px;">Attack Duration:</label>
-                        <select class="form-select form-select-sm bg-dark text-white border-secondary" id="modal-duration">
+                        <select class="form-select form-select-sm bg-white text-dark border" id="modal-duration">
                             <option value="10">10 Seconds</option>
                             <option value="15" selected>15 Seconds</option>
                             <option value="30">30 Seconds</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer py-2 px-3 border-top border-secondary border-opacity-25">
+                <div class="modal-footer py-2 px-3 border-top">
                     <button type="button" class="btn-action" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn-action btn-action-danger" onclick="executeModalAttack()">Launch Attack</button>
                 </div>
@@ -819,7 +840,7 @@
         let activeBlockedNodes = new Set();
         let attackModalInstance = null;
 
-        // Initialize Production Analytics Chart
+        // Initialize Production Analytics Chart (Light Theme)
         function initChart() {
             const fontSpec = { family: 'Inter', size: 11 };
             const ctx = document.getElementById('activeChart').getContext('2d');
@@ -836,7 +857,7 @@
                             position: 'top',
                             align: 'end',
                             labels: {
-                                color: '#94a3b8',
+                                color: '#475569',
                                 font: fontSpec,
                                 usePointStyle: true,
                                 boxWidth: 6,
@@ -849,6 +870,8 @@
                             borderWidth: 1,
                             titleFont: { family: 'Inter', size: 11, weight: '600' },
                             bodyFont: { family: 'JetBrains Mono', size: 11 },
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
                             padding: 8,
                             cornerRadius: 4
                         }
@@ -856,11 +879,11 @@
                     scales: {
                         x: {
                             ticks: { color: '#64748b', font: fontSpec, maxTicksLimit: 7 },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' }
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
                         },
                         y: {
                             ticks: { color: '#64748b', font: fontSpec },
-                            grid: { color: 'rgba(255, 255, 255, 0.04)' }
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
                         }
                     }
                 }
@@ -915,7 +938,7 @@
             if (type === 'success') icon = '<i class="fa-solid fa-circle-check text-success"></i>';
             if (type === 'warning') icon = '<i class="fa-solid fa-circle-exclamation text-warning"></i>';
 
-            card.innerHTML = `${icon} <div><div class="fw-semibold">${title}</div><div class="text-muted" style="font-size:11px;">${msg}</div></div>`;
+            card.innerHTML = `${icon} <div><div class="fw-semibold text-dark">${title}</div><div class="text-muted" style="font-size:11px;">${msg}</div></div>`;
             dock.appendChild(card);
             setTimeout(() => {
                 card.style.opacity = '0';
@@ -942,7 +965,7 @@
             }
         }
 
-        // Render Clean Enterprise Node Monitoring Cards
+        // Render Clean Enterprise Node Monitoring Cards (Light Theme)
         function renderNodes(nodes) {
             const container = document.getElementById('nodes-container');
             if (!nodes || nodes.length === 0) {
@@ -992,7 +1015,7 @@
                             <div class="meter-group">
                                 <div class="meter-header">
                                     <span class="meter-label">Memory Usage</span>
-                                    <span class="meter-val">${node.memory_percent}%</span>
+                                    <span class="meter-val text-dark">${node.memory_percent}%</span>
                                 </div>
                                 <div class="progress-bar-track">
                                     <div class="progress-bar-fill ${memColor}" style="width: ${Math.min(node.memory_percent, 100)}%;"></div>
@@ -1007,7 +1030,7 @@
                             </div>
 
                             <!-- Controls -->
-                            <div class="d-flex gap-1 pt-1 border-top border-secondary border-opacity-25">
+                            <div class="d-flex gap-1 pt-2 border-top">
                                 ${isAttacking ? `
                                     <button class="btn-action btn-action-danger w-100" onclick="stopAttack('${node.agent_id}', ${node.c2_port || 5001})">
                                         <i class="fa-solid fa-stop me-1"></i> Halt Flood
@@ -1029,7 +1052,7 @@
             }).join('');
         }
 
-        // Render OpenFlow Drop Rules Table
+        // Render OpenFlow Drop Rules Table (Light Theme)
         function renderSDNRules(rules) {
             const table = document.getElementById('sdn-rules-table');
             const badge = document.getElementById('tab-rules-badge');
@@ -1049,7 +1072,7 @@
                 return `
                     <tr>
                         <td class="mono text-muted" style="font-size: 11px;">${rule.rule_id}</td>
-                        <td><strong class="text-white mono">${srcIp}</strong> <span class="text-muted ms-1">(${rule.agent_id || 'Node'})</span></td>
+                        <td><strong class="text-dark mono">${srcIp}</strong> <span class="text-muted ms-1">(${rule.agent_id || 'Node'})</span></td>
                         <td><span class="badge-status status-ALERT mono" style="font-size: 10px;">ipv4_src = ${srcIp}</span></td>
                         <td><span class="badge-status status-ATTACKING"><i class="fa-solid fa-ban me-1"></i>DROP</span></td>
                         <td class="text-end">
@@ -1092,7 +1115,7 @@
             }
         }
 
-        // Update Topology Map
+        // Update Topology Map (Light Theme)
         function updateTopologyVisualizer(nodes, rules) {
             const blockedIps = new Set(rules.map(r => r.match ? r.match.ipv4_src : r.src_ip));
 
@@ -1117,13 +1140,13 @@
                     if (statusText) {
                         if (isBlocked) {
                             statusText.textContent = 'BLOCKED';
-                            statusText.setAttribute('fill', '#ef4444');
+                            statusText.setAttribute('fill', '#dc2626');
                         } else if (isAttacking) {
                             statusText.textContent = 'ATTACKING';
-                            statusText.setAttribute('fill', '#ef4444');
+                            statusText.setAttribute('fill', '#dc2626');
                         } else {
                             statusText.textContent = 'NORMAL';
-                            statusText.setAttribute('fill', '#10b981');
+                            statusText.setAttribute('fill', '#059669');
                         }
                     }
                 }
@@ -1151,8 +1174,8 @@
 
         function renderChartData() {
             if (!activeChart) return;
-            // Clean palette: Blue, Red, Emerald, Amber
-            const colors = ['#38bdf8', '#ef4444', '#10b981', '#f59e0b'];
+            // Clean palette: Sky Blue, Crimson, Emerald, Amber
+            const colors = ['#0284c7', '#dc2626', '#059669', '#d97706'];
             const nodeIds = Object.keys(agentNetHistory);
 
             if (currentChartTab === 'traffic') {
@@ -1164,7 +1187,7 @@
                     backgroundColor: 'transparent',
                     tension: 0.2,
                     borderWidth: 1.8,
-                    pointRadius: 2,
+                    pointRadius: 2.5,
                     pointHoverRadius: 4
                 }));
                 activeChart.options.scales.y.title = { display: false };
@@ -1178,7 +1201,7 @@
                     borderDash: [3, 3],
                     tension: 0.1,
                     borderWidth: 1.5,
-                    pointRadius: 2
+                    pointRadius: 2.5
                 }));
                 activeChart.options.scales.y.title = { display: false };
                 activeChart.update('none');
