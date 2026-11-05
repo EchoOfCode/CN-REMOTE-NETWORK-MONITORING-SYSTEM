@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Network Health Monitoring & SDN Attack Simulation System Launcher (Linux/WSL)
+# Remote Network Health Monitor — Unified Startup & Lab Management Script
+# Industry-Grade Two-Router Multi-Subnet SDN Platform
 # ==============================================================================
 
 set -e
@@ -17,7 +18,7 @@ CYAN="\033[96m"
 BOLD="\033[1m"
 RESET="\033[0m"
 
-# Check Python 3
+# Detect Python 3 binary
 if command -v python3 >/dev/null 2>&1; then
     PY_BIN="python3"
 elif command -v python >/dev/null 2>&1; then
@@ -27,108 +28,146 @@ else
     exit 1
 fi
 
-# Ensure required packages exist
+# Ensure required Python dependencies exist
 check_dependencies() {
-    echo -e "[*] Checking Python dependencies (flask, psutil)..."
+    echo -e "[*] Checking Python dependencies (flask, psutil, aiohttp)..."
     if ! $PY_BIN -c "import flask, psutil" >/dev/null 2>&1; then
         echo -e "[*] Installing required packages from requirements.txt..."
         if [ -f "requirements.txt" ]; then
             $PY_BIN -m pip install -r requirements.txt || {
-                echo -e "${YELLOW}[WARNING] pip install failed. If in managed environment, use: sudo apt install python3-flask python3-psutil${RESET}"
+                echo -e "${YELLOW}[WARNING] pip install failed. If in Debian/Ubuntu, run: sudo apt install python3-flask python3-psutil python3-aiohttp${RESET}"
             }
         else
-            $PY_BIN -m pip install flask psutil || true
+            $PY_BIN -m pip install flask psutil aiohttp || true
         fi
     fi
 }
 
-# Stop all background components and clean Mininet
+# Stop all background components and clean Mininet & ports
 stop_all() {
-    echo -e "\n[*] Terminating all system background processes..."
-    pkill -f "ryu-manager" 2>/dev/null || true
-    pkill -f "sdn_controller.py" 2>/dev/null || true
-    pkill -f "server.py" 2>/dev/null || true
-    pkill -f "agent.py" 2>/dev/null || true
-    pkill -f "socat TCP-LISTEN:5050" 2>/dev/null || true
+    echo -e "\n[*] Terminating all running background processes and cleaning ports..."
+    sudo pkill -9 -f "ryu-manager" 2>/dev/null || true
+    sudo pkill -9 -f "sdn_controller.py" 2>/dev/null || true
+    sudo pkill -9 -f "server.py" 2>/dev/null || true
+    sudo pkill -9 -f "agent.py" 2>/dev/null || true
+    sudo pkill -9 -f "backend/app.py" 2>/dev/null || true
+    sudo pkill -9 -f "load_balancer/proxy.py" 2>/dev/null || true
+    sudo pkill -9 -f "router_monitor.py" 2>/dev/null || true
+    sudo pkill -9 -f "socat TCP-LISTEN:5050" 2>/dev/null || true
+    
+    # Release network ports if held
+    sudo fuser -k 5000/udp 2>/dev/null || true
+    sudo fuser -k 5050/tcp 2>/dev/null || true
+    sudo fuser -k 8080/tcp 2>/dev/null || true
+    sudo fuser -k 8000/tcp 2>/dev/null || true
+    sudo fuser -k 8001/tcp 2>/dev/null || true
+    sudo fuser -k 8002/tcp 2>/dev/null || true
+    sudo fuser -k 8003/tcp 2>/dev/null || true
+    sudo fuser -k 6653/tcp 2>/dev/null || true
 
     if command -v mn >/dev/null 2>&1; then
         echo -e "[*] Running Mininet cleanup (sudo mn -c)..."
         sudo mn -c >/dev/null 2>&1 || true
     fi
 
-    echo -e "${GREEN}[OK] All processes stopped and Mininet cleaned.${RESET}\n"
+    echo -e "${GREEN}[OK] Cleaned all ports and terminated background processes.${RESET}\n"
 }
 
-# Launch Mininet & Ryu full pipeline
+# Launch full Mininet Two-Router SDN network
 start_mininet_pipeline() {
     check_dependencies
     stop_all
 
     echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
-    echo -e "${BOLD}${CYAN}   LAUNCHING MININET + RYU OPENFLOW CONTROLLER PIPELINE${RESET}"
+    echo -e "${BOLD}${CYAN}   LAUNCHING TWO-ROUTER MININET + SDN CONTROLLER PIPELINE${RESET}"
     echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
 
-    # 1. Start Ryu Controller
-    if command -v ryu-manager >/dev/null 2>&1; then
-        echo -e "[*] Starting Ryu OpenFlow Controller on port 6653 (REST API: 8080)..."
-        ryu-manager ryu_sdn_controller.py --wsapi-port 8080 > /tmp/ryu_sdn.log 2>&1 &
-        RYU_PID=$!
-        sleep 2
-        echo -e "    -> Ryu Controller running in background (PID: $RYU_PID, Log: /tmp/ryu_sdn.log)"
-    else
-        echo -e "${YELLOW}[WARNING] 'ryu-manager' not found in PATH! Falling back to standalone controller mock...${RESET}"
-        $PY_BIN sdn_controller.py > /tmp/ryu_sdn.log 2>&1 &
-        sleep 1
+    # 1. Start SDN Controller in background
+    echo -e "[*] Starting Standalone SDN OpenFlow Controller on port 8080..."
+    sudo $PY_BIN sdn_controller.py > /tmp/sdn_controller.log 2>&1 &
+    SDN_PID=$!
+    sleep 2
+    echo -e "    -> SDN Controller running in background (PID: $SDN_PID, Log: /tmp/sdn_controller.log)"
+
+    # Verify controller is listening
+    if curl -s -m 2 http://127.0.0.1:8080/health >/dev/null 2>&1; then
+        echo -e "    ${GREEN}✔ SDN Controller verified healthy on port 8080${RESET}"
     fi
 
     # 2. Launch Mininet Topology
-    echo -e "[*] Launching Mininet Topology (requires sudo privileges)..."
-    echo -e "    -> Central Server will run on Host h4 (10.0.0.4:5050)"
-    echo -e "    -> Agents will run on Hosts h1, h2, h3\n"
+    echo -e "\n[*] Launching Mininet Two-Router Multi-Subnet Topology (requires sudo privileges)..."
+    echo -e "    -> Subnet 1 (10.0.1.0/24): Clients h1-h3, Monitor h4 (:5050), Switch s1"
+    echo -e "    -> Transit Network (10.0.12.0/30): Point-to-Point Router r1 <===> Router r2"
+    echo -e "    -> Subnet 2 (10.0.2.0/24): Switch s2, Load Balancer h8 (:8000), Backends h5-h7"
+    echo -e "    -> Web Dashboard will be available at: ${BOLD}http://localhost:5050${RESET}\n"
+
     sudo $PY_BIN topology.py
+
+    # When Mininet exits (Ctrl+D or exit)
+    echo -e "\n[*] Mininet session closed. Cleaning up background services..."
+    stop_all
 }
 
-# Launch standalone local simulation (process mode without Mininet)
+# Launch standalone local multi-process simulation (when Mininet is not available)
 start_local_simulation() {
     check_dependencies
     stop_all
 
     echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
-    echo -e "${BOLD}${CYAN}   LAUNCHING LOCAL MULTI-PROCESS SIMULATION${RESET}"
+    echo -e "${BOLD}${CYAN}   LAUNCHING LOCAL MULTI-PROCESS TWO-ROUTER SIMULATION (NO MININET)${RESET}"
     echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
 
     echo -e "[*] Starting SDN Controller on port 8080..."
-    $PY_BIN sdn_controller.py > /tmp/sdn_controller.log 2>&1 &
+    sudo $PY_BIN sdn_controller.py > /tmp/sdn_controller.log 2>&1 &
     sleep 1
 
-    echo -e "[*] Starting Central Server on port 5050..."
+    echo -e "[*] Starting Central Monitoring Server on port 5050..."
     $PY_BIN server.py > /tmp/server.log 2>&1 &
     sleep 2
 
-    echo -e "[*] Launching Agents (Node-1, Node-2, Node-3)..."
+    # Launch Backends if present
+    if [ -f "backend/app.py" ]; then
+        echo -e "[*] Launching Backend Microservices (h5: 8001, h6: 8002, h7: 8003)..."
+        $PY_BIN backend/app.py --id backend-1 --port 8001 > /tmp/backend_h5.log 2>&1 &
+        $PY_BIN backend/app.py --id backend-2 --port 8002 > /tmp/backend_h6.log 2>&1 &
+        $PY_BIN backend/app.py --id backend-3 --port 8003 > /tmp/backend_h7.log 2>&1 &
+        sleep 1
+    fi
+
+    # Launch Load Balancer if present
+    if [ -f "load_balancer/proxy.py" ]; then
+        echo -e "[*] Launching Load Balancer (h8: 8000)..."
+        $PY_BIN load_balancer/proxy.py --host 0.0.0.0 --port 8000 > /tmp/lb_h8.log 2>&1 &
+        sleep 1
+    fi
+
+    echo -e "[*] Launching Telemetry & C2 Agents (Clients & Backends)..."
     $PY_BIN agent.py --agent-id Node-1 --c2-port 5001 > /tmp/agent_node1.log 2>&1 &
     $PY_BIN agent.py --agent-id Node-2 --c2-port 5002 > /tmp/agent_node2.log 2>&1 &
     $PY_BIN agent.py --agent-id Node-3 --c2-port 5003 > /tmp/agent_node3.log 2>&1 &
+    $PY_BIN agent.py --agent-id Backend-1 --c2-port 5005 > /tmp/agent_backend1.log 2>&1 &
+    $PY_BIN agent.py --agent-id Backend-2 --c2-port 5006 > /tmp/agent_backend2.log 2>&1 &
+    $PY_BIN agent.py --agent-id Backend-3 --c2-port 5007 > /tmp/agent_backend3.log 2>&1 &
+    $PY_BIN agent.py --agent-id LoadBalancer --c2-port 5008 > /tmp/agent_lb.log 2>&1 &
 
-    sleep 3
-    echo -e "\n${GREEN}[OK] Local simulation running!${RESET}"
+    sleep 2
+    echo -e "\n${GREEN}[OK] All 7 nodes, Load Balancer, Controller & Central Server are active!${RESET}"
     echo -e "  - Dashboard:   ${BOLD}http://127.0.0.1:5050${RESET}"
     echo -e "  - SDN API:     ${BOLD}http://127.0.0.1:8080${RESET}"
-    echo -e "  - Telemetry:   UDP 5000\n"
+    echo -e "  - Load Balancer: http://127.0.0.1:8000${RESET}"
+    echo -e "  - Telemetry:   UDP port 5000\n"
 
-    if command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "http://127.0.0.1:5050" 2>/dev/null || true
-    fi
-
-    echo -e "Options:"
+    echo -e "Interactive Options:"
     echo -e "  [T] Run Automated Test Suite (demo_runner.py)"
+    echo -e "  [P] Run Performance Benchmarks (performance_eval.py)"
     echo -e "  [K] Stop all background processes"
     echo -e "  [Q] Exit to shell (processes remain active)"
 
     while true; do
-        read -rp "Action [T/K/Q]: " action
+        read -rp "Action [T/P/K/Q]: " action
         case "$action" in
             [tT]) run_tests ;;
+            [pP]) run_perf ;;
             [kK]) stop_all; break ;;
             [qQ]) break ;;
             *) echo "Invalid choice." ;;
@@ -136,68 +175,42 @@ start_local_simulation() {
     done
 }
 
-# Run automated evaluation runner
+# Run automated evaluation suite
 run_tests() {
     echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
-    echo -e "${BOLD}${CYAN}   RUNNING 5-STAGE AUTOMATED EVALUATION SUITE${RESET}"
+    echo -e "${BOLD}${CYAN}   RUNNING 9-PHASE AUTOMATED EVALUATION SUITE (demo_runner.py)${RESET}"
     echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
-
-    # Check if a Central Server is already reachable
-    local server_running=false
-    if curl -s -m 2 http://10.0.0.4:5050/api/metrics >/dev/null 2>&1 || curl -s -m 2 http://127.0.0.1:5050/api/metrics >/dev/null 2>&1; then
-        server_running=true
-    fi
-
-    local started_temp_cluster=false
-    if [ "$server_running" = false ]; then
-        echo -e "${YELLOW}[*] No active Central Server detected. Automatically launching test cluster...${RESET}"
-        check_dependencies
-        $PY_BIN sdn_controller.py > /tmp/sdn_controller.log 2>&1 &
-        sleep 1
-        $PY_BIN server.py > /tmp/server.log 2>&1 &
-        sleep 2
-        $PY_BIN agent.py --agent-id Node-1 --c2-port 5001 > /tmp/agent_node1.log 2>&1 &
-        $PY_BIN agent.py --agent-id Node-2 --c2-port 5002 > /tmp/agent_node2.log 2>&1 &
-        $PY_BIN agent.py --agent-id Node-3 --c2-port 5003 > /tmp/agent_node3.log 2>&1 &
-        sleep 3
-        started_temp_cluster=true
-        echo -e "${GREEN}[*] Test cluster initialized successfully!${RESET}\n"
-    fi
 
     $PY_BIN demo_runner.py
-
-    if [ "$started_temp_cluster" = true ]; then
-        echo ""
-        read -rp "Keep test cluster running in background? [y/N]: " keep_running
-        if [[ ! "$keep_running" =~ ^[yY]$ ]]; then
-            stop_all
-        else
-            echo -e "${GREEN}[OK] Cluster running in background on http://127.0.0.1:5050${RESET}"
-        fi
-    fi
 }
 
+# Run performance benchmark suite
 run_perf() {
     echo -e "\n${BOLD}${CYAN}========================================================================${RESET}"
-    echo -e "${BOLD}${CYAN}   RUNNING PERFORMANCE EVALUATION & BENCHMARK SUITE${RESET}"
+    echo -e "${BOLD}${CYAN}   RUNNING 9-PHASE PERFORMANCE BENCHMARK MATRIX (performance_eval.py)${RESET}"
     echo -e "${BOLD}${CYAN}========================================================================${RESET}\n"
+
     $PY_BIN performance_eval.py
     echo ""
     read -rp "Press Enter to return to menu..."
 }
 
-# Interactive CLI Menu
+# Interactive Menu
 show_menu() {
     clear
     echo -e "========================================================================"
-    echo -e "  ${BOLD}NETWORKING COURSE PROJECT: HEALTH MONITORING & SDN SYSTEM${RESET}"
+    echo -e "  ${BOLD}REMOTE NETWORK HEALTH MONITOR — OPERATOR NOC LAUNCHER${RESET}"
     echo -e "========================================================================"
     echo ""
-    echo -e "  [1] Launch Mininet + Ryu SDN Pipeline (sudo python3 topology.py)"
-    echo -e "  [2] Start Local Simulation (Controller + Server + 3 Agents + UI)"
-    echo -e "  [3] Run Automated Verification Suite (python3 demo_runner.py)"
-    echo -e "  [4] Run Performance Benchmark (python3 performance_eval.py)"
-    echo -e "  [5] Stop All Background Processes & Clean Mininet"
+    echo -e "  ${GREEN}[1] Launch Full Mininet Two-Router Network (Recommended for Lab)${RESET}"
+    echo -e "      -> Starts SDN Controller + Two-Router Mininet Topology + All Nodes"
+    echo ""
+    echo -e "  [2] Launch Local Simulation (No Mininet / Process Mode)"
+    echo -e "      -> Starts Controller + Server + LB + Backends + Agents on Host"
+    echo ""
+    echo -e "  [3] Run 9-Phase Automated Demo Runner (demo_runner.py)"
+    echo -e "  [4] Run Performance Benchmarks (performance_eval.py)"
+    echo -e "  [5] Stop All Processes & Clean Mininet Ports"
     echo -e "  [Q] Quit"
     echo ""
     echo -e "========================================================================"
@@ -215,12 +228,12 @@ show_menu() {
     esac
 }
 
-# Argument handling
+# CLI Argument dispatcher
 case "$1" in
-    mininet|prod) start_mininet_pipeline ;;
-    local|sim)   start_local_simulation ;;
-    test|eval)   run_tests ;;
-    perf|bench)  run_perf ;;
-    stop|clean)  stop_all ;;
-    *)           show_menu ;;
+    mininet|prod|all) start_mininet_pipeline ;;
+    local|sim)        start_local_simulation ;;
+    test|eval|demo)   run_tests ;;
+    perf|bench)       run_perf ;;
+    stop|clean|kill)  stop_all ;;
+    *)                show_menu ;;
 esac
