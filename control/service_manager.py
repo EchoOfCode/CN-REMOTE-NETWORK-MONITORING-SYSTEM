@@ -127,3 +127,4 @@ class ServiceManager:
 
 # Global singleton
 service_manager = ServiceManager()
+

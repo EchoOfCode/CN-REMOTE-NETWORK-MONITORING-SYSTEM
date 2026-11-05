@@ -113,7 +113,7 @@ class OperationManager:
                 target=str(op.get("parameters")),
                 result="SUCCESS" if success else "FAILED",
                 actor=op.get("operator", "OPERATOR"),
-                details=op.get("message", "")
+                details=str(verification_result or error or "")
             )
 
             # Publish event
@@ -144,3 +144,4 @@ class OperationManager:
 
 # Global singleton
 operation_manager = OperationManager()
+

@@ -112,12 +112,15 @@
         /* Nav Section Tabs */
         .nav-tabs-bar {
             background: #ffffff;
+            border-top: 1px solid var(--border-subtle);
             border-bottom: 1px solid var(--border-subtle);
             padding: 0 1.25rem;
             display: flex;
             gap: 1.25rem;
             overflow-x: auto;
             white-space: nowrap;
+            margin-top: 6px;
+            margin-bottom: 8px;
         }
 
         .nav-tab-item {
@@ -146,7 +149,7 @@
             background-color: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 9px 12px;
+            padding: 8px 12px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -155,7 +158,7 @@
         }
 
         .kpi-label {
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -164,14 +167,14 @@
         }
 
         .kpi-value {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             line-height: 1.2;
             font-family: 'JetBrains Mono', monospace;
         }
 
         .kpi-subtext {
-            font-size: 10px;
+            font-size: 9.5px;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -188,7 +191,7 @@
         }
 
         .panel-header {
-            padding: 8px 12px;
+            padding: 7px 12px;
             background-color: var(--bg-panel-header);
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
@@ -208,7 +211,7 @@
         }
 
         .panel-body {
-            padding: 10px 12px;
+            padding: 8px 12px;
             flex: 1;
         }
 
@@ -253,6 +256,14 @@
             color: #ffffff;
         }
         .btn-action-primary:hover { background-color: var(--color-primary-hover); color: #ffffff; }
+
+        .btn-action-demo {
+            background-color: #2563eb;
+            border-color: #1d4ed8;
+            color: #ffffff;
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3);
+        }
+        .btn-action-demo:hover { background-color: #1d4ed8; color: #ffffff; }
 
         .btn-action-danger {
             background-color: #ffffff;
@@ -309,7 +320,7 @@
         .topology-container {
             position: relative;
             width: 100%;
-            height: 220px;
+            height: 200px;
             background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
@@ -381,8 +392,8 @@
         /* Plain-English Loss Banner */
         .loss-banner {
             border-radius: var(--radius-sm);
-            padding: 6px 12px;
-            font-size: 11.5px;
+            padding: 5px 10px;
+            font-size: 11px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -437,6 +448,18 @@
         }
         .sub-tab-content { display: none; }
         .sub-tab-content.active { display: block; }
+
+        /* Live Automated Demo Banner */
+        .demo-progress-banner {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+            margin-bottom: 8px;
+            display: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .demo-progress-banner.active { display: block; }
     </style>
 </head>
 <body>
@@ -454,6 +477,12 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            <!-- DEMO RUN BUTTON (Prominent) -->
+            <button class="btn-action btn-action-demo shadow-sm" id="btn-demo-run" onclick="toggleAutomatedDemo()" title="Run full 9-phase automated live demonstration">
+                <i class="fa-solid fa-play me-1" id="demo-btn-icon"></i>
+                <span id="demo-btn-text">Demo Run</span>
+            </button>
+
             <!-- Automated Remediation Toggle Button -->
             <button class="btn-action btn-action-success shadow-sm" id="btn-remediation-toggle" onclick="toggleAutoRemediation()" title="Toggle automated SDN defense">
                 <i class="fa-solid fa-shield-halved me-1" id="remediation-icon"></i>
@@ -474,7 +503,7 @@
 
             <!-- Emergency Stop -->
             <button class="btn-action btn-action-danger shadow-sm" onclick="executeEmergencyStop()" title="Halt all stressors & reset link drops">
-                <i class="fa-solid fa-hand me-1"></i> Emergency Stop
+                <i class="fa-solid fa-hand me-1"></i> Stop All Stress
             </button>
 
             <!-- Refresh Button -->
@@ -484,44 +513,12 @@
         </div>
     </header>
 
-    <!-- Navigation Section Tabs (10 Operations Sections) -->
-    <div class="nav-tabs-bar">
-        <div class="nav-tab-item active" onclick="switchNavSection('overview')" id="nav-btn-overview">
-            <i class="fa-solid fa-gauge-high"></i> 1. Overview & Topology
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('control')" id="nav-btn-control">
-            <i class="fa-solid fa-sliders"></i> 2. System Control Centre
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('traffic')" id="nav-btn-traffic">
-            <i class="fa-solid fa-paper-plane"></i> 3. Traffic Operations & Packets
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('routers')" id="nav-btn-routers">
-            <i class="fa-solid fa-route"></i> 4. Two Routers (R1, R2)
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('trafficmanager')" id="nav-btn-trafficmanager">
-            <i class="fa-solid fa-scale-balanced"></i> 5. Load Balancer (h8)
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('sdn')" id="nav-btn-sdn">
-            <i class="fa-solid fa-network-wired"></i> 6. SDN & OpenFlow
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('faults')" id="nav-btn-faults">
-            <i class="fa-solid fa-biohazard"></i> 7. Fault Injection Lab
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('scenarios')" id="nav-btn-scenarios">
-            <i class="fa-solid fa-play text-primary"></i> 8. 9-Phase Scenarios
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('events')" id="nav-btn-events">
-            <i class="fa-solid fa-clock-rotate-left"></i> 9. Events & Audit Log
-        </div>
-        <div class="nav-tab-item" onclick="switchNavSection('diagnostics')" id="nav-btn-diagnostics">
-            <i class="fa-solid fa-file-waveform"></i> 10. Diagnostics & Reports
-        </div>
-    </div>
-
     <!-- Main Workspace Container -->
     <main class="container-fluid px-3 py-2">
 
-        <!-- Top Overview Stats (Row of 5 KPI Cards in Plain English) -->
+        <!-- ================= PERSISTENT UPPER SECTION (ALWAYS VISIBLE) ================= -->
+        
+        <!-- Row 1: Top Overview Stats (Row of 5 KPI Cards in Plain English) -->
         <div class="row g-2 mb-2">
             <div class="col-6 col-md-4 col-xl">
                 <div class="kpi-card">
@@ -572,219 +569,275 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 1: OVERVIEW & TWO-ROUTER SDN ================= -->
-        <div id="section-overview" class="tab-content-section active">
-            <!-- TOP ROW: Two-Router Topology with Live Animated Packets (Left) & Real-Time Charts (Right) -->
-            <div class="row g-2 mb-2">
-                <!-- TOP LEFT: Animated Topology Diagram with Packet Flow -->
-                <div class="col-lg-6">
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h2 class="panel-title">
-                                <i class="fa-solid fa-diagram-project text-muted"></i> Live Packet Flow & Two-Router Topology
-                            </h2>
-                            <div class="d-flex gap-2 text-muted" style="font-size: 10px;">
-                                <span><span class="status-dot pulse-green"></span>Normal Packet</span>
-                                <span><span class="status-dot pulse-red"></span>Attack / Dropped</span>
-                                <span><span class="status-dot pulse-yellow"></span>Delayed</span>
-                            </div>
-                        </div>
-                        <div class="panel-body p-2">
-                            <!-- Visual Packet Canvas + SVG Topology -->
-                            <div class="topology-container" id="topo-wrap">
-                                <svg class="topology-svg" viewBox="0 0 960 215">
-                                    <rect width="960" height="215" fill="#f8fafc" />
-
-                                    <!-- Subnet 1 Box (Clients & Monitor) -->
-                                    <rect x="10" y="10" width="280" height="195" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
-                                    <text x="20" y="25" fill="#64748b" font-weight="700" font-size="8.5">SUBNET 1: 10.0.1.0/24 (Clients & Monitor)</text>
-
-                                    <!-- Transit Link Box (R1 <-> R2) -->
-                                    <rect x="330" y="55" width="280" height="105" rx="5" fill="#f0f9ff" stroke="#bae6fd" stroke-dasharray="2 2" />
-                                    <text x="390" y="70" fill="#0369a1" font-weight="700" font-size="8.5">TRANSIT LINK: 10.0.12.0/30 (R1 &harr; R2)</text>
-
-                                    <!-- Subnet 2 Box (Load Balancer & Servers) -->
-                                    <rect x="650" y="10" width="300" height="195" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
-                                    <text x="660" y="25" fill="#64748b" font-weight="700" font-size="8.5">SUBNET 2: 10.0.2.0/24 (Traffic Manager & Servers)</text>
-
-                                    <!-- Subnet 1 Links -->
-                                    <line id="link-h1" class="topo-line" x1="70" y1="50" x2="210" y2="105" />
-                                    <line id="link-h2" class="topo-line" x1="70" y1="100" x2="210" y2="105" />
-                                    <line id="link-h3" class="topo-line" x1="70" y1="150" x2="210" y2="105" />
-                                    <line id="link-h4" class="topo-line" x1="140" y1="150" x2="210" y2="105" />
-
-                                    <!-- Switch s1 to Router r1 Link -->
-                                    <line id="link-s1-r1" class="topo-line-active" x1="210" y1="105" x2="365" y2="105" />
-
-                                    <!-- POINT-TO-POINT TRANSIT LINK: Router r1 <-> Router r2 -->
-                                    <line id="link-transit" class="topo-line-transit" x1="365" y1="105" x2="575" y2="105" />
-
-                                    <!-- Router r2 to Switch s2 Link -->
-                                    <line id="link-r2-s2" class="topo-line-active" x1="575" y1="105" x2="710" y2="105" />
-
-                                    <!-- Switch s2 to Traffic Manager (h8) -->
-                                    <line id="link-s2-h8" class="topo-line-active" x1="710" y1="105" x2="795" y2="60" />
-
-                                    <!-- Traffic Manager (h8) to Backend Servers -->
-                                    <line id="link-h8-h5" class="topo-line" x1="795" y1="60" x2="890" y2="50" />
-                                    <line id="link-h8-h6" class="topo-line" x1="795" y1="60" x2="890" y2="105" />
-                                    <line id="link-h8-h7" class="topo-line" x1="795" y1="60" x2="890" y2="160" />
-
-                                    <!-- SDN Controller Control Lines -->
-                                    <line class="topo-line" x1="470" y1="26" x2="210" y2="105" stroke="#9333ea" />
-                                    <line class="topo-line" x1="470" y1="26" x2="710" y2="105" stroke="#9333ea" />
-
-                                    <!-- SDN Controller (c0) -->
-                                    <g transform="translate(470, 26)">
-                                        <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#faf5ff" stroke="#a855f7" stroke-width="1.2" />
-                                        <text text-anchor="middle" dy="4" fill="#7e22ce" font-weight="700" font-size="9.5">SDN Controller (c0)</text>
-                                    </g>
-
-                                    <!-- Switch s1 (Client OVS) -->
-                                    <g transform="translate(210, 105)">
-                                        <rect x="-28" y="-16" width="56" height="32" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
-                                        <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9.5">Switch s1</text>
-                                        <text text-anchor="middle" dy="9" fill="#2563eb" font-size="7.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
-                                    </g>
-
-                                    <!-- ROUTER 1 (r1) -->
-                                    <g id="viz-router-r1" transform="translate(365, 105)">
-                                        <rect x="-38" y="-18" width="76" height="36" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
-                                        <text text-anchor="middle" dy="-2" fill="#047857" font-weight="700" font-size="10">Router r1</text>
-                                        <text text-anchor="middle" dy="9" fill="#059669" font-size="7.5" font-family="'JetBrains Mono', monospace">10.0.1.1 / 12.1</text>
-                                    </g>
-
-                                    <!-- Transit Link Midpoint Pill -->
-                                    <g transform="translate(470, 105)">
-                                        <rect x="-42" y="-10" width="84" height="20" rx="3" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" id="transit-pill-bg" />
-                                        <text text-anchor="middle" dy="3.5" fill="#0369a1" font-weight="700" font-size="8" id="transit-pill-text">10.0.12.0/30 &bull; 0%</text>
-                                    </g>
-
-                                    <!-- ROUTER 2 (r2) -->
-                                    <g id="viz-router-r2" transform="translate(575, 105)">
-                                        <rect x="-38" y="-18" width="76" height="36" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
-                                        <text text-anchor="middle" dy="-2" fill="#047857" font-weight="700" font-size="10">Router r2</text>
-                                        <text text-anchor="middle" dy="9" fill="#059669" font-size="7.5" font-family="'JetBrains Mono', monospace">10.0.12.2 / 2.1</text>
-                                    </g>
-
-                                    <!-- Switch s2 (Backend OVS) -->
-                                    <g transform="translate(710, 105)">
-                                        <rect x="-28" y="-16" width="56" height="32" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
-                                        <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9.5">Switch s2</text>
-                                        <text text-anchor="middle" dy="9" fill="#2563eb" font-size="7.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
-                                    </g>
-
-                                    <!-- Subnet 1 Nodes (h1, h2, h3, h4) -->
-                                    <g id="viz-node-h1" transform="translate(70, 50)">
-                                        <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h1 (Node-1)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.11</text>
-                                    </g>
-
-                                    <g id="viz-node-h2" transform="translate(70, 100)">
-                                        <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h2 (Node-2)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.12</text>
-                                    </g>
-
-                                    <g id="viz-node-h3" transform="translate(70, 150)">
-                                        <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h3 (Node-3)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.13</text>
-                                    </g>
-
-                                    <g id="viz-node-h4" transform="translate(140, 150)">
-                                        <rect x="-30" y="-12" width="60" height="24" rx="3" fill="#f0fdf4" stroke="#16a34a" />
-                                        <text text-anchor="middle" dy="0" fill="#15803d" font-weight="700" font-size="8">h4 Monitor</text>
-                                        <text text-anchor="middle" dy="8" fill="#16a34a" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.20</text>
-                                    </g>
-
-                                    <!-- Traffic Manager (h8 - Load Balancer) -->
-                                    <g id="viz-node-h8" transform="translate(795, 60)">
-                                        <rect x="-42" y="-14" width="84" height="28" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.4" />
-                                        <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="8.5">Traffic Manager</text>
-                                        <text text-anchor="middle" dy="9" fill="#2563eb" font-family="'JetBrains Mono', monospace" font-size="7">h8: 10.0.2.30</text>
-                                    </g>
-
-                                    <!-- Subnet 2 Servers (h5, h6, h7) -->
-                                    <g id="viz-node-h5" transform="translate(890, 50)">
-                                        <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h5" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h5">Server 1 (h5)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.11:8001</text>
-                                    </g>
-
-                                    <g id="viz-node-h6" transform="translate(890, 105)">
-                                        <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h6" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h6">Server 2 (h6)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.12:8002</text>
-                                    </g>
-
-                                    <g id="viz-node-h7" transform="translate(890, 160)">
-                                        <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h7" />
-                                        <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h7">Server 3 (h7)</text>
-                                        <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.13:8003</text>
-                                    </g>
-                                </svg>
-                                <!-- Interactive 60fps Packet Animation Canvas -->
-                                <canvas class="packet-canvas" id="packetCanvas"></canvas>
-                            </div>
-
-                            <!-- Plain-English Diagnostic Loss Banner -->
-                            <div class="loss-banner loss-banner-healthy mt-2" id="loss-diagnostic-banner">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-circle-check text-success" id="loss-banner-icon"></i>
-                                    <div>
-                                        <strong id="loss-banner-headline">All Network Paths Healthy</strong>
-                                        <div class="text-muted" style="font-size: 10px;" id="loss-banner-explanation">
-                                            Data packets are flowing smoothly across all network devices with 0% loss.
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="badge bg-success" id="loss-banner-badge">0 out of 100 lost</span>
-                            </div>
+        <!-- Row 2: Live Animated Topology (Left) + Real-Time Charts (Right) — ALWAYS VISIBLE -->
+        <div class="row g-2 mb-2">
+            <!-- Left: Live Topology Diagram with Animated 60fps Packet Flow & Loss Banner -->
+            <div class="col-lg-6">
+                <div class="panel h-100">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fa-solid fa-diagram-project text-muted"></i> Live Packet Flow & Two-Router Topology
+                        </h2>
+                        <div class="d-flex gap-2 text-muted" style="font-size: 10px;">
+                            <span><span class="status-dot pulse-green"></span>Normal Packet</span>
+                            <span><span class="status-dot pulse-red"></span>Attack / Dropped</span>
+                            <span><span class="status-dot pulse-yellow"></span>Delayed</span>
                         </div>
                     </div>
-                </div>
+                    <div class="panel-body p-2 d-flex flex-column justify-content-between">
+                        <!-- Visual Packet Canvas + SVG Topology -->
+                        <div class="topology-container" id="topo-wrap">
+                            <svg class="topology-svg" viewBox="0 0 960 215">
+                                <rect width="960" height="215" fill="#f8fafc" />
 
-                <!-- TOP RIGHT: Real-Time Metrics Graphs with Smart Auto-Scaling -->
-                <div class="col-lg-6">
-                    <div class="panel">
-                        <div class="panel-header">
-                            <div class="d-flex align-items-center gap-1">
-                                <button class="btn btn-sm btn-primary active py-0 px-2" style="font-size: 10.5px;" id="btn-chart-mbps" onclick="switchChartMode('mbps')">
-                                    <i class="fa-solid fa-chart-line me-1"></i> Network Speed
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 10.5px;" id="btn-chart-cpu" onclick="switchChartMode('cpu')">
-                                    <i class="fa-solid fa-gauge-high me-1"></i> CPU Usage
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 10.5px;" id="btn-chart-loss" onclick="switchChartMode('loss')">
-                                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Lost Data (%)
-                                </button>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-danger d-none" id="chart-spike-badge">SPIKE DETECTED</span>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-secondary py-0 px-1" style="font-size: 9.5px;" onclick="setChartRange(30)">30s</button>
-                                    <button class="btn btn-outline-secondary py-0 px-1 active" style="font-size: 9.5px;" onclick="setChartRange(60)">1m</button>
-                                    <button class="btn btn-outline-secondary py-0 px-1" style="font-size: 9.5px;" onclick="setChartRange(300)">5m</button>
-                                </div>
-                                <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size: 10px;" id="btn-pause-chart" onclick="toggleChartPause()" title="Pause chart scrolling">
-                                    <i class="fa-solid fa-pause"></i>
-                                </button>
-                            </div>
+                                <!-- Subnet 1 Box (Clients & Monitor) -->
+                                <rect x="10" y="10" width="280" height="195" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
+                                <text x="20" y="25" fill="#64748b" font-weight="700" font-size="8.5">SUBNET 1: 10.0.1.0/24 (Clients & Monitor)</text>
+
+                                <!-- Transit Link Box (R1 <-> R2) -->
+                                <rect x="330" y="55" width="280" height="105" rx="5" fill="#f0f9ff" stroke="#bae6fd" stroke-dasharray="2 2" />
+                                <text x="390" y="70" fill="#0369a1" font-weight="700" font-size="8.5">TRANSIT LINK: 10.0.12.0/30 (R1 &harr; R2)</text>
+
+                                <!-- Subnet 2 Box (Load Balancer & Servers) -->
+                                <rect x="650" y="10" width="300" height="195" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
+                                <text x="660" y="25" fill="#64748b" font-weight="700" font-size="8.5">SUBNET 2: 10.0.2.0/24 (Traffic Manager & Servers)</text>
+
+                                <!-- Subnet 1 Links -->
+                                <line id="link-h1" class="topo-line" x1="70" y1="50" x2="210" y2="105" />
+                                <line id="link-h2" class="topo-line" x1="70" y1="100" x2="210" y2="105" />
+                                <line id="link-h3" class="topo-line" x1="70" y1="150" x2="210" y2="105" />
+                                <line id="link-h4" class="topo-line" x1="140" y1="150" x2="210" y2="105" />
+
+                                <!-- Switch s1 to Router r1 Link -->
+                                <line id="link-s1-r1" class="topo-line-active" x1="210" y1="105" x2="365" y2="105" />
+
+                                <!-- POINT-TO-POINT TRANSIT LINK: Router r1 <-> Router r2 -->
+                                <line id="link-transit" class="topo-line-transit" x1="365" y1="105" x2="575" y2="105" />
+
+                                <!-- Router r2 to Switch s2 Link -->
+                                <line id="link-r2-s2" class="topo-line-active" x1="575" y1="105" x2="710" y2="105" />
+
+                                <!-- Switch s2 to Traffic Manager (h8) -->
+                                <line id="link-s2-h8" class="topo-line-active" x1="710" y1="105" x2="795" y2="60" />
+
+                                <!-- Traffic Manager (h8) to Backend Servers -->
+                                <line id="link-h8-h5" class="topo-line" x1="795" y1="60" x2="890" y2="50" />
+                                <line id="link-h8-h6" class="topo-line" x1="795" y1="60" x2="890" y2="105" />
+                                <line id="link-h8-h7" class="topo-line" x1="795" y1="60" x2="890" y2="160" />
+
+                                <!-- SDN Controller Control Lines -->
+                                <line class="topo-line" x1="470" y1="26" x2="210" y2="105" stroke="#9333ea" />
+                                <line class="topo-line" x1="470" y1="26" x2="710" y2="105" stroke="#9333ea" />
+
+                                <!-- SDN Controller (c0) -->
+                                <g transform="translate(470, 26)">
+                                    <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#faf5ff" stroke="#a855f7" stroke-width="1.2" />
+                                    <text text-anchor="middle" dy="4" fill="#7e22ce" font-weight="700" font-size="9.5">SDN Controller (c0)</text>
+                                </g>
+
+                                <!-- Switch s1 (Client OVS) -->
+                                <g transform="translate(210, 105)">
+                                    <rect x="-28" y="-16" width="56" height="32" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                                    <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9.5">Switch s1</text>
+                                    <text text-anchor="middle" dy="9" fill="#2563eb" font-size="7.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
+                                </g>
+
+                                <!-- ROUTER 1 (r1) -->
+                                <g id="viz-router-r1" transform="translate(365, 105)">
+                                    <rect x="-38" y="-18" width="76" height="36" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
+                                    <text text-anchor="middle" dy="-2" fill="#047857" font-weight="700" font-size="10">Router r1</text>
+                                    <text text-anchor="middle" dy="9" fill="#059669" font-size="7.5" font-family="'JetBrains Mono', monospace">10.0.1.1 / 12.1</text>
+                                </g>
+
+                                <!-- Transit Link Midpoint Pill -->
+                                <g transform="translate(470, 105)">
+                                    <rect x="-42" y="-10" width="84" height="20" rx="3" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" id="transit-pill-bg" />
+                                    <text text-anchor="middle" dy="3.5" fill="#0369a1" font-weight="700" font-size="8" id="transit-pill-text">10.0.12.0/30 &bull; 0%</text>
+                                </g>
+
+                                <!-- ROUTER 2 (r2) -->
+                                <g id="viz-router-r2" transform="translate(575, 105)">
+                                    <rect x="-38" y="-18" width="76" height="36" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
+                                    <text text-anchor="middle" dy="-2" fill="#047857" font-weight="700" font-size="10">Router r2</text>
+                                    <text text-anchor="middle" dy="9" fill="#059669" font-size="7.5" font-family="'JetBrains Mono', monospace">10.0.12.2 / 2.1</text>
+                                </g>
+
+                                <!-- Switch s2 (Backend OVS) -->
+                                <g transform="translate(710, 105)">
+                                    <rect x="-28" y="-16" width="56" height="32" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                                    <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9.5">Switch s2</text>
+                                    <text text-anchor="middle" dy="9" fill="#2563eb" font-size="7.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
+                                </g>
+
+                                <!-- Subnet 1 Nodes (h1, h2, h3, h4) -->
+                                <g id="viz-node-h1" transform="translate(70, 50)">
+                                    <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h1 (Node-1)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.11</text>
+                                </g>
+
+                                <g id="viz-node-h2" transform="translate(70, 100)">
+                                    <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h2 (Node-2)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.12</text>
+                                </g>
+
+                                <g id="viz-node-h3" transform="translate(70, 150)">
+                                    <rect x="-35" y="-12" width="70" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5">h3 (Node-3)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.13</text>
+                                </g>
+
+                                <g id="viz-node-h4" transform="translate(140, 150)">
+                                    <rect x="-30" y="-12" width="60" height="24" rx="3" fill="#f0fdf4" stroke="#16a34a" />
+                                    <text text-anchor="middle" dy="0" fill="#15803d" font-weight="700" font-size="8">h4 Monitor</text>
+                                    <text text-anchor="middle" dy="8" fill="#16a34a" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.1.20</text>
+                                </g>
+
+                                <!-- Traffic Manager (h8 - Load Balancer) -->
+                                <g id="viz-node-h8" transform="translate(795, 60)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.4" />
+                                    <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="8.5">Traffic Manager</text>
+                                    <text text-anchor="middle" dy="9" fill="#2563eb" font-family="'JetBrains Mono', monospace" font-size="7">h8: 10.0.2.30</text>
+                                </g>
+
+                                <!-- Subnet 2 Servers (h5, h6, h7) -->
+                                <g id="viz-node-h5" transform="translate(890, 50)">
+                                    <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h5" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h5">Server 1 (h5)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.11:8001</text>
+                                </g>
+
+                                <g id="viz-node-h6" transform="translate(890, 105)">
+                                    <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h6" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h6">Server 2 (h6)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.12:8002</text>
+                                </g>
+
+                                <g id="viz-node-h7" transform="translate(890, 160)">
+                                    <rect x="-40" y="-12" width="80" height="24" rx="3" fill="#ffffff" stroke="#cbd5e1" id="viz-bg-h7" />
+                                    <text text-anchor="middle" dy="0" fill="#0f172a" font-weight="600" font-size="8.5" id="viz-title-h7">Server 3 (h7)</text>
+                                    <text text-anchor="middle" dy="8" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="6.5">10.0.2.13:8003</text>
+                                </g>
+                            </svg>
+                            <!-- Interactive 60fps Packet Animation Canvas -->
+                            <canvas class="packet-canvas" id="packetCanvas"></canvas>
                         </div>
-                        <div class="panel-body p-2" style="height: 255px; position: relative;">
-                            <canvas id="telemetryChart"></canvas>
+
+                        <!-- Plain-English Diagnostic Loss Banner -->
+                        <div class="loss-banner loss-banner-healthy mt-2" id="loss-diagnostic-banner">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-success" id="loss-banner-icon"></i>
+                                <div>
+                                    <strong id="loss-banner-headline">All Network Paths Healthy</strong>
+                                    <div class="text-muted" style="font-size: 10px;" id="loss-banner-explanation">
+                                        Data packets are flowing smoothly across all network devices with 0% loss.
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="badge bg-success" id="loss-banner-badge">0 out of 100 lost</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTTOM ROW: Backend Server Power Controls (Left) & Active SDN Drop Rules (Right) -->
+            <!-- Right: Real-Time Metrics Graphs with Smart Auto-Scaling -->
+            <div class="col-lg-6">
+                <div class="panel h-100">
+                    <div class="panel-header">
+                        <div class="d-flex align-items-center gap-1">
+                            <button class="btn btn-sm btn-primary active py-0 px-2" style="font-size: 10.5px;" id="btn-chart-mbps" onclick="switchChartMode('mbps')">
+                                <i class="fa-solid fa-chart-line me-1"></i> Network Speed
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 10.5px;" id="btn-chart-cpu" onclick="switchChartMode('cpu')">
+                                <i class="fa-solid fa-gauge-high me-1"></i> CPU Usage
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 10.5px;" id="btn-chart-loss" onclick="switchChartMode('loss')">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Lost Data (%)
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger d-none" id="chart-spike-badge">SPIKE DETECTED</span>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary py-0 px-1" style="font-size: 9.5px;" onclick="setChartRange(30)">30s</button>
+                                <button class="btn btn-outline-secondary py-0 px-1 active" style="font-size: 9.5px;" onclick="setChartRange(60)">1m</button>
+                                <button class="btn btn-outline-secondary py-0 px-1" style="font-size: 9.5px;" onclick="setChartRange(300)">5m</button>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size: 10px;" id="btn-pause-chart" onclick="toggleChartPause()" title="Pause chart scrolling">
+                                <i class="fa-solid fa-pause"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body p-2" style="height: 235px; position: relative;">
+                        <canvas id="telemetryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Automated Demo Running Progress Banner (Displays during Demo Run) -->
+        <div class="demo-progress-banner" id="demo-banner">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
+                    <strong class="text-warning" id="demo-phase-title">Phase 1/9: Baseline Normal Check</strong>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark mono" id="demo-step-badge">Step 1 of 9</span>
+                    <button class="btn btn-xs btn-outline-light py-0 px-2" onclick="advanceDemoStep()">Next Phase &rarr;</button>
+                    <button class="btn btn-xs btn-danger py-0 px-2" onclick="stopAutomatedDemo()">Stop Demo</button>
+                </div>
+            </div>
+            <div class="text-light opacity-75 mb-2" style="font-size: 10.5px;" id="demo-phase-desc">
+                Verifying all 7 host nodes, two routers, and backends healthy with zero packet loss.
+            </div>
+            <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.2);">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="demo-progress-bar" style="width: 11%;"></div>
+            </div>
+        </div>
+
+        <!-- ================= NAVIGATION TABS (SHIFTS LOWER WORKSPACE OPTIONS) ================= -->
+        <div class="nav-tabs-bar">
+            <div class="nav-tab-item active" onclick="switchNavSection('overview')" id="nav-btn-overview">
+                <i class="fa-solid fa-gauge-high"></i> 1. Overview & Servers
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('control')" id="nav-btn-control">
+                <i class="fa-solid fa-sliders"></i> 2. System Control Centre
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('traffic')" id="nav-btn-traffic">
+                <i class="fa-solid fa-paper-plane"></i> 3. Traffic Operations & Packets
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('routers')" id="nav-btn-routers">
+                <i class="fa-solid fa-route"></i> 4. Two Routers (R1, R2)
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('trafficmanager')" id="nav-btn-trafficmanager">
+                <i class="fa-solid fa-scale-balanced"></i> 5. Load Balancer (h8)
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('sdn')" id="nav-btn-sdn">
+                <i class="fa-solid fa-network-wired"></i> 6. SDN & OpenFlow
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('faults')" id="nav-btn-faults">
+                <i class="fa-solid fa-biohazard"></i> 7. Fault Injection Lab
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('scenarios')" id="nav-btn-scenarios">
+                <i class="fa-solid fa-play text-primary"></i> 8. 9-Phase Scenarios
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('events')" id="nav-btn-events">
+                <i class="fa-solid fa-clock-rotate-left"></i> 9. Events & Audit Log
+            </div>
+            <div class="nav-tab-item" onclick="switchNavSection('diagnostics')" id="nav-btn-diagnostics">
+                <i class="fa-solid fa-file-waveform"></i> 10. Diagnostics & Reports
+            </div>
+        </div>
+
+        <!-- ================= TAB CONTENT PANELS (SHIFTS ON TAB SELECTION) ================= -->
+
+        <!-- SECTION 1: OVERVIEW & SERVERS (Power Controls & SDN DROP Rules) -->
+        <div id="section-overview" class="tab-content-section active">
             <div class="row g-2">
-                <!-- BOTTOM LEFT: Backend Server Power ON/OFF Controls & Dynamic Redistribution -->
+                <!-- Left: Backend Server Power ON/OFF Controls & Dynamic Redistribution -->
                 <div class="col-lg-6">
-                    <div class="panel">
+                    <div class="panel h-100">
                         <div class="panel-header">
                             <h2 class="panel-title">
                                 <i class="fa-solid fa-power-off text-danger"></i> Backend Server Power Controls & Traffic Shares
@@ -851,9 +904,9 @@
                     </div>
                 </div>
 
-                <!-- BOTTOM RIGHT: Active OpenFlow 1.3 DROP Rules -->
+                <!-- Right: Active OpenFlow 1.3 DROP Rules -->
                 <div class="col-lg-6">
-                    <div class="panel">
+                    <div class="panel h-100">
                         <div class="panel-header">
                             <h2 class="panel-title">
                                 <i class="fa-solid fa-table-list text-muted"></i> Active OpenFlow 1.3 DROP Rules (SDN Mitigations)
@@ -861,7 +914,7 @@
                             </h2>
                             <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" onclick="triggerManualUnblockAll()">Clear Rules</button>
                         </div>
-                        <div class="panel-body p-0" style="max-height: 180px; overflow-y: auto;">
+                        <div class="panel-body p-0" style="max-height: 150px; overflow-y: auto;">
                             <table class="table-custom">
                                 <thead>
                                     <tr>
@@ -884,7 +937,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 2: SYSTEM CONTROL CENTRE ================= -->
+        <!-- SECTION 2: SYSTEM CONTROL CENTRE -->
         <div id="section-control" class="tab-content-section">
             <div class="d-flex gap-2 mb-2">
                 <button class="sub-tab-btn active" onclick="switchControlSubTab('nodes')" id="sub-btn-nodes"><i class="fa-solid fa-desktop me-1"></i> Nodes (h1–h8)</button>
@@ -897,7 +950,7 @@
             <!-- SUB-TAB: Nodes Control -->
             <div id="sub-nodes" class="sub-tab-content active">
                 <div class="row g-2" id="nodes-control-grid">
-                    <!-- Populated dynamically by renderNodesControl() -->
+                    <!-- Populated dynamically by fetchNodesControl() -->
                 </div>
             </div>
 
@@ -1001,7 +1054,7 @@
                         <div class="panel">
                             <div class="panel-header">
                                 <h2 class="panel-title"><i class="fa-solid fa-network-wired text-primary"></i> Switch s1 (Clients Open vSwitch)</h2>
-                                <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="viewFlowTable('s1')">View Flows</button>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="loadSwitchFlows('s1')">View Flows</button>
                             </div>
                             <div class="panel-body p-0">
                                 <table class="table-custom">
@@ -1023,7 +1076,7 @@
                         <div class="panel">
                             <div class="panel-header">
                                 <h2 class="panel-title"><i class="fa-solid fa-network-wired text-success"></i> Switch s2 (Backends Open vSwitch)</h2>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="viewFlowTable('s2')">View Flows</button>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="loadSwitchFlows('s2')">View Flows</button>
                             </div>
                             <div class="panel-body p-0">
                                 <table class="table-custom">
@@ -1170,7 +1223,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 3: TRAFFIC OPERATIONS & PACKETS ================= -->
+        <!-- SECTION 3: TRAFFIC OPERATIONS & PACKETS -->
         <div id="section-traffic" class="tab-content-section">
             <div class="row g-2 mb-2">
                 <!-- Generator 1: ICMP Ping Probes -->
@@ -1336,7 +1389,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 4: TWO ROUTERS (R1, R2 & TRANSIT) ================= -->
+        <!-- SECTION 4: TWO ROUTERS (R1, R2 & TRANSIT) -->
         <div id="section-routers" class="tab-content-section">
             <div class="row g-2 mb-2">
                 <!-- Router 1 (Client Gateway) -->
@@ -1479,7 +1532,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 5: TRAFFIC MANAGER (LOAD BALANCER h8) ================= -->
+        <!-- SECTION 5: TRAFFIC MANAGER (LOAD BALANCER h8) -->
         <div id="section-trafficmanager" class="tab-content-section">
             <div class="row g-2">
                 <div class="col-md-4">
@@ -1556,7 +1609,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 6: SDN & OPENFLOW MANAGEMENT ================= -->
+        <!-- SECTION 6: SDN & OPENFLOW MANAGEMENT -->
         <div id="section-sdn" class="tab-content-section">
             <div class="row g-2 mb-2">
                 <div class="col-md-6">
@@ -1602,7 +1655,7 @@
                         <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="loadSwitchFlows('s2')">Load s2 Flows</button>
                     </div>
                 </div>
-                <div class="panel-body p-0" style="max-height: 280px; overflow-y: auto;">
+                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -1622,7 +1675,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 7: FAULT INJECTION LAB ================= -->
+        <!-- SECTION 7: FAULT INJECTION LAB -->
         <div id="section-faults" class="tab-content-section">
             <div class="panel mb-2">
                 <div class="panel-header">
@@ -1644,7 +1697,7 @@
                         <div class="col-md-4">
                             <div class="node-card-compact h-100">
                                 <strong>High-Volume Network Flood</strong>
-                                <p class="text-muted mb-2" style="font-size: 10.5px;">Dispatches unmitigated 45 Mbps UDP stream to simulate volumetric DDoS.</p>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Dispatches unmitigated 45 Mbps UDP stream to observe live spike.</p>
                                 <button class="btn-action btn-action-warning w-100" onclick="injectNetworkFlood()">Launch 45 Mbps Surge</button>
                             </div>
                         </div>
@@ -1689,12 +1742,14 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 8: 9 DEMONSTRATION SCENARIOS ================= -->
+        <!-- SECTION 8: 9 DEMONSTRATION SCENARIOS -->
         <div id="section-scenarios" class="tab-content-section">
             <div class="panel">
                 <div class="panel-header">
                     <h2 class="panel-title"><i class="fa-solid fa-flask text-primary"></i> 9 Pre-Programmed Demonstration Scenarios</h2>
-                    <span class="text-muted mono" style="font-size: 10px;">One-click automated scenarios for evaluator rubric</span>
+                    <button class="btn btn-action btn-action-demo py-0 px-2" onclick="toggleAutomatedDemo()">
+                        <i class="fa-solid fa-play me-1"></i> Run All 9 Phases Sequentially
+                    </button>
                 </div>
                 <div class="panel-body p-2">
                     <div class="row g-2">
@@ -1783,14 +1838,14 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 9: EVENTS & AUDIT LOG ================= -->
+        <!-- SECTION 9: EVENTS & AUDIT LOG -->
         <div id="section-events" class="tab-content-section">
             <div class="panel mb-2">
                 <div class="panel-header">
                     <h2 class="panel-title"><i class="fa-solid fa-timeline"></i> Plain-English System Event Stream</h2>
                     <span class="text-muted mono" style="font-size: 10px;">Lifecycle: DETECTED &rarr; MITIGATING &rarr; RECOVERED</span>
                 </div>
-                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
+                <div class="panel-body p-0" style="max-height: 200px; overflow-y: auto;">
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -1816,7 +1871,7 @@
                     <h2 class="panel-title"><i class="fa-solid fa-clipboard-check"></i> Operations & Audit Trail (SQLite)</h2>
                     <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="fetchOperationsLog()"><i class="fa-solid fa-rotate me-1"></i> Refresh Audit</button>
                 </div>
-                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
+                <div class="panel-body p-0" style="max-height: 200px; overflow-y: auto;">
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -1837,7 +1892,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 10: DIAGNOSTICS & REPORTS ================= -->
+        <!-- SECTION 10: DIAGNOSTICS & REPORTS -->
         <div id="section-diagnostics" class="tab-content-section">
             <div class="row g-2 mb-2">
                 <div class="col-md-6">
@@ -1912,6 +1967,101 @@
         let chartHistoryLimit = 60;
         const chartHistory = { labels: [], datasets: {} };
         let autoRemediationEnabled = true;
+
+        // Automated Demo Runner State
+        let demoRunning = false;
+        let demoStepIndex = 0;
+        let demoTimer = null;
+        let demoCountdown = 0;
+
+        const demoPhases = [
+            {
+                phase: 1,
+                title: "Phase 1: Baseline Normal Check",
+                desc: "Verifying all 7 host nodes, two routers, and backends healthy with zero packet loss.",
+                action: async () => {
+                    await executeEmergencyStop();
+                    await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: true}) });
+                },
+                seconds: 5
+            },
+            {
+                phase: 2,
+                title: "Phase 2: Controlled CPU Stress Surge",
+                desc: "Saturating host CPU cores to 90%+; testing anomaly detector alert triggering.",
+                action: async () => {
+                    await injectCpuFault();
+                },
+                seconds: 6
+            },
+            {
+                phase: 3,
+                title: "Phase 3: Unmitigated Traffic Spike (Auto-Remediation OFF)",
+                desc: "Automated defense turned OFF. 45 Mbps volumetric UDP flood surge climbing live chart.",
+                action: async () => {
+                    await injectNetworkFlood();
+                },
+                seconds: 7
+            },
+            {
+                phase: 4,
+                title: "Phase 4: Automated SDN Defense (FlowMod DROP)",
+                desc: "Auto-Remediation ON. Ryu SDN Controller identifies attacker and pushes OpenFlow DROP rule in <2s.",
+                action: async () => {
+                    await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: true}) });
+                    await fetch('/api/attack/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({agent_id: 'Node-1', c2_port: 5001, duration: 12}) });
+                },
+                seconds: 6
+            },
+            {
+                phase: 5,
+                title: "Phase 5: Power OFF Server 2 (Failover 50% / 0% / 50%)",
+                desc: "Simulating backend failure. Load Balancer excludes Server 2 and redistributes load to healthy servers.",
+                action: async () => {
+                    await toggleBackendPower('backend-2');
+                },
+                seconds: 6
+            },
+            {
+                phase: 6,
+                title: "Phase 6: Power ON Server 2 (Recovery 33.3% Each)",
+                desc: "Server 2 powered back on. Load Balancer health checks verify recovery and re-admit it to rotation.",
+                action: async () => {
+                    await toggleBackendPower('backend-2');
+                },
+                seconds: 6
+            },
+            {
+                phase: 7,
+                title: "Phase 7: Transit Link 24% Loss Localization",
+                desc: "Applying 24% packet drop to R1-R2 link; packet loss detector localizes exact impaired segment.",
+                action: async () => {
+                    await simulateTransitLoss(24);
+                },
+                seconds: 6
+            },
+            {
+                phase: 8,
+                title: "Phase 8: Switch Load Balancing Algorithm",
+                desc: "Dynamically switching proxy algorithm from Round Robin to Least Connections without downtime.",
+                action: async () => {
+                    const cur = document.getElementById('lb-algo-select') ? document.getElementById('lb-algo-select').value : 'round_robin';
+                    const next = cur === 'round_robin' ? 'least_connections' : 'round_robin';
+                    if (document.getElementById('lb-algo-select')) document.getElementById('lb-algo-select').value = next;
+                    await changeLbAlgorithm(next);
+                },
+                seconds: 5
+            },
+            {
+                phase: 9,
+                title: "Phase 9: Complete System Recovery & Normalization",
+                desc: "Reconciling clean baseline: clearing stressors, re-admitting backends, removing drop rules.",
+                action: async () => {
+                    await executeFullRecovery();
+                },
+                seconds: 5
+            }
+        ];
 
         // Packet Flow Animation Particles
         const particles = [];
@@ -2272,28 +2422,28 @@
             const r2Status = r2.status || 'HEALTHY';
             document.getElementById('r1-header-status').innerText = r1Status === 'HEALTHY' ? 'OK' : r1Status;
             document.getElementById('r2-header-status').innerText = r2Status === 'HEALTHY' ? 'OK' : r2Status;
-            document.getElementById('r1-tab-status').innerText = r1Status;
-            document.getElementById('r2-tab-status').innerText = r2Status;
+            if (document.getElementById('r1-tab-status')) document.getElementById('r1-tab-status').innerText = r1Status;
+            if (document.getElementById('r2-tab-status')) document.getElementById('r2-tab-status').innerText = r2Status;
 
             // R1 Stats
             const r1Sys = r1.system || {};
-            document.getElementById('r1-cpu').innerText = `${r1Sys.cpu_percent || 3.8}%`;
-            document.getElementById('r1-cpu-bar').style.width = `${r1Sys.cpu_percent || 3.8}%`;
-            document.getElementById('r1-mem').innerText = `${r1Sys.memory_percent || 18.2}%`;
-            document.getElementById('r1-mem-bar').style.width = `${r1Sys.memory_percent || 18.2}%`;
-            document.getElementById('r1-lat').innerText = `${r1.connectivity ? r1.connectivity.latency_ms : 0.45} ms`;
+            if (document.getElementById('r1-cpu')) document.getElementById('r1-cpu').innerText = `${r1Sys.cpu_percent || 3.8}%`;
+            if (document.getElementById('r1-cpu-bar')) document.getElementById('r1-cpu-bar').style.width = `${r1Sys.cpu_percent || 3.8}%`;
+            if (document.getElementById('r1-mem')) document.getElementById('r1-mem').innerText = `${r1Sys.memory_percent || 18.2}%`;
+            if (document.getElementById('r1-mem-bar')) document.getElementById('r1-mem-bar').style.width = `${r1Sys.memory_percent || 18.2}%`;
+            if (document.getElementById('r1-lat')) document.getElementById('r1-lat').innerText = `${r1.connectivity ? r1.connectivity.latency_ms : 0.45} ms`;
 
             // R2 Stats
             const r2Sys = r2.system || {};
-            document.getElementById('r2-cpu').innerText = `${r2Sys.cpu_percent || 3.4}%`;
-            document.getElementById('r2-cpu-bar').style.width = `${r2Sys.cpu_percent || 3.4}%`;
-            document.getElementById('r2-mem').innerText = `${r2Sys.memory_percent || 17.9}%`;
-            document.getElementById('r2-mem-bar').style.width = `${r2Sys.memory_percent || 17.9}%`;
-            document.getElementById('r2-lat').innerText = `${r2.connectivity ? r2.connectivity.latency_ms : 0.75} ms`;
+            if (document.getElementById('r2-cpu')) document.getElementById('r2-cpu').innerText = `${r2Sys.cpu_percent || 3.4}%`;
+            if (document.getElementById('r2-cpu-bar')) document.getElementById('r2-cpu-bar').style.width = `${r2Sys.cpu_percent || 3.4}%`;
+            if (document.getElementById('r2-mem')) document.getElementById('r2-mem').innerText = `${r2Sys.memory_percent || 17.9}%`;
+            if (document.getElementById('r2-mem-bar')) document.getElementById('r2-mem-bar').style.width = `${r2Sys.memory_percent || 17.9}%`;
+            if (document.getElementById('r2-lat')) document.getElementById('r2-lat').innerText = `${r2.connectivity ? r2.connectivity.latency_ms : 0.75} ms`;
 
             // Transit Link Stats
-            document.getElementById('transit-lat').innerText = `${transit.latency_ms || 0.80} ms`;
-            document.getElementById('transit-loss').innerText = `${transit.loss_percent || 0.0}%`;
+            if (document.getElementById('transit-lat')) document.getElementById('transit-lat').innerText = `${transit.latency_ms || 0.80} ms`;
+            if (document.getElementById('transit-loss')) document.getElementById('transit-loss').innerText = `${transit.loss_percent || 0.0}%`;
             document.getElementById('transit-pill-text').innerText = `10.0.12.0/30 • ${transit.loss_percent || 0.0}%`;
         }
 
@@ -2376,20 +2526,21 @@
             document.getElementById('kpi-lb-algo').innerText = algo;
             document.getElementById('kpi-lb-summary').innerText = `${config.healthy_backend_count || 3} Active • ${metrics.requests_per_second || 0} RPS`;
 
-            document.getElementById('lb-total-reqs').innerText = metrics.total_requests || 0;
-            document.getElementById('lb-current-rps').innerText = `${metrics.requests_per_second || 0} RPS`;
-            document.getElementById('lb-avg-latency').innerText = `${metrics.latency_ms ? metrics.latency_ms.average : 0} ms`;
+            if (document.getElementById('lb-total-reqs')) document.getElementById('lb-total-reqs').innerText = metrics.total_requests || 0;
+            if (document.getElementById('lb-current-rps')) document.getElementById('lb-current-rps').innerText = `${metrics.requests_per_second || 0} RPS`;
+            if (document.getElementById('lb-avg-latency')) document.getElementById('lb-avg-latency').innerText = `${metrics.latency_ms ? metrics.latency_ms.average : 0} ms`;
 
             const dist = metrics.traffic_distribution || {};
-            document.getElementById('lb-cnt-b1').innerText = dist['backend-1'] || 0;
-            document.getElementById('lb-cnt-b2').innerText = dist['backend-2'] || 0;
-            document.getElementById('lb-cnt-b3').innerText = dist['backend-3'] || 0;
+            if (document.getElementById('lb-cnt-b1')) document.getElementById('lb-cnt-b1').innerText = dist['backend-1'] || 0;
+            if (document.getElementById('lb-cnt-b2')) document.getElementById('lb-cnt-b2').innerText = dist['backend-2'] || 0;
+            if (document.getElementById('lb-cnt-b3')) document.getElementById('lb-cnt-b3').innerText = dist['backend-3'] || 0;
         }
 
         function updateSdn(sdn) {
             const rules = sdn.active_rules || [];
             document.getElementById('rules-badge').innerText = rules.length;
             const tbody = document.getElementById('rules-table-body');
+            if (!tbody) return;
 
             if (!rules.length) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No OpenFlow DROP rules installed. Traffic forwarding normally.</td></tr>';
@@ -2413,6 +2564,7 @@
 
         function updateEvents(events) {
             const tbody = document.getElementById('events-stream-body');
+            if (!tbody) return;
             if (!events.length) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No events logged yet.</td></tr>';
                 return;
@@ -2466,12 +2618,98 @@
             renderChart();
         }
 
+        // --- AUTOMATED DEMO RUNNER ---
+        async function toggleAutomatedDemo() {
+            if (demoRunning) {
+                stopAutomatedDemo();
+            } else {
+                startAutomatedDemo();
+            }
+        }
+
+        async function startAutomatedDemo() {
+            demoRunning = true;
+            demoStepIndex = 0;
+            const btn = document.getElementById('btn-demo-run');
+            const icon = document.getElementById('demo-btn-icon');
+            const txt = document.getElementById('demo-btn-text');
+            btn.className = 'btn-action btn-action-danger shadow-sm';
+            icon.className = 'fa-solid fa-stop me-1';
+            txt.innerText = 'Stop Demo';
+
+            document.getElementById('demo-banner').classList.add('active');
+            await fetch('/api/demo/run', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'START'}) });
+
+            executeDemoStep(0);
+        }
+
+        async function executeDemoStep(idx) {
+            if (!demoRunning) return;
+            if (idx >= demoPhases.length) {
+                // Completed all 9 phases
+                document.getElementById('demo-phase-title').innerText = '🎉 9-Phase Demonstration Completed Successfully!';
+                document.getElementById('demo-phase-desc').innerText = 'All verification milestones passed. You can now download the forensic CSV diagnostic report.';
+                document.getElementById('demo-progress-bar').style.width = '100%';
+                document.getElementById('demo-step-badge').innerText = '9 of 9 (Complete)';
+                setTimeout(stopAutomatedDemo, 4000);
+                return;
+            }
+
+            demoStepIndex = idx;
+            const step = demoPhases[idx];
+            document.getElementById('demo-phase-title').innerText = step.title;
+            document.getElementById('demo-phase-desc').innerText = step.desc;
+            document.getElementById('demo-step-badge').innerText = `Step ${step.phase} of 9`;
+            const pct = Math.round((step.phase / 9.0) * 100);
+            document.getElementById('demo-progress-bar').style.width = `${pct}%`;
+
+            // Inform backend
+            fetch('/api/demo/run', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({phase: step.phase}) }).catch(()=>{});
+
+            // Execute actual action
+            try {
+                await step.action();
+                fetchMetrics();
+            } catch (err) {
+                console.error(`Error in demo step ${step.phase}:`, err);
+            }
+
+            // Auto-advance after step.seconds
+            clearTimeout(demoTimer);
+            demoTimer = setTimeout(() => {
+                if (demoRunning) {
+                    executeDemoStep(idx + 1);
+                }
+            }, step.seconds * 1000);
+        }
+
+        function advanceDemoStep() {
+            clearTimeout(demoTimer);
+            executeDemoStep(demoStepIndex + 1);
+        }
+
+        async function stopAutomatedDemo() {
+            demoRunning = false;
+            clearTimeout(demoTimer);
+            const btn = document.getElementById('btn-demo-run');
+            const icon = document.getElementById('demo-btn-icon');
+            const txt = document.getElementById('demo-btn-text');
+            btn.className = 'btn-action btn-action-demo shadow-sm';
+            icon.className = 'fa-solid fa-play me-1';
+            txt.innerText = 'Demo Run';
+
+            document.getElementById('demo-banner').classList.remove('active');
+            await fetch('/api/demo/run', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'STOP'}) });
+            fetchMetrics();
+        }
+
         // --- CONTROL PLANE HANDLERS ---
         async function fetchNodesControl() {
             try {
                 const resp = await fetch('/api/nodes/all');
                 const nodes = await resp.json();
                 const grid = document.getElementById('nodes-control-grid');
+                if (!grid) return;
                 let html = '';
                 for (const [nid, n] of Object.entries(nodes)) {
                     const isUp = n.power_state === 'ON';
@@ -2593,6 +2831,7 @@
                 const resp = await fetch('/api/traffic/jobs');
                 const jobs = await resp.json();
                 const tbody = document.getElementById('traffic-jobs-tbody');
+                if (!tbody) return;
                 if (!jobs.length) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No active traffic generator jobs. Launch probes above.</td></tr>';
                     return;
@@ -2628,11 +2867,13 @@
 
         async function fetchPackets() {
             try {
-                const proto = document.getElementById('filter-packet-proto').value;
+                const filterEl = document.getElementById('filter-packet-proto');
+                const proto = filterEl ? filterEl.value : '';
                 const url = proto ? `/api/packets/capture?limit=30&proto=${proto}` : '/api/packets/capture?limit=30';
                 const resp = await fetch(url);
                 const pkts = await resp.json();
                 const tbody = document.getElementById('packets-capture-tbody');
+                if (!tbody) return;
                 if (!pkts.length) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No matching packets captured.</td></tr>';
                     return;
@@ -2662,6 +2903,7 @@
                 const resp = await fetch(`/api/switches/${switchId}/flows`);
                 const data = await resp.json();
                 const tbody = document.getElementById('sdn-flows-table-body');
+                if (!tbody) return;
                 const flows = data.flows || [];
                 if (!flows.length) {
                     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted">No flows installed on Switch ${switchId}.</td></tr>`;
@@ -2727,6 +2969,7 @@
                 const resp = await fetch('/api/operations?limit=25');
                 const ops = await resp.json();
                 const tbody = document.getElementById('operations-audit-tbody');
+                if (!tbody) return;
                 if (!ops.length) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No operations recorded yet.</td></tr>';
                     return;
@@ -2755,6 +2998,7 @@
                 const resp = await fetch('/api/system/status');
                 const data = await resp.json();
                 const tbody = document.getElementById('system-audit-tbody');
+                if (!tbody) return;
                 const comps = data.components || {};
                 let html = '';
                 for (const [name, meta] of Object.entries(comps)) {
@@ -2795,7 +3039,7 @@
             a.click();
         }
 
-        // --- 9 DEMONSTRATION SCENARIOS ---
+        // --- 9 INDIVIDUAL DEMONSTRATION SCENARIOS ---
         async function runScenario(scenarioNum) {
             if (scenarioNum === 1) {
                 await executeEmergencyStop();
@@ -2814,9 +3058,9 @@
             } else if (scenarioNum === 7) {
                 await simulateTransitLoss(24);
             } else if (scenarioNum === 8) {
-                const cur = document.getElementById('lb-algo-select').value;
+                const cur = document.getElementById('lb-algo-select') ? document.getElementById('lb-algo-select').value : 'round_robin';
                 const next = cur === 'round_robin' ? 'least_connections' : 'round_robin';
-                document.getElementById('lb-algo-select').value = next;
+                if (document.getElementById('lb-algo-select')) document.getElementById('lb-algo-select').value = next;
                 await changeLbAlgorithm(next);
             } else if (scenarioNum === 9) {
                 await executeFullRecovery();

@@ -266,3 +266,4 @@ class TrafficManager:
 
 # Global singleton
 traffic_manager = TrafficManager()
+

@@ -22,8 +22,8 @@ import sys
 import time
 import json
 import subprocess
-import psutil
 from datetime import datetime
+import psutil
 
 # Ensure parent directory is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -201,35 +201,43 @@ class NodeManager:
         )
 
     def inspect_node(self, node_id):
-        """Returns deep inspection metrics for the node, including process count, CPU, and interface counters."""
-        status = self.get_node_status(node_id)
-        if not status:
+        """Returns deep telemetry, interface counters, and process metrics for a node."""
+        meta = NODE_REGISTRY.get(node_id)
+        if not meta:
             return None
+        state = self.node_states.get(node_id, {})
+        cpu = psutil.cpu_percent(interval=None)
+        mem = psutil.virtual_memory().percent
+        net = psutil.net_io_counters()
+
         return {
-            **status,
-            "system": {
-                "cpu_percent": round(psutil.cpu_percent(interval=None), 1),
-                "memory_percent": round(psutil.virtual_memory().percent, 1),
-                "process_count": len(psutil.pids())
-            },
-            "network": {
-                "rx_bytes": 1048576,
-                "tx_bytes": 2097152,
-                "rx_packets": 1024,
-                "tx_packets": 1500,
-                "rx_drops": 0,
-                "tx_drops": 0
-            }
+            "node_id": node_id,
+            "name": meta["name"],
+            "ip": meta["ip"],
+            "intf": meta["intf"],
+            "role": meta["role"],
+            "subnet": meta["subnet"],
+            "power_state": state.get("power_state", "ON"),
+            "status": state.get("status", "HEALTHY"),
+            "isolated": state.get("isolated", False),
+            "cpu_percent": cpu,
+            "memory_percent": mem,
+            "bytes_sent": net.bytes_sent,
+            "bytes_recv": net.bytes_recv,
+            "packets_sent": net.packets_sent,
+            "packets_recv": net.packets_recv,
+            "last_action": state.get("last_action", "INITIALIZED"),
+            "last_action_time": state.get("last_action_time", "N/A")
         }
 
-    def run_connectivity_test(self, node_id, target_ip="10.0.1.1", count=4):
+    def run_connectivity_test(self, node_id, target_ip="10.0.1.1"):
         """Executes a real ping connectivity test from/to the node."""
-        op_id = operation_manager.create_operation(node_id, "PING_TEST", parameters={"target": target_ip, "count": count})
+        op_id = operation_manager.create_operation(node_id, "PING_TEST", parameters={"target": target_ip})
         meta = NODE_REGISTRY.get(node_id)
         if not meta:
             return operation_manager.complete_operation(op_id, success=False, error=f"Unknown node {node_id}")
 
-        cmd = f"ping -c {count} -W 1 {target_ip} 2>/dev/null || ping -n {count} -w 800 {target_ip}"
+        cmd = f"ping -c 2 -W 1 {target_ip} 2>/dev/null || ping -n 2 -w 800 {target_ip}"
         res = self._exec_command(cmd)
 
         success = (res["returncode"] == 0 and ("0% packet loss" in res["stdout"] or "0% loss" in res["stdout"]))
@@ -243,3 +251,4 @@ class NodeManager:
 
 # Global singleton
 node_manager = NodeManager()
+

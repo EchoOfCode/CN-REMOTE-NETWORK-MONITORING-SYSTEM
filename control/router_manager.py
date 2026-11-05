@@ -176,3 +176,4 @@ class RouterManager:
 
 # Global singleton
 router_manager = RouterManager()
+

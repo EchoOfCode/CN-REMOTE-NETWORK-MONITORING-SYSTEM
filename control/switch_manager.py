@@ -135,3 +135,4 @@ class SwitchManager:
 
 # Global singleton
 switch_manager = SwitchManager()
+

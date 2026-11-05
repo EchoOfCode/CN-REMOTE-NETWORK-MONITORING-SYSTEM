@@ -62,3 +62,4 @@ class DiagnosticsService:
 
 # Global singleton
 diagnostics_service = DiagnosticsService()
+

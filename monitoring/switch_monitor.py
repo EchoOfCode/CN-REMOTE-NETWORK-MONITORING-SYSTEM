@@ -49,3 +49,4 @@ class SwitchMonitor:
 
 # Global singleton
 switch_monitor = SwitchMonitor()
+

@@ -192,3 +192,4 @@ class LabManager:
 
 # Global singleton
 lab_manager = LabManager()
+

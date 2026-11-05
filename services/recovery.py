@@ -91,3 +91,4 @@ class RecoveryManager:
 
 # Global singleton
 recovery_manager = RecoveryManager()
+

@@ -826,6 +826,63 @@ def sim_stop_all():
     return jsonify({"status": "SUCCESS", "message": "All simulation stressors halted and link loss reset."})
 
 
+# --- AUTOMATED DEMO APIS ---
+
+demo_state = {
+    "running": False,
+    "current_phase": 0,
+    "phase_name": "IDLE",
+    "phase_description": "No demonstration currently running",
+    "total_phases": 9,
+    "progress_percent": 0
+}
+
+
+@app.route("/api/demo/status")
+def api_demo_status():
+    return jsonify(demo_state)
+
+
+@app.route("/api/demo/run", methods=["POST"])
+def api_demo_run():
+    global demo_state
+    data = request.json or {}
+    action = data.get("action", "START")
+    phase = data.get("phase")
+
+    if action == "STOP":
+        demo_state["running"] = False
+        demo_state["phase_name"] = "STOPPED"
+        demo_state["progress_percent"] = 0
+        sim_stop_all()
+        return jsonify({"status": "SUCCESS", "demo_state": demo_state})
+
+    if phase is not None:
+        p_num = int(phase)
+        demo_state["current_phase"] = p_num
+        demo_state["running"] = True
+        demo_state["progress_percent"] = int((p_num / 9.0) * 100)
+        phases = {
+            1: "Phase 1: Normal Baseline Check",
+            2: "Phase 2: Controlled CPU Stress Surge",
+            3: "Phase 3: Raw Traffic Spike (Auto-Remediation OFF)",
+            4: "Phase 4: Automated SDN Defense (FlowMod DROP)",
+            5: "Phase 5: Power OFF Server 2 (Failover 50%/0%/50%)",
+            6: "Phase 6: Power ON Server 2 (Restoration 33%/33%/33%)",
+            7: "Phase 7: Transit Link 24% Loss Localization",
+            8: "Phase 8: Switch Load Balancing Algorithm",
+            9: "Phase 9: Complete System Baseline Recovery"
+        }
+        demo_state["phase_name"] = phases.get(p_num, f"Phase {p_num}")
+        return jsonify({"status": "SUCCESS", "demo_state": demo_state})
+
+    demo_state["running"] = True
+    demo_state["current_phase"] = 1
+    demo_state["phase_name"] = "Phase 1: Normal Baseline Check"
+    demo_state["progress_percent"] = 11
+    return jsonify({"status": "SUCCESS", "demo_state": demo_state})
+
+
 # --- SDN MITIGATION APIS ---
 
 @app.route("/api/sdn/mitigate", methods=["POST"])

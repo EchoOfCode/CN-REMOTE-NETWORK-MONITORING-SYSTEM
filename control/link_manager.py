@@ -184,3 +184,4 @@ class LinkManager:
 
 # Global singleton
 link_manager = LinkManager()
+

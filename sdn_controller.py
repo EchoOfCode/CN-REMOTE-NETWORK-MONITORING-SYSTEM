@@ -16,6 +16,7 @@ import json
 import time
 import threading
 import subprocess
+from socketserver import ThreadingMixIn
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Attempt importing Ryu controller classes for ryu-manager
@@ -36,6 +37,41 @@ switch_stats = {
     "switches": managed_switches
 }
 lock = threading.Lock()
+_last_flow_query_time = 0.0
+_cached_flows = []
+
+
+def _exec_ovs_cmd(cmd_str):
+    """
+    Executes an ovs command safely without ever prompting for sudo password.
+    Uses 'sudo -n' (non-interactive) to fail-fast if password is required.
+    Uses stdin=subprocess.DEVNULL and timeout=1.5s to prevent any hanging.
+    """
+    is_root = (os.name != 'nt' and hasattr(os, 'geteuid') and os.geteuid() == 0)
+    if is_root:
+        attempts = [cmd_str]
+    else:
+        attempts = [
+            f"sudo -n {cmd_str}",
+            cmd_str
+        ]
+
+    for c in attempts:
+        try:
+            res = subprocess.run(
+                c,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                timeout=1.5
+            )
+            if res.returncode == 0:
+                return True, res.stdout
+        except (subprocess.TimeoutExpired, Exception):
+            pass
+    return False, ""
 
 
 def push_ovs_flow(src_ip, switches=None):
@@ -43,19 +79,11 @@ def push_ovs_flow(src_ip, switches=None):
     target_switches = switches or managed_switches
     success = False
     for sw in target_switches:
-        cmds = [
-            f'ovs-ofctl -O OpenFlow13 add-flow {sw} "priority=1000,ip,nw_src={src_ip},actions=drop"',
-            f'sudo ovs-ofctl -O OpenFlow13 add-flow {sw} "priority=1000,ip,nw_src={src_ip},actions=drop"'
-        ]
-        for cmd in cmds:
-            try:
-                res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                if res.returncode == 0:
-                    print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule installed for {src_ip}")
-                    success = True
-                    break
-            except Exception:
-                pass
+        cmd = f'ovs-ofctl -O OpenFlow13 add-flow {sw} "priority=1000,ip,nw_src={src_ip},actions=drop"'
+        ok, _ = _exec_ovs_cmd(cmd)
+        if ok:
+            print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule installed for {src_ip}")
+            success = True
     return success
 
 
@@ -64,39 +92,35 @@ def remove_ovs_flow(src_ip, switches=None):
     target_switches = switches or managed_switches
     success = False
     for sw in target_switches:
-        cmds = [
-            f'ovs-ofctl -O OpenFlow13 del-flows {sw} "ip,nw_src={src_ip}"',
-            f'sudo ovs-ofctl -O OpenFlow13 del-flows {sw} "ip,nw_src={src_ip}"'
-        ]
-        for cmd in cmds:
-            try:
-                res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                if res.returncode == 0:
-                    print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule removed for {src_ip}")
-                    success = True
-                    break
-            except Exception:
-                pass
+        cmd = f'ovs-ofctl -O OpenFlow13 del-flows {sw} "ip,nw_src={src_ip}"'
+        ok, _ = _exec_ovs_cmd(cmd)
+        if ok:
+            print(f"[SDN CONTROLLER] ⚡ Open vSwitch {sw} programmed: DROP rule removed for {src_ip}")
+            success = True
     return success
 
 
 def query_ovs_flows():
-    """Queries live OVS flow statistics across managed switches."""
+    """Queries live OVS flow statistics across managed switches with 1.0s caching."""
+    global _last_flow_query_time, _cached_flows
+    now = time.time()
+    if now - _last_flow_query_time < 1.0 and _cached_flows is not None:
+        return _cached_flows
+
     stats = []
     for sw in managed_switches:
-        cmd = f'sudo ovs-ofctl -O OpenFlow13 dump-flows {sw} 2>/dev/null || ovs-ofctl -O OpenFlow13 dump-flows {sw} 2>/dev/null'
-        try:
-            res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            if res.returncode == 0 and res.stdout:
-                for line in res.stdout.splitlines():
-                    if "actions=drop" in line or "drop" in line.lower():
-                        stats.append({"switch": sw, "flow": line.strip()})
-        except Exception:
-            pass
+        ok, stdout = _exec_ovs_cmd(f"ovs-ofctl -O OpenFlow13 dump-flows {sw} 2>/dev/null")
+        if ok and stdout:
+            for line in stdout.splitlines():
+                if "actions=drop" in line or "drop" in line.lower():
+                    stats.append({"switch": sw, "flow": line.strip()})
+
+    _last_flow_query_time = now
+    _cached_flows = stats
     return stats
 
 
-class SDNServer(HTTPServer):
+class SDNServer(ThreadingMixIn, HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
@@ -106,10 +130,26 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
         pass
 
     def _send_response(self, code, data):
-        self.send_response(code)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps(data).encode('utf-8'))
+        try:
+            self.send_response(code)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Connection', 'close')
+            self.end_headers()
+            self.wfile.write(json.dumps(data).encode('utf-8'))
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+    def handle(self):
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+    def finish(self):
+        try:
+            super().finish()
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
 
     def do_GET(self):
         if self.path == '/api/v1/sdn/stats' or self.path == '/api/sdn/stats':
@@ -187,12 +227,19 @@ class SDNRESTHandler(BaseHTTPRequestHandler):
 
 
 def run_standalone_controller(host='0.0.0.0', port=8080):
+    is_root = (os.name != 'nt' and hasattr(os, 'geteuid') and os.geteuid() == 0)
     print("========================================")
     print("  STANDALONE SDN REST CONTROLLER (OVS)  ")
     print("========================================")
     print(f"Listening on: http://{host}:{port}")
     print(f"Managed Switches: {', '.join(managed_switches)}")
     print("Direct OpenFlow 1.3 Kernel FlowMod Injection: ACTIVE")
+    if not is_root and os.name != 'nt':
+        print("\n[NOTICE] Running as non-root user.")
+        print("         To allow hardware Open vSwitch kernel programming without password prompts,")
+        print("         start the controller with: sudo python3 sdn_controller.py")
+    else:
+        print("Root / Kernel Datapath Privileges: CONFIRMED")
     print("========================================\n")
 
     httpd = SDNServer((host, port), SDNRESTHandler)
