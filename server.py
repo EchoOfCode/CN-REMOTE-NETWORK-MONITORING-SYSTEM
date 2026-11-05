@@ -21,7 +21,19 @@ sys.path.insert(0, BASE_DIR)
 import db
 from monitoring.anomaly_detector import AnomalyDetector
 from monitoring.packet_loss import packet_loss_detector
+from monitoring.packet_monitor import packet_monitor
+from monitoring.switch_monitor import switch_monitor
 from services.event_manager import event_manager
+from services.recovery import recovery_manager
+from services.diagnostics import diagnostics_service
+from control.operation_manager import operation_manager
+from control.node_manager import node_manager
+from control.router_manager import router_manager
+from control.switch_manager import switch_manager
+from control.link_manager import link_manager
+from control.service_manager import service_manager
+from control.lab_manager import lab_manager
+from traffic.traffic_manager import traffic_manager
 from simulation.cpu_stress import run_cpu_stress, stop_all_cpu_stress
 from simulation.network_stress import run_network_stress
 from simulation.node_failure import simulate_backend_failure, restore_backend
