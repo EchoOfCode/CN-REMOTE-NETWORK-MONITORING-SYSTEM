@@ -40,7 +40,7 @@ def run_cpu_stress(duration=10, intensity=0.95, cores=None):
     duration = min(max(2, duration), 30)
     num_cores = cores or min(multiprocessing.cpu_count(), 4)
 
-    print(f"[SIMULATION] 🔥 Starting CPU Stress for {duration}s on {num_cores} cores (Intensity: {int(intensity*100)}%)...")
+    print(f"[SIMULATION] [START] Starting CPU Stress for {duration}s on {num_cores} cores (Intensity: {int(intensity*100)}%)...")
 
     # Try stress-ng first if installed
     res = subprocess.run("which stress-ng", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -49,7 +49,7 @@ def run_cpu_stress(duration=10, intensity=0.95, cores=None):
         p = subprocess.Popen(cmd, shell=True)
         try:
             p.wait(timeout=duration + 2)
-            print("[SIMULATION] ✅ stress-ng completed.")
+            print("[SIMULATION] [OK] stress-ng completed.")
             return {"status": "SUCCESS", "engine": "stress-ng", "duration": duration, "cores": num_cores}
         except Exception:
             p.kill()
@@ -70,14 +70,14 @@ def run_cpu_stress(duration=10, intensity=0.95, cores=None):
         if p.is_alive():
             p.terminate()
 
-    print("[SIMULATION] 🛑 CPU Stress cycle ended. Load normalizing.")
+    print("[SIMULATION] [STOP] CPU Stress cycle ended. Load normalizing.")
     return {"status": "SUCCESS", "engine": "python_multiprocessing", "duration": duration, "cores": num_cores}
 
 
 def stop_all_cpu_stress():
     _stop_event.set()
-    subprocess.run("pkill -f stress-ng", shell=True)
-    print("[SIMULATION] 🛑 Emergency STOP sent to all CPU stress tasks.")
+    subprocess.run("pkill -f stress-ng 2>/dev/null || taskkill /F /IM stress-ng.exe 2>nul", shell=True)
+    print("[SIMULATION] [STOP] Emergency STOP sent to all CPU stress tasks.")
 
 
 if __name__ == "__main__":

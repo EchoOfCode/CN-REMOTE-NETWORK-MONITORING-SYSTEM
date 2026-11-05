@@ -97,7 +97,7 @@ class OperationManager:
                 return None
 
             op["stage"] = "SUCCESS" if success else "FAILED"
-            op["status"] = "COMPLETED" if success else "FAILED"
+            op["status"] = "SUCCESS" if success else "FAILED"
             op["completed_at"] = now
             op["updated_at"] = now
             op["verification_result"] = verification_result or ("Verified OK" if success else "Verification Failed")
@@ -111,8 +111,9 @@ class OperationManager:
             db.log_audit(
                 action=f"{op['component']}:{op['action']}",
                 target=str(op.get("parameters")),
-                status="SUCCESS" if success else "FAILED",
-                user=op.get("operator", "OPERATOR")
+                result="SUCCESS" if success else "FAILED",
+                actor=op.get("operator", "OPERATOR"),
+                details=op.get("message", "")
             )
 
             # Publish event

@@ -837,10 +837,7 @@ def manual_sdn_mitigate():
     return jsonify(res)
 
 
-@app.route("/api/sdn/unblock", methods=["POST"])
-def manual_sdn_unblock():
-    req_json = request.json or {}
-    src_ip = req_json.get("src_ip")
+def manual_sdn_unblock_core(src_ip="ALL"):
     controller_url = get_sdn_controller_url()
     try:
         req_data = json.dumps({"src_ip": src_ip}).encode('utf-8')
@@ -849,11 +846,11 @@ def manual_sdn_unblock():
             data=req_data,
             headers={'Content-Type': 'application/json'}
         )
-        with urllib.request.urlopen(req_obj, timeout=3) as resp:
+        with urllib.request.urlopen(req_obj, timeout=1.5) as resp:
             res = json.loads(resp.read().decode('utf-8'))
             with node_lock:
                 for node in active_nodes.values():
-                    if node.get("ip_address") == src_ip:
+                    if src_ip == "ALL" or node.get("ip_address") == src_ip:
                         node["sdn_mitigated"] = False
             db.log_sdn_event(
                 time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -862,9 +859,308 @@ def manual_sdn_unblock():
                 f"Removed OpenFlow DROP rule for src_ip {src_ip}",
                 "REMOVED"
             )
-            return jsonify(res)
+            return res
     except Exception as e:
-        return jsonify({"status": "ERROR", "message": str(e)})
+        return {"status": "ERROR", "message": str(e)}
+
+
+@app.route("/api/sdn/unblock", methods=["POST"])
+def manual_sdn_unblock():
+    req_json = request.json or {}
+    src_ip = req_json.get("src_ip", "ALL")
+    return jsonify(manual_sdn_unblock_core(src_ip))
+
+
+# --- SYSTEM CONTROL APIS ---
+
+@app.route("/api/system/status")
+def api_system_status():
+    return jsonify(lab_manager.check_system())
+
+
+@app.route("/api/system/reset", methods=["POST"])
+def api_system_reset():
+    res = recovery_manager.execute_full_recovery(unblock_sdn_callback=manual_sdn_unblock_core)
+    return jsonify(res)
+
+
+@app.route("/api/system/emergency-stop", methods=["POST"])
+def api_system_emergency_stop():
+    res = lab_manager.emergency_stop()
+    return jsonify(res)
+
+
+# --- NODE CONTROL APIS ---
+
+@app.route("/api/nodes/all")
+def api_nodes_all():
+    return jsonify(node_manager.get_all_nodes())
+
+
+@app.route("/api/nodes/<node_id>/details")
+def api_node_details(node_id):
+    info = node_manager.inspect_node(node_id)
+    if not info:
+        return jsonify({"error": f"Node '{node_id}' not found"}), 404
+    return jsonify(info)
+
+
+@app.route("/api/nodes/<node_id>/isolate", methods=["POST"])
+def api_node_isolate(node_id):
+    return jsonify(node_manager.isolate_node(node_id))
+
+
+@app.route("/api/nodes/<node_id>/restore", methods=["POST"])
+def api_node_restore(node_id):
+    return jsonify(node_manager.restore_node(node_id))
+
+
+@app.route("/api/nodes/<node_id>/power_off", methods=["POST"])
+def api_node_power_off(node_id):
+    # If it's a backend node (h5, h6, h7), also coordinate with LB
+    if node_id in ["h5", "h6", "h7"]:
+        bmap = {"h5": "backend-1", "h6": "backend-2", "h7": "backend-3"}
+        bid = bmap[node_id]
+        power_off_backend(bid)
+    return jsonify(node_manager.power_off_node(node_id))
+
+
+@app.route("/api/nodes/<node_id>/power_on", methods=["POST"])
+def api_node_power_on(node_id):
+    if node_id in ["h5", "h6", "h7"]:
+        bmap = {"h5": "backend-1", "h6": "backend-2", "h7": "backend-3"}
+        bid = bmap[node_id]
+        power_on_backend(bid)
+    return jsonify(node_manager.power_on_node(node_id))
+
+
+@app.route("/api/nodes/<node_id>/ping", methods=["POST"])
+def api_node_ping(node_id):
+    data = request.json or {}
+    target_ip = data.get("target_ip", "10.0.1.20")
+    count = int(data.get("count", 4))
+    return jsonify(node_manager.run_connectivity_test(node_id, target_ip, count=count))
+
+
+# --- ROUTER CONTROL APIS ---
+
+@app.route("/api/routers/<router_id>/details")
+def api_router_details(router_id):
+    status = router_manager.get_router_status(router_id)
+    if not status:
+        return jsonify({"error": f"Router '{router_id}' not found"}), 404
+    return jsonify(status)
+
+
+@app.route("/api/routers/<router_id>/interfaces/<interface>/<action>", methods=["POST"])
+def api_router_interface_action(router_id, interface, action):
+    action = action.lower()
+    if action == "restart":
+        res = router_manager.restart_interface(router_id, interface)
+    elif action in ["up", "down"]:
+        res = router_manager.set_interface_state(router_id, interface, action.upper())
+    else:
+        return jsonify({"error": f"Invalid action '{action}'. Use up, down, or restart."}), 400
+    return jsonify(res)
+
+
+@app.route("/api/routers/<router_id>/ping", methods=["POST"])
+def api_router_ping(router_id):
+    data = request.json or {}
+    target_ip = data.get("target_ip", "10.0.12.2")
+    count = int(data.get("count", 4))
+    return jsonify(router_manager.run_ping(router_id, target_ip, count=count))
+
+
+# --- SWITCH CONTROL APIS ---
+
+@app.route("/api/switches")
+def api_switches():
+    return jsonify({
+        "s1": switch_manager.get_switch_status("s1"),
+        "s2": switch_manager.get_switch_status("s2")
+    })
+
+
+@app.route("/api/switches/<switch_id>/ports")
+def api_switch_ports(switch_id):
+    status = switch_manager.get_switch_status(switch_id)
+    if not status:
+        return jsonify({"error": f"Switch '{switch_id}' not found"}), 404
+    return jsonify(status.get("ports", {}))
+
+
+@app.route("/api/switches/<switch_id>/flows")
+def api_switch_flows(switch_id):
+    return jsonify(switch_manager.get_flow_table(switch_id))
+
+
+@app.route("/api/switches/<switch_id>/ports/<port>/<action>", methods=["POST"])
+def api_switch_port_action(switch_id, port, action):
+    action = action.upper()
+    if action not in ["UP", "DOWN"]:
+        return jsonify({"error": "Action must be UP or DOWN"}), 400
+    return jsonify(switch_manager.set_port_state(switch_id, port, action))
+
+
+@app.route("/api/switches/<switch_id>/flows/delete", methods=["POST"])
+def api_switch_delete_flow(switch_id):
+    data = request.json or {}
+    match_spec = data.get("match", "ALL")
+    return jsonify(switch_manager.delete_flow(switch_id, match_spec))
+
+
+# --- LINK & TC NETEM IMPAIRMENT APIS ---
+
+@app.route("/api/links")
+def api_links():
+    return jsonify(link_manager.get_all_links())
+
+
+@app.route("/api/links/<link_id>")
+def api_link_get(link_id):
+    lnk = link_manager.get_link_status(link_id)
+    if not lnk:
+        return jsonify({"error": f"Link '{link_id}' not found"}), 404
+    return jsonify(lnk)
+
+
+@app.route("/api/links/<link_id>/disable", methods=["POST"])
+def api_link_disable(link_id):
+    return jsonify(link_manager.set_link_state(link_id, "DOWN"))
+
+
+@app.route("/api/links/<link_id>/enable", methods=["POST"])
+def api_link_enable(link_id):
+    return jsonify(link_manager.set_link_state(link_id, "UP"))
+
+
+@app.route("/api/links/<link_id>/configure", methods=["POST"])
+def api_link_configure(link_id):
+    data = request.json or {}
+    loss_percent = float(data.get("loss_percent", 0.0))
+    delay_ms = float(data.get("delay_ms", 0.0))
+    jitter_ms = float(data.get("jitter_ms", 0.0))
+    rate_mbps = float(data.get("rate_mbps", 100.0)) if "rate_mbps" in data else None
+    return jsonify(link_manager.configure_link(link_id, loss_percent=loss_percent, delay_ms=delay_ms, jitter_ms=jitter_ms, rate_mbps=rate_mbps))
+
+
+@app.route("/api/links/<link_id>/reset", methods=["POST"])
+def api_link_reset(link_id):
+    return jsonify(link_manager.reset_link(link_id))
+
+
+# --- TRAFFIC GENERATOR & BENCHMARK APIS ---
+
+@app.route("/api/traffic/jobs")
+def api_traffic_jobs():
+    return jsonify(traffic_manager.get_jobs())
+
+
+@app.route("/api/traffic/ping/start", methods=["POST"])
+def api_traffic_ping_start():
+    data = request.json or {}
+    source = data.get("source", "h1")
+    destination = data.get("destination", "10.0.1.20")
+    count = int(data.get("count", 5))
+    interval = float(data.get("interval", 1.0))
+    return jsonify(traffic_manager.start_ping_job(source=source, destination=destination, count=count, interval=interval))
+
+
+@app.route("/api/traffic/udp/start", methods=["POST"])
+def api_traffic_udp_start():
+    data = request.json or {}
+    source = data.get("source", "h1")
+    destination = data.get("destination", "10.0.1.20")
+    target_port = int(data.get("target_port", 5000))
+    bandwidth_mbps = float(data.get("bandwidth_mbps", 25))
+    duration = int(data.get("duration", 5))
+    packet_size = int(data.get("packet_size", 1024))
+    return jsonify(traffic_manager.start_udp_job(source=source, destination=destination, target_port=target_port, bandwidth_mbps=bandwidth_mbps, duration=duration, packet_size=packet_size))
+
+
+@app.route("/api/traffic/http/start", methods=["POST"])
+def api_traffic_http_start():
+    data = request.json or {}
+    source = data.get("source", "h1")
+    url = data.get("url", "http://10.0.2.30:8000/")
+    total_requests = int(data.get("total_requests", 10))
+    concurrency = int(data.get("concurrency", 2))
+    return jsonify(traffic_manager.start_http_job(source=source, url=url, total_requests=total_requests, concurrency=concurrency))
+
+
+@app.route("/api/traffic/<job_id>/stop", methods=["POST"])
+def api_traffic_job_stop(job_id):
+    return jsonify(traffic_manager.stop_job(job_id))
+
+
+@app.route("/api/traffic/stop-all", methods=["POST"])
+def api_traffic_stop_all():
+    return jsonify(traffic_manager.stop_all_jobs())
+
+
+# --- PACKET CAPTURE & METRICS APIS ---
+
+@app.route("/api/packets/summary")
+def api_packets_summary():
+    return jsonify(packet_monitor.get_summary())
+
+
+@app.route("/api/packets/capture")
+def api_packets_capture():
+    limit = int(request.args.get("limit", 50))
+    src = request.args.get("src")
+    dst = request.args.get("dst")
+    proto = request.args.get("proto")
+    intf = request.args.get("intf")
+    return jsonify(packet_monitor.get_packets(limit=limit, src_filter=src, dst_filter=dst, proto_filter=proto, intf_filter=intf))
+
+
+@app.route("/api/metrics/packet-loss")
+def api_metrics_packet_loss():
+    with node_lock:
+        r1_copy = dict(routers_state["r1"])
+        r2_copy = dict(routers_state["r2"])
+        nodes = list(active_nodes.values())
+    res = packet_loss_detector.evaluate_loss_state(r1_copy, r2_copy, nodes, simulated_drops)
+    return jsonify(res)
+
+
+# --- OPERATIONS AUDIT, RECOVERY & DIAGNOSTICS APIS ---
+
+@app.route("/api/operations")
+def api_operations():
+    limit = int(request.args.get("limit", 50))
+    return jsonify(operation_manager.get_operations(limit=limit))
+
+
+@app.route("/api/operations/<op_id>")
+def api_operation_get(op_id):
+    op = operation_manager.get_operation(op_id)
+    if not op:
+        return jsonify({"error": f"Operation '{op_id}' not found"}), 404
+    return jsonify(op)
+
+
+@app.route("/api/recovery/execute", methods=["POST"])
+def api_recovery_execute():
+    res = recovery_manager.execute_full_recovery(unblock_sdn_callback=manual_sdn_unblock_core)
+    return jsonify(res)
+
+
+@app.route("/api/diagnostics")
+def api_diagnostics():
+    return jsonify(diagnostics_service.get_full_diagnostics())
+
+
+@app.route("/api/diagnostics/export.csv")
+def api_diagnostics_export_csv():
+    csv_str = diagnostics_service.export_csv()
+    return Response(
+        csv_str,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=network_diagnostics.csv"}
+    )
 
 
 # --- ATTACK & C2 DISPATCH APIS ---

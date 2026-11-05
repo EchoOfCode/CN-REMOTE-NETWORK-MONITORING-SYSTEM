@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Network Health Monitor — Two-Router SDN & Traffic Management Center</title>
+    <title>Remote Network Health Monitor — Operator-Controlled Network Operations Centre</title>
     
     <!-- Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,7 +115,9 @@
             border-bottom: 1px solid var(--border-subtle);
             padding: 0 1.25rem;
             display: flex;
-            gap: 1.5rem;
+            gap: 1.25rem;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         .nav-tab-item {
@@ -130,6 +132,7 @@
             align-items: center;
             gap: 6px;
             transition: all 0.15s ease;
+            user-select: none;
         }
 
         .nav-tab-item:hover { color: var(--text-heading); }
@@ -281,10 +284,10 @@
             letter-spacing: 0.02em;
             text-transform: uppercase;
         }
-        .status-HEALTHY, .status-NORMAL { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-        .status-ATTACKING, .status-CRITICAL, .status-ALERT { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-        .status-DOWN, .status-OFFLINE { background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-        .status-DEGRADED { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .status-HEALTHY, .status-NORMAL, .status-SUCCESS, .status-UP { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .status-ATTACKING, .status-CRITICAL, .status-ALERT, .status-FAILED { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .status-DOWN, .status-OFFLINE, .status-ISOLATED, .status-POWERED_OFF { background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .status-DEGRADED, .status-WARNING { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 
         /* Progress Bars */
         .progress-bar-track {
@@ -415,6 +418,25 @@
             border-radius: 4px;
         }
         .btn-power-on:hover { background-color: #d1fae5; color: #047857; }
+
+        /* Sub-tabs within Control Section */
+        .sub-tab-btn {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #ffffff;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .sub-tab-btn.active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: var(--color-primary);
+        }
+        .sub-tab-content { display: none; }
+        .sub-tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -427,7 +449,7 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="brand-title">Remote Network Health Monitor</span>
-                <span class="brand-badge d-none d-md-inline">Two-Router SDN Architecture</span>
+                <span class="brand-badge d-none d-md-inline">Operator-Controlled NOC Lab</span>
             </div>
         </div>
 
@@ -451,8 +473,8 @@
             </div>
 
             <!-- Emergency Stop -->
-            <button class="btn-action btn-action-danger shadow-sm" onclick="stopAllSimulations()" title="Halt all stressors & reset link drops">
-                <i class="fa-solid fa-hand me-1"></i> Stop All Stress
+            <button class="btn-action btn-action-danger shadow-sm" onclick="executeEmergencyStop()" title="Halt all stressors & reset link drops">
+                <i class="fa-solid fa-hand me-1"></i> Emergency Stop
             </button>
 
             <!-- Refresh Button -->
@@ -462,22 +484,37 @@
         </div>
     </header>
 
-    <!-- Navigation Section Tabs -->
+    <!-- Navigation Section Tabs (10 Operations Sections) -->
     <div class="nav-tabs-bar">
         <div class="nav-tab-item active" onclick="switchNavSection('overview')" id="nav-btn-overview">
-            <i class="fa-solid fa-gauge-high"></i> Overview & Two-Router SDN
+            <i class="fa-solid fa-gauge-high"></i> 1. Overview & Topology
+        </div>
+        <div class="nav-tab-item" onclick="switchNavSection('control')" id="nav-btn-control">
+            <i class="fa-solid fa-sliders"></i> 2. System Control Centre
+        </div>
+        <div class="nav-tab-item" onclick="switchNavSection('traffic')" id="nav-btn-traffic">
+            <i class="fa-solid fa-paper-plane"></i> 3. Traffic Operations & Packets
         </div>
         <div class="nav-tab-item" onclick="switchNavSection('routers')" id="nav-btn-routers">
-            <i class="fa-solid fa-route"></i> Two Routers (R1, R2 & Transit)
+            <i class="fa-solid fa-route"></i> 4. Two Routers (R1, R2)
         </div>
         <div class="nav-tab-item" onclick="switchNavSection('trafficmanager')" id="nav-btn-trafficmanager">
-            <i class="fa-solid fa-scale-balanced"></i> Traffic Manager (Load Balancer h8)
+            <i class="fa-solid fa-scale-balanced"></i> 5. Load Balancer (h8)
+        </div>
+        <div class="nav-tab-item" onclick="switchNavSection('sdn')" id="nav-btn-sdn">
+            <i class="fa-solid fa-network-wired"></i> 6. SDN & OpenFlow
+        </div>
+        <div class="nav-tab-item" onclick="switchNavSection('faults')" id="nav-btn-faults">
+            <i class="fa-solid fa-biohazard"></i> 7. Fault Injection Lab
         </div>
         <div class="nav-tab-item" onclick="switchNavSection('scenarios')" id="nav-btn-scenarios">
-            <i class="fa-solid fa-play text-primary"></i> Demonstration Scenarios (9)
+            <i class="fa-solid fa-play text-primary"></i> 8. 9-Phase Scenarios
         </div>
         <div class="nav-tab-item" onclick="switchNavSection('events')" id="nav-btn-events">
-            <i class="fa-solid fa-bell"></i> Live Event Stream (<span id="active-alert-count">0</span>)
+            <i class="fa-solid fa-clock-rotate-left"></i> 9. Events & Audit Log
+        </div>
+        <div class="nav-tab-item" onclick="switchNavSection('diagnostics')" id="nav-btn-diagnostics">
+            <i class="fa-solid fa-file-waveform"></i> 10. Diagnostics & Reports
         </div>
     </div>
 
@@ -537,8 +574,7 @@
 
         <!-- ================= SECTION 1: OVERVIEW & TWO-ROUTER SDN ================= -->
         <div id="section-overview" class="tab-content-section active">
-            
-            <!-- TOP ROW: Two-Router Topology with Live Animated Packets (Left) & 4 Real-Time Charts (Right) -->
+            <!-- TOP ROW: Two-Router Topology with Live Animated Packets (Left) & Real-Time Charts (Right) -->
             <div class="row g-2 mb-2">
                 <!-- TOP LEFT: Animated Topology Diagram with Packet Flow -->
                 <div class="col-lg-6">
@@ -710,7 +746,7 @@
                     </div>
                 </div>
 
-                <!-- TOP RIGHT: 4 Real-Time Metrics Graphs with Smart Auto-Scaling -->
+                <!-- TOP RIGHT: Real-Time Metrics Graphs with Smart Auto-Scaling -->
                 <div class="col-lg-6">
                     <div class="panel">
                         <div class="panel-header">
@@ -848,7 +884,459 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 2: TWO ROUTERS (R1, R2 & TRANSIT) ================= -->
+        <!-- ================= SECTION 2: SYSTEM CONTROL CENTRE ================= -->
+        <div id="section-control" class="tab-content-section">
+            <div class="d-flex gap-2 mb-2">
+                <button class="sub-tab-btn active" onclick="switchControlSubTab('nodes')" id="sub-btn-nodes"><i class="fa-solid fa-desktop me-1"></i> Nodes (h1–h8)</button>
+                <button class="sub-tab-btn" onclick="switchControlSubTab('routers')" id="sub-btn-routers"><i class="fa-solid fa-route me-1"></i> Routers (r1, r2)</button>
+                <button class="sub-tab-btn" onclick="switchControlSubTab('switches')" id="sub-btn-switches"><i class="fa-solid fa-network-wired me-1"></i> Switches (s1, s2)</button>
+                <button class="sub-tab-btn" onclick="switchControlSubTab('links')" id="sub-btn-links"><i class="fa-solid fa-link me-1"></i> Link tc netem Impairments</button>
+                <button class="sub-tab-btn" onclick="switchControlSubTab('lifecycle')" id="sub-btn-lifecycle"><i class="fa-solid fa-heart-pulse me-1"></i> Global Lab Lifecycle</button>
+            </div>
+
+            <!-- SUB-TAB: Nodes Control -->
+            <div id="sub-nodes" class="sub-tab-content active">
+                <div class="row g-2" id="nodes-control-grid">
+                    <!-- Populated dynamically by renderNodesControl() -->
+                </div>
+            </div>
+
+            <!-- SUB-TAB: Routers Control -->
+            <div id="sub-routers" class="sub-tab-content">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-route text-primary"></i> Router 1 (r1) Interfaces</h2>
+                                <span class="badge bg-success" id="ctrl-r1-status">UP</span>
+                            </div>
+                            <div class="panel-body p-0">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Interface</th>
+                                            <th>IP / Subnet</th>
+                                            <th>Status</th>
+                                            <th>Impact</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>r1-eth0</strong></td>
+                                            <td class="mono">10.0.1.1/24</td>
+                                            <td><span class="badge bg-success" id="status-r1-eth0">UP</span></td>
+                                            <td class="text-muted" style="font-size: 10px;">Client Subnet Gateway</td>
+                                            <td>
+                                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="toggleRouterIntf('r1', 'r1-eth0', 'down')">Down</button>
+                                                <button class="btn btn-xs btn-outline-success py-0 px-1" onclick="toggleRouterIntf('r1', 'r1-eth0', 'up')">Up</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>r1-eth1</strong></td>
+                                            <td class="mono">10.0.12.1/30</td>
+                                            <td><span class="badge bg-success" id="status-r1-eth1">UP</span></td>
+                                            <td class="text-muted" style="font-size: 10px;">Inter-Router Transit Trunk</td>
+                                            <td>
+                                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="toggleRouterIntf('r1', 'r1-eth1', 'down')">Down</button>
+                                                <button class="btn btn-xs btn-outline-success py-0 px-1" onclick="toggleRouterIntf('r1', 'r1-eth1', 'up')">Up</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-route text-success"></i> Router 2 (r2) Interfaces</h2>
+                                <span class="badge bg-success" id="ctrl-r2-status">UP</span>
+                            </div>
+                            <div class="panel-body p-0">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Interface</th>
+                                            <th>IP / Subnet</th>
+                                            <th>Status</th>
+                                            <th>Impact</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>r2-eth0</strong></td>
+                                            <td class="mono">10.0.12.2/30</td>
+                                            <td><span class="badge bg-success" id="status-r2-eth0">UP</span></td>
+                                            <td class="text-muted" style="font-size: 10px;">Inter-Router Transit Trunk</td>
+                                            <td>
+                                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="toggleRouterIntf('r2', 'r2-eth0', 'down')">Down</button>
+                                                <button class="btn btn-xs btn-outline-success py-0 px-1" onclick="toggleRouterIntf('r2', 'r2-eth0', 'up')">Up</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>r2-eth1</strong></td>
+                                            <td class="mono">10.0.2.1/24</td>
+                                            <td><span class="badge bg-success" id="status-r2-eth1">UP</span></td>
+                                            <td class="text-muted" style="font-size: 10px;">Server Subnet Gateway</td>
+                                            <td>
+                                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="toggleRouterIntf('r2', 'r2-eth1', 'down')">Down</button>
+                                                <button class="btn btn-xs btn-outline-success py-0 px-1" onclick="toggleRouterIntf('r2', 'r2-eth1', 'up')">Up</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB: Switches Control -->
+            <div id="sub-switches" class="sub-tab-content">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-network-wired text-primary"></i> Switch s1 (Clients Open vSwitch)</h2>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="viewFlowTable('s1')">View Flows</button>
+                            </div>
+                            <div class="panel-body p-0">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr><th>Port</th><th>Connected Host</th><th>State</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody id="s1-ports-body">
+                                        <tr><td>s1-eth1</td><td>h1 (Client 1)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s1', 's1-eth1', 'down')">Disable</button></td></tr>
+                                        <tr><td>s1-eth2</td><td>h2 (Client 2)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s1', 's1-eth2', 'down')">Disable</button></td></tr>
+                                        <tr><td>s1-eth3</td><td>h3 (Client 3)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s1', 's1-eth3', 'down')">Disable</button></td></tr>
+                                        <tr><td>s1-eth4</td><td>h4 (Monitor)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s1', 's1-eth4', 'down')">Disable</button></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-network-wired text-success"></i> Switch s2 (Backends Open vSwitch)</h2>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="viewFlowTable('s2')">View Flows</button>
+                            </div>
+                            <div class="panel-body p-0">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr><th>Port</th><th>Connected Host</th><th>State</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody id="s2-ports-body">
+                                        <tr><td>s2-eth1</td><td>h5 (Server 1)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s2', 's2-eth1', 'down')">Disable</button></td></tr>
+                                        <tr><td>s2-eth2</td><td>h6 (Server 2)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s2', 's2-eth2', 'down')">Disable</button></td></tr>
+                                        <tr><td>s2-eth3</td><td>h7 (Server 3)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s2', 's2-eth3', 'down')">Disable</button></td></tr>
+                                        <tr><td>s2-eth4</td><td>h8 (Traffic Mgr)</td><td><span class="badge bg-success">UP</span></td><td><button class="btn btn-xs btn-outline-danger" onclick="toggleSwitchPort('s2', 's2-eth4', 'down')">Disable</button></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB: Links & Netem Impairments -->
+            <div id="sub-links" class="sub-tab-content">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title"><i class="fa-solid fa-link"></i> Topology Links & Linux Traffic Control (`tc netem`) Impairments</h2>
+                        <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="resetAllLinks()"><i class="fa-solid fa-rotate-left me-1"></i> Reset All Links to 0%</button>
+                    </div>
+                    <div class="panel-body p-0">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Link ID</th>
+                                    <th>Segment Name</th>
+                                    <th>Interface</th>
+                                    <th>State</th>
+                                    <th>Loss %</th>
+                                    <th>Delay ms</th>
+                                    <th>Rate Limit</th>
+                                    <th>Apply Impairment</th>
+                                    <th>Reset</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Transit Link r1-r2 -->
+                                <tr>
+                                    <td><strong class="mono">r1-r2</strong></td>
+                                    <td>Transit Link (R1 &harr; R2)</td>
+                                    <td class="mono">r1-eth1</td>
+                                    <td><span class="badge bg-success" id="link-state-r1-r2">UP</span></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="loss-r1-r2" value="0" min="0" max="100" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="delay-r1-r2" value="0" min="0" max="500" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="rate-r1-r2" value="100" min="1" max="1000" style="width: 70px;"></td>
+                                    <td><button class="btn btn-action btn-action-warning py-0 px-2" onclick="applyLinkNetem('r1-r2')">Apply tc netem</button></td>
+                                    <td><button class="btn btn-action py-0 px-2" onclick="resetSingleLink('r1-r2')">Reset</button></td>
+                                </tr>
+                                <!-- Client Access h1-s1 -->
+                                <tr>
+                                    <td><strong class="mono">h1-s1</strong></td>
+                                    <td>Client Access (h1 &harr; s1)</td>
+                                    <td class="mono">h1-eth0</td>
+                                    <td><span class="badge bg-success" id="link-state-h1-s1">UP</span></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="loss-h1-s1" value="0" min="0" max="100" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="delay-h1-s1" value="0" min="0" max="500" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="rate-h1-s1" value="100" min="1" max="1000" style="width: 70px;"></td>
+                                    <td><button class="btn btn-action btn-action-warning py-0 px-2" onclick="applyLinkNetem('h1-s1')">Apply tc netem</button></td>
+                                    <td><button class="btn btn-action py-0 px-2" onclick="resetSingleLink('h1-s1')">Reset</button></td>
+                                </tr>
+                                <!-- s1-r1 -->
+                                <tr>
+                                    <td><strong class="mono">s1-r1</strong></td>
+                                    <td>Switch s1 &harr; Router r1</td>
+                                    <td class="mono">r1-eth0</td>
+                                    <td><span class="badge bg-success" id="link-state-s1-r1">UP</span></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="loss-s1-r1" value="0" min="0" max="100" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="delay-s1-r1" value="0" min="0" max="500" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="rate-s1-r1" value="100" min="1" max="1000" style="width: 70px;"></td>
+                                    <td><button class="btn btn-action btn-action-warning py-0 px-2" onclick="applyLinkNetem('s1-r1')">Apply tc netem</button></td>
+                                    <td><button class="btn btn-action py-0 px-2" onclick="resetSingleLink('s1-r1')">Reset</button></td>
+                                </tr>
+                                <!-- r2-s2 -->
+                                <tr>
+                                    <td><strong class="mono">r2-s2</strong></td>
+                                    <td>Router r2 &harr; Switch s2</td>
+                                    <td class="mono">r2-eth1</td>
+                                    <td><span class="badge bg-success" id="link-state-r2-s2">UP</span></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="loss-r2-s2" value="0" min="0" max="100" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="delay-r2-s2" value="0" min="0" max="500" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="rate-r2-s2" value="100" min="1" max="1000" style="width: 70px;"></td>
+                                    <td><button class="btn btn-action btn-action-warning py-0 px-2" onclick="applyLinkNetem('r2-s2')">Apply tc netem</button></td>
+                                    <td><button class="btn btn-action py-0 px-2" onclick="resetSingleLink('r2-s2')">Reset</button></td>
+                                </tr>
+                                <!-- s2-h8 -->
+                                <tr>
+                                    <td><strong class="mono">s2-h8</strong></td>
+                                    <td>Switch s2 &harr; Traffic Mgr</td>
+                                    <td class="mono">h8-eth0</td>
+                                    <td><span class="badge bg-success" id="link-state-s2-h8">UP</span></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="loss-s2-h8" value="0" min="0" max="100" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="delay-s2-h8" value="0" min="0" max="500" style="width: 60px;"></td>
+                                    <td><input type="number" class="form-control form-control-sm py-0 px-1 mono" id="rate-s2-h8" value="100" min="1" max="1000" style="width: 70px;"></td>
+                                    <td><button class="btn btn-action btn-action-warning py-0 px-2" onclick="applyLinkNetem('s2-h8')">Apply tc netem</button></td>
+                                    <td><button class="btn btn-action py-0 px-2" onclick="resetSingleLink('s2-h8')">Reset</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB: Global Lifecycle -->
+            <div id="sub-lifecycle" class="sub-tab-content">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-arrows-rotate text-success"></i> Full Baseline Reconciliation</h2>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 11px;">
+                                    Deterministically restores all network components:
+                                    re-enables all disabled router interfaces, removes link impairments, powers ON all backends, and unblocks SDN rules.
+                                </p>
+                                <button class="btn-action btn-action-success w-100" onclick="executeFullRecovery()">
+                                    <i class="fa-solid fa-rotate-left me-1"></i> Reconcile Baseline Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title"><i class="fa-solid fa-hand text-danger"></i> Emergency Kill Switch</h2>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 11px;">
+                                    Immediately kills all active background traffic generators, stress-ng processes, and resets link packet drops.
+                                </p>
+                                <button class="btn-action btn-action-danger w-100" onclick="executeEmergencyStop()">
+                                    <i class="fa-solid fa-skull-crossbones me-1"></i> Emergency Kill Switch
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 3: TRAFFIC OPERATIONS & PACKETS ================= -->
+        <div id="section-traffic" class="tab-content-section">
+            <div class="row g-2 mb-2">
+                <!-- Generator 1: ICMP Ping Probes -->
+                <div class="col-md-4">
+                    <div class="panel h-100">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-satellite-dish text-primary"></i> 1. ICMP Ping Probes</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size: 10px;">Source Node</label>
+                                <select class="form-select form-select-sm" id="gen-ping-src">
+                                    <option value="h1">h1 (10.0.1.11)</option>
+                                    <option value="h2">h2 (10.0.1.12)</option>
+                                    <option value="h3">h3 (10.0.1.13)</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size: 10px;">Target IP</label>
+                                <input type="text" class="form-control form-control-sm mono" id="gen-ping-target" value="10.0.1.20">
+                            </div>
+                            <div class="row g-1 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Count</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-ping-count" value="4">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Interval (s)</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-ping-interval" value="0.5" step="0.1">
+                                </div>
+                            </div>
+                            <button class="btn-action btn-action-primary w-100 mt-2" onclick="launchPingJob()">
+                                <i class="fa-solid fa-paper-plane me-1"></i> Send Ping Probes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generator 2: UDP Throughput Surge -->
+                <div class="col-md-4">
+                    <div class="panel h-100">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-bolt text-warning"></i> 2. UDP Bandwidth Surge</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size: 10px;">Source Node</label>
+                                <select class="form-select form-select-sm" id="gen-udp-src">
+                                    <option value="h1">h1 (10.0.1.11)</option>
+                                    <option value="h2">h2 (10.0.1.12)</option>
+                                    <option value="h3">h3 (10.0.1.13)</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size: 10px;">Target IP & Port</label>
+                                <input type="text" class="form-control form-control-sm mono" id="gen-udp-target" value="10.0.1.20:5000">
+                            </div>
+                            <div class="row g-1 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Mbps Rate</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-udp-mbps" value="35">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Duration (s)</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-udp-duration" value="6">
+                                </div>
+                            </div>
+                            <button class="btn-action btn-action-warning w-100 mt-2" onclick="launchUdpJob()">
+                                <i class="fa-solid fa-fire me-1"></i> Launch UDP Surge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generator 3: HTTP Web Workload -->
+                <div class="col-md-4">
+                    <div class="panel h-100">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-globe text-info"></i> 3. HTTP Web Benchmark</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size: 10px;">Target Load Balancer URL</label>
+                                <input type="text" class="form-control form-control-sm mono" id="gen-http-url" value="http://10.0.2.30:8000/">
+                            </div>
+                            <div class="row g-1 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Total Requests</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-http-reqs" value="15">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted" style="font-size: 10px;">Concurrency</label>
+                                    <input type="number" class="form-control form-control-sm" id="gen-http-conc" value="3">
+                                </div>
+                            </div>
+                            <button class="btn-action btn-action-primary w-100 mt-4" onclick="launchHttpJob()">
+                                <i class="fa-solid fa-server me-1"></i> Send HTTP Benchmark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Jobs Container -->
+            <div class="panel mb-2">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Active Traffic Generator Jobs</h2>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="stopAllTrafficJobs()">Halt All Traffic</button>
+                </div>
+                <div class="panel-body p-0">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>Type</th>
+                                <th>Source &rarr; Target</th>
+                                <th>Progress / Rate</th>
+                                <th>Loss / Latency</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="traffic-jobs-tbody">
+                            <tr><td colspan="7" class="text-center text-muted py-3">No active traffic generator jobs. Launch probes above.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bounded Ring Buffer Packet Capture Table -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-fingerprint"></i> Packet Capture Ring Buffer (Last 500 Observed Packets)</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <select class="form-select form-select-sm py-0 px-1" id="filter-packet-proto" onchange="fetchPackets()" style="font-size: 10px;">
+                            <option value="">All Protocols</option>
+                            <option value="TCP">TCP</option>
+                            <option value="UDP">UDP</option>
+                            <option value="ICMP">ICMP</option>
+                            <option value="HTTP">HTTP</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="fetchPackets()"><i class="fa-solid fa-rotate me-1"></i> Refresh Capture</button>
+                    </div>
+                </div>
+                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Interface</th>
+                                <th>Source IP:Port</th>
+                                <th>Destination IP:Port</th>
+                                <th>Protocol</th>
+                                <th>Packet Size</th>
+                                <th>Delivery Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="packets-capture-tbody">
+                            <tr><td colspan="7" class="text-center text-muted py-3">Sampling packet ring buffer...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 4: TWO ROUTERS (R1, R2 & TRANSIT) ================= -->
         <div id="section-routers" class="tab-content-section">
             <div class="row g-2 mb-2">
                 <!-- Router 1 (Client Gateway) -->
@@ -991,7 +1479,7 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 3: TRAFFIC MANAGER (LOAD BALANCER h8) ================= -->
+        <!-- ================= SECTION 5: TRAFFIC MANAGER (LOAD BALANCER h8) ================= -->
         <div id="section-trafficmanager" class="tab-content-section">
             <div class="row g-2">
                 <div class="col-md-4">
@@ -1068,7 +1556,140 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 4: 9 DEMONSTRATION SCENARIOS ================= -->
+        <!-- ================= SECTION 6: SDN & OPENFLOW MANAGEMENT ================= -->
+        <div id="section-sdn" class="tab-content-section">
+            <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-shield-virus"></i> Manual SDN Flow Injection</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row g-2">
+                                <div class="col-8">
+                                    <input type="text" class="form-control form-control-sm mono" id="manual-block-ip" placeholder="Target Source IP (e.g. 10.0.1.11)">
+                                </div>
+                                <div class="col-4">
+                                    <button class="btn btn-action btn-action-danger w-100 py-1" onclick="injectManualSdnBlock()">
+                                        <i class="fa-solid fa-ban me-1"></i> Drop IP
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-broom"></i> Controller Actions</h2>
+                            <button class="btn btn-action btn-action-success py-1 px-3" onclick="triggerManualUnblockAll()">
+                                <i class="fa-solid fa-lock-open me-1"></i> Unblock All / Clear FlowMods
+                            </button>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-muted mb-0" style="font-size: 11px;">Removes all dynamic DROP flowmod entries from Switch s1 & s2 data planes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow Tables Container -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-table"></i> OpenFlow 1.3 Active Flow Tables (s1 & s2)</h2>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="loadSwitchFlows('s1')">Load s1 Flows</button>
+                        <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="loadSwitchFlows('s2')">Load s2 Flows</button>
+                    </div>
+                </div>
+                <div class="panel-body p-0" style="max-height: 280px; overflow-y: auto;">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Switch</th>
+                                <th>Priority</th>
+                                <th>Match Fields</th>
+                                <th>Actions</th>
+                                <th>Packets</th>
+                                <th>Bytes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sdn-flows-table-body">
+                            <tr><td colspan="6" class="text-center py-3 text-muted">Click 'Load s1 Flows' or 'Load s2 Flows' to query switch data planes.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 7: FAULT INJECTION LAB ================= -->
+        <div id="section-faults" class="tab-content-section">
+            <div class="panel mb-2">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-biohazard text-danger"></i> Granular Fault Injection Laboratory</h2>
+                    <button class="btn btn-action btn-action-danger py-0 px-2" onclick="executeEmergencyStop()">Emergency Kill All</button>
+                </div>
+                <div class="panel-body p-2">
+                    <div class="row g-2">
+                        <!-- Fault 1: CPU Burner -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>CPU Resource Exhaustion</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Saturates CPU cores to 90%+ using multiprocessing burner.</p>
+                                <button class="btn-action btn-action-danger w-100" onclick="injectCpuFault()">Inject 90% CPU Load</button>
+                            </div>
+                        </div>
+
+                        <!-- Fault 2: Bandwidth Flood -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>High-Volume Network Flood</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Dispatches unmitigated 45 Mbps UDP stream to simulate volumetric DDoS.</p>
+                                <button class="btn-action btn-action-warning w-100" onclick="injectNetworkFlood()">Launch 45 Mbps Surge</button>
+                            </div>
+                        </div>
+
+                        <!-- Fault 3: Link Loss -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>Transit Link Packet Impairment</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Applies `tc netem` 24% loss on 10.0.12.0/30 transit link.</p>
+                                <button class="btn-action btn-action-warning w-100" onclick="simulateTransitLoss(24)">Inject 24% Transit Loss</button>
+                            </div>
+                        </div>
+
+                        <!-- Fault 4: Server Outage -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>Backend Server 2 Failure</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Powers OFF Server 2 (h6); triggers dynamic traffic failover.</p>
+                                <button class="btn-action btn-action-danger w-100" onclick="toggleBackendPower('backend-2')">Power OFF Server 2</button>
+                            </div>
+                        </div>
+
+                        <!-- Fault 5: Node Isolation -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>Client Node 1 Isolation</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Brings down interface `h1-eth0`, cleanly disconnecting Client 1.</p>
+                                <button class="btn-action btn-action-danger w-100" onclick="isolateNodeAction('h1')">Isolate Node 1 (h1)</button>
+                            </div>
+                        </div>
+
+                        <!-- Fault 6: Router Interface Drop -->
+                        <div class="col-md-4">
+                            <div class="node-card-compact h-100">
+                                <strong>Transit Trunk Severance</strong>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Disables interface `r1-eth1`, severing inter-router transit.</p>
+                                <button class="btn-action btn-action-danger w-100" onclick="toggleRouterIntf('r1', 'r1-eth1', 'down')">Sever Transit Link</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 8: 9 DEMONSTRATION SCENARIOS ================= -->
         <div id="section-scenarios" class="tab-content-section">
             <div class="panel">
                 <div class="panel-header">
@@ -1099,7 +1720,7 @@
                         <div class="col-md-4">
                             <div class="node-card-compact h-100">
                                 <strong>3. Unmitigated Traffic Spike</strong>
-                                <p class="text-muted mb-2" style="font-size: 10.5px;">Turns Auto-Remediation OFF to observe live 50 Mbps spike.</p>
+                                <p class="text-muted mb-2" style="font-size: 10.5px;">Turns Auto-Remediation OFF to observe live 45 Mbps spike.</p>
                                 <button class="btn-action btn-action-warning w-100" onclick="runScenario(3)">Observe Raw Spike</button>
                             </div>
                         </div>
@@ -1162,14 +1783,14 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 5: LIVE EVENT STREAM ================= -->
+        <!-- ================= SECTION 9: EVENTS & AUDIT LOG ================= -->
         <div id="section-events" class="tab-content-section">
-            <div class="panel">
+            <div class="panel mb-2">
                 <div class="panel-header">
                     <h2 class="panel-title"><i class="fa-solid fa-timeline"></i> Plain-English System Event Stream</h2>
                     <span class="text-muted mono" style="font-size: 10px;">Lifecycle: DETECTED &rarr; MITIGATING &rarr; RECOVERED</span>
                 </div>
-                <div class="panel-body p-0">
+                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -1184,6 +1805,97 @@
                         </thead>
                         <tbody id="events-stream-body">
                             <tr><td colspan="7" class="text-center text-muted py-3">No events logged yet. Monitoring stream active.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Operations Audit Log Table -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-clipboard-check"></i> Operations & Audit Trail (SQLite)</h2>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="fetchOperationsLog()"><i class="fa-solid fa-rotate me-1"></i> Refresh Audit</button>
+                </div>
+                <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Op ID</th>
+                                <th>Component</th>
+                                <th>Action</th>
+                                <th>Stage</th>
+                                <th>Status</th>
+                                <th>Verification Result</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operations-audit-tbody">
+                            <tr><td colspan="7" class="text-center text-muted py-3">Loading operations audit logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 10: DIAGNOSTICS & REPORTS ================= -->
+        <div id="section-diagnostics" class="tab-content-section">
+            <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                    <div class="panel h-100">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-download text-primary"></i> Export Diagnostic Forensic Reports</h2>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-muted" style="font-size: 11px;">
+                                Export complete system state snapshots for grading, compliance, and academic evaluation.
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="/api/diagnostics/export.csv" class="btn-action btn-action-primary flex-fill text-center justify-content-center" download="network_diagnostics.csv">
+                                    <i class="fa-solid fa-file-csv me-1"></i> Download CSV Report
+                                </a>
+                                <button class="btn-action flex-fill justify-content-center" onclick="downloadJsonReport()">
+                                    <i class="fa-solid fa-file-code me-1"></i> Download JSON Snapshot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel h-100">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-rotate-left text-success"></i> Full Baseline Recovery</h2>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-muted" style="font-size: 11px;">
+                                Restores all 11 planes, removes packet losses, clears temporary drop rules, and re-admits healthy backends.
+                            </p>
+                            <button class="btn-action btn-action-success w-100" onclick="executeFullRecovery()">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Run Automated Recovery
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11-Plane System Health Audit -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title"><i class="fa-solid fa-heart-pulse"></i> 11-Plane Infrastructure Health Audit</h2>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="refreshSystemAudit()"><i class="fa-solid fa-rotate me-1"></i> Re-Audit Now</button>
+                </div>
+                <div class="panel-body p-0">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Plane</th>
+                                <th>Component</th>
+                                <th>Verification Port / Endpoint</th>
+                                <th>Health Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="system-audit-tbody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted">Auditing all 11 infrastructure planes...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1224,6 +1936,20 @@
             const targetBtn = document.getElementById(`nav-btn-${sectionId}`);
             if (targetSection) targetSection.classList.add('active');
             if (targetBtn) targetBtn.classList.add('active');
+
+            if (sectionId === 'control') fetchNodesControl();
+            if (sectionId === 'traffic') { fetchTrafficJobs(); fetchPackets(); }
+            if (sectionId === 'events') fetchOperationsLog();
+            if (sectionId === 'diagnostics') refreshSystemAudit();
+        }
+
+        function switchControlSubTab(subId) {
+            document.querySelectorAll('.sub-tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
+            const content = document.getElementById(`sub-${subId}`);
+            const btn = document.getElementById(`sub-btn-${subId}`);
+            if (content) content.classList.add('active');
+            if (btn) btn.classList.add('active');
         }
 
         // 2. Chart Mode Switcher
@@ -1333,7 +2059,7 @@
             chartInstance.data.labels = chartHistory.labels;
             chartInstance.data.datasets = datasets;
 
-            // SMART DYNAMIC SCALE: Normal idle (0.003 Mbps) cleanly rendered at ~45% height!
+            // SMART DYNAMIC SCALE: Normal idle (0.003 Mbps) cleanly rendered at ~40% height!
             if (chartMode === 'mbps') {
                 if (maxVal <= 0.006) {
                     chartInstance.options.scales.y.suggestedMax = 0.008;
@@ -1345,9 +2071,12 @@
                     chartInstance.options.scales.y.suggestedMax = Math.max(25, maxVal * 1.15);
                 }
                 chartInstance.options.scales.y.suggestedMin = 0;
+            } else if (chartMode === 'cpu') {
+                chartInstance.options.scales.y.suggestedMin = 0;
+                chartInstance.options.scales.y.suggestedMax = Math.max(20, Math.min(100, maxVal * 1.15));
             } else {
                 chartInstance.options.scales.y.suggestedMin = 0;
-                chartInstance.options.scales.y.suggestedMax = 100;
+                chartInstance.options.scales.y.suggestedMax = Math.max(10, Math.min(100, maxVal * 1.2));
             }
 
             chartInstance.update();
@@ -1391,22 +2120,23 @@
 
         // 5. Backend Power Toggle (POWER ON / POWER OFF)
         async function toggleBackendPower(backendId) {
-            const card = document.getElementById(`card-${backendId}`);
             const btn = document.getElementById(`btn-pwr-${backendId}`);
-            const isCurrentlyOn = btn.innerText.includes('OFF');
+            const isCurrentlyOn = btn && btn.innerText.includes('OFF');
             const endpoint = isCurrentlyOn ? `/api/backend/${backendId}/power_off` : `/api/backend/${backendId}/power_on`;
 
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            }
 
             try {
                 const resp = await fetch(endpoint, { method: 'POST' });
-                const data = await resp.json();
+                await resp.json();
                 fetchMetrics();
             } catch (err) {
                 console.error("Power toggle error:", err);
             } finally {
-                btn.disabled = false;
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -1451,7 +2181,6 @@
                     if (p.progress >= 1.0) {
                         p.progress = 0.0;
                         p.segIdx++;
-                        // If loss is happening on transit link (segment 2 between r1 and r2)
                         if (p.segIdx === 2 && currentTransitLoss > 5.0 && Math.random() < (currentTransitLoss / 100.0)) {
                             p.isDropped = true;
                         }
@@ -1459,7 +2188,6 @@
 
                     if (p.segIdx >= p.path.length - 1 || p.isDropped) {
                         if (p.isDropped) {
-                            // Draw red burst drop 'X'
                             const pt = p.path[2];
                             ctx.fillStyle = '#dc2626';
                             ctx.font = '10px sans-serif';
@@ -1571,7 +2299,6 @@
 
         function updateBackends(backends) {
             for (const [bid, b] of Object.entries(backends)) {
-                const card = document.getElementById(`card-${bid}`);
                 const badge = document.getElementById(`badge-pwr-${bid}`);
                 const shareEl = document.getElementById(`share-${bid}`);
                 const btn = document.getElementById(`btn-pwr-${bid}`);
@@ -1590,7 +2317,6 @@
                     btn.innerHTML = isOnline ? '<i class="fa-solid fa-power-off me-1"></i> Power OFF' : '<i class="fa-solid fa-play me-1"></i> Power ON';
                 }
 
-                // Table rows in Traffic Manager tab
                 const shortId = bid.replace('backend-', 'b');
                 const tblPwr = document.getElementById(`tbl-pwr-${shortId}`);
                 const tblShare = document.getElementById(`tbl-share-${shortId}`);
@@ -1602,7 +2328,6 @@
                     tblShare.innerText = `${b.traffic_share_percent || 0.0}%`;
                 }
 
-                // Visual node styling in topology
                 const vizBg = document.getElementById(`viz-bg-${shortId.replace('b', 'h')}`);
                 if (vizBg) {
                     vizBg.setAttribute('fill', isOnline ? '#ffffff' : '#f1f5f9');
@@ -1687,7 +2412,6 @@
         }
 
         function updateEvents(events) {
-            document.getElementById('active-alert-count').innerText = events.length;
             const tbody = document.getElementById('events-stream-body');
             if (!events.length) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No events logged yet.</td></tr>';
@@ -1742,31 +2466,352 @@
             renderChart();
         }
 
-        // Action Handlers
+        // --- CONTROL PLANE HANDLERS ---
+        async function fetchNodesControl() {
+            try {
+                const resp = await fetch('/api/nodes/all');
+                const nodes = await resp.json();
+                const grid = document.getElementById('nodes-control-grid');
+                let html = '';
+                for (const [nid, n] of Object.entries(nodes)) {
+                    const isUp = n.power_state === 'ON';
+                    const isConn = n.isolation_state === 'CONNECTED';
+                    html += `
+                    <div class="col-md-3">
+                        <div class="node-card-compact h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>${n.name}</strong>
+                                <span class="badge-status status-${isUp && isConn ? 'HEALTHY' : 'DOWN'}">${isUp ? (isConn ? 'ONLINE' : 'ISOLATED') : 'OFF'}</span>
+                            </div>
+                            <div class="mono text-muted mb-1" style="font-size: 9px;">IP: ${n.ip} | Port: ${n.service_port || n.c2_port}</div>
+                            <div class="d-flex gap-1 mt-2">
+                                <button class="btn btn-action py-0 px-2 flex-fill" onclick="toggleNodeIsolation('${nid}', '${isConn ? 'isolate' : 'restore'}')">${isConn ? 'Isolate' : 'Restore'}</button>
+                                <button class="btn btn-action py-0 px-2 flex-fill ${isUp ? 'btn-action-danger' : 'btn-action-success'}" onclick="toggleNodePowerState('${nid}', '${isUp ? 'power_off' : 'power_on'}')">${isUp ? 'Power OFF' : 'Power ON'}</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                grid.innerHTML = html;
+            } catch (err) {
+                console.error("fetchNodesControl error:", err);
+            }
+        }
+
+        async function toggleNodeIsolation(nodeId, action) {
+            await fetch(`/api/nodes/${nodeId}/${action}`, { method: 'POST' });
+            fetchNodesControl();
+            fetchMetrics();
+        }
+
+        async function toggleNodePowerState(nodeId, action) {
+            await fetch(`/api/nodes/${nodeId}/${action}`, { method: 'POST' });
+            fetchNodesControl();
+            fetchMetrics();
+        }
+
+        async function toggleRouterIntf(routerId, iface, action) {
+            await fetch(`/api/routers/${routerId}/interfaces/${iface}/${action}`, { method: 'POST' });
+            fetchMetrics();
+        }
+
+        async function toggleSwitchPort(switchId, port, action) {
+            await fetch(`/api/switches/${switchId}/ports/${port}/${action}`, { method: 'POST' });
+            fetchMetrics();
+        }
+
+        async function applyLinkNetem(linkId) {
+            const loss = parseFloat(document.getElementById(`loss-${linkId}`).value) || 0;
+            const delay = parseFloat(document.getElementById(`delay-${linkId}`).value) || 0;
+            const rate = parseFloat(document.getElementById(`rate-${linkId}`).value) || 100;
+            await fetch(`/api/links/${linkId}/configure`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ loss_percent: loss, delay_ms: delay, rate_mbps: rate })
+            });
+            fetchMetrics();
+        }
+
+        async function resetSingleLink(linkId) {
+            await fetch(`/api/links/${linkId}/reset`, { method: 'POST' });
+            document.getElementById(`loss-${linkId}`).value = 0;
+            document.getElementById(`delay-${linkId}`).value = 0;
+            fetchMetrics();
+        }
+
+        async function resetAllLinks() {
+            for (const lid of ['r1-r2', 'h1-s1', 's1-r1', 'r2-s2', 's2-h8']) {
+                await resetSingleLink(lid);
+            }
+        }
+
+        // --- TRAFFIC GENERATOR HANDLERS ---
+        async function launchPingJob() {
+            const src = document.getElementById('gen-ping-src').value;
+            const dst = document.getElementById('gen-ping-target').value;
+            const count = parseInt(document.getElementById('gen-ping-count').value) || 4;
+            const interval = parseFloat(document.getElementById('gen-ping-interval').value) || 0.5;
+
+            await fetch('/api/traffic/ping/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source: src, destination: dst, count: count, interval: interval })
+            });
+            fetchTrafficJobs();
+        }
+
+        async function launchUdpJob() {
+            const src = document.getElementById('gen-udp-src').value;
+            const target = document.getElementById('gen-udp-target').value;
+            const [dst, portStr] = target.split(':');
+            const port = parseInt(portStr) || 5000;
+            const mbps = parseFloat(document.getElementById('gen-udp-mbps').value) || 35;
+            const duration = parseInt(document.getElementById('gen-udp-duration').value) || 6;
+
+            await fetch('/api/traffic/udp/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source: src, destination: dst, target_port: port, bandwidth_mbps: mbps, duration: duration })
+            });
+            fetchTrafficJobs();
+        }
+
+        async function launchHttpJob() {
+            const url = document.getElementById('gen-http-url').value;
+            const reqs = parseInt(document.getElementById('gen-http-reqs').value) || 15;
+            const conc = parseInt(document.getElementById('gen-http-conc').value) || 3;
+
+            await fetch('/api/traffic/http/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source: 'h1', url: url, total_requests: reqs, concurrency: conc })
+            });
+            fetchTrafficJobs();
+        }
+
+        async function fetchTrafficJobs() {
+            try {
+                const resp = await fetch('/api/traffic/jobs');
+                const jobs = await resp.json();
+                const tbody = document.getElementById('traffic-jobs-tbody');
+                if (!jobs.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No active traffic generator jobs. Launch probes above.</td></tr>';
+                    return;
+                }
+                let html = '';
+                jobs.slice().reverse().forEach(j => {
+                    html += `
+                    <tr>
+                        <td><strong class="mono">${j.job_id}</strong></td>
+                        <td><span class="badge ${j.protocol === 'UDP' ? 'bg-warning text-dark' : 'bg-primary'}">${j.type}</span></td>
+                        <td class="mono">${j.source} &rarr; ${j.destination}</td>
+                        <td class="mono">${j.achieved_mbps ? j.achieved_mbps + ' Mbps' : (j.packets_sent || j.requests_sent || 0) + ' sent'}</td>
+                        <td class="mono">${j.packet_loss_percent !== undefined ? j.packet_loss_percent + '% loss' : (j.avg_response_ms ? j.avg_response_ms + 'ms' : '-')}</td>
+                        <td><span class="badge-status status-${j.status === 'RUNNING' ? 'ATTACKING' : 'SUCCESS'}">${j.status}</span></td>
+                        <td>${j.status === 'RUNNING' ? `<button class="btn btn-xs btn-outline-danger" onclick="stopSingleJob('${j.job_id}')">Stop</button>` : '<span class="text-muted">Done</span>'}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                console.error("fetchTrafficJobs error:", err);
+            }
+        }
+
+        async function stopSingleJob(jobId) {
+            await fetch(`/api/traffic/${jobId}/stop`, { method: 'POST' });
+            fetchTrafficJobs();
+        }
+
+        async function stopAllTrafficJobs() {
+            await fetch('/api/traffic/stop-all', { method: 'POST' });
+            fetchTrafficJobs();
+        }
+
+        async function fetchPackets() {
+            try {
+                const proto = document.getElementById('filter-packet-proto').value;
+                const url = proto ? `/api/packets/capture?limit=30&proto=${proto}` : '/api/packets/capture?limit=30';
+                const resp = await fetch(url);
+                const pkts = await resp.json();
+                const tbody = document.getElementById('packets-capture-tbody');
+                if (!pkts.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No matching packets captured.</td></tr>';
+                    return;
+                }
+                let html = '';
+                pkts.forEach(p => {
+                    html += `
+                    <tr>
+                        <td class="mono">${p.timestamp}</td>
+                        <td><span class="badge bg-light text-dark border">${p.interface}</span></td>
+                        <td class="mono">${p.src_ip}:${p.src_port || 0}</td>
+                        <td class="mono">${p.dst_ip}:${p.dst_port || 0}</td>
+                        <td><span class="badge ${p.protocol === 'UDP' ? 'bg-warning text-dark' : p.protocol === 'TCP' ? 'bg-primary' : 'bg-info'}">${p.protocol}</span></td>
+                        <td class="mono">${p.packet_size} B</td>
+                        <td><span class="badge-status status-${p.status === 'DELIVERED' ? 'HEALTHY' : 'CRITICAL'}">${p.status}</span></td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                console.error("fetchPackets error:", err);
+            }
+        }
+
+        // --- SDN FLOW TABLE INSPECTOR ---
+        async function loadSwitchFlows(switchId) {
+            try {
+                const resp = await fetch(`/api/switches/${switchId}/flows`);
+                const data = await resp.json();
+                const tbody = document.getElementById('sdn-flows-table-body');
+                const flows = data.flows || [];
+                if (!flows.length) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted">No flows installed on Switch ${switchId}.</td></tr>`;
+                    return;
+                }
+                let html = '';
+                flows.forEach(f => {
+                    html += `
+                    <tr>
+                        <td><strong>${switchId}</strong></td>
+                        <td class="mono">${f.priority || 0}</td>
+                        <td class="mono" style="font-size: 10px;">${f.match || f.raw || 'ALL'}</td>
+                        <td class="mono text-success">${f.actions || 'NORMAL'}</td>
+                        <td class="mono">${f.n_packets || 0}</td>
+                        <td class="mono">${f.n_bytes || 0}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                console.error("loadSwitchFlows error:", err);
+            }
+        }
+
+        async function injectManualSdnBlock() {
+            const ip = document.getElementById('manual-block-ip').value.trim();
+            if (!ip) return;
+            await fetch('/api/sdn/mitigate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ src_ip: ip, agent_id: 'ManualOperator' })
+            });
+            fetchMetrics();
+        }
+
+        // --- FAULT INJECTIONS ---
+        async function injectCpuFault() {
+            await fetch('/api/simulation/cpu/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duration: 10, intensity: 0.92 })
+            });
+            fetchMetrics();
+        }
+
+        async function injectNetworkFlood() {
+            await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: false}) });
+            await fetch('/api/simulation/network/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target: '10.0.1.20', mbps: 45, duration: 10 })
+            });
+            fetchMetrics();
+        }
+
+        async function isolateNodeAction(nodeId) {
+            await fetch(`/api/nodes/${nodeId}/isolate`, { method: 'POST' });
+            fetchMetrics();
+        }
+
+        // --- OPERATIONS AUDIT LOG & DIAGNOSTICS ---
+        async function fetchOperationsLog() {
+            try {
+                const resp = await fetch('/api/operations?limit=25');
+                const ops = await resp.json();
+                const tbody = document.getElementById('operations-audit-tbody');
+                if (!ops.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No operations recorded yet.</td></tr>';
+                    return;
+                }
+                let html = '';
+                ops.forEach(op => {
+                    html += `
+                    <tr>
+                        <td><strong class="mono">${op.operation_id || ''}</strong></td>
+                        <td>${op.component || ''}</td>
+                        <td>${op.action || ''}</td>
+                        <td><span class="badge ${op.stage === 'SUCCESS' ? 'bg-success' : op.stage === 'FAILED' ? 'bg-danger' : 'bg-info'}">${op.stage}</span></td>
+                        <td><span class="badge-status status-${op.status}">${op.status}</span></td>
+                        <td style="font-size: 10px;">${typeof op.verification_result === 'object' ? JSON.stringify(op.verification_result) : op.verification_result || ''}</td>
+                        <td class="mono">${op.created_at || ''}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (err) {
+                console.error("fetchOperationsLog error:", err);
+            }
+        }
+
+        async function refreshSystemAudit() {
+            try {
+                const resp = await fetch('/api/system/status');
+                const data = await resp.json();
+                const tbody = document.getElementById('system-audit-tbody');
+                const comps = data.components || {};
+                let html = '';
+                for (const [name, meta] of Object.entries(comps)) {
+                    html += `
+                    <tr>
+                        <td><strong>${meta.plane || 'CORE'}</strong></td>
+                        <td>${meta.name || name}</td>
+                        <td class="mono">${meta.target || meta.port || '-'}</td>
+                        <td><span class="badge-status status-${meta.status}">${meta.status}</span></td>
+                        <td>${meta.message || 'Operational'}</td>
+                    </tr>`;
+                }
+                tbody.innerHTML = html;
+            } catch (err) {
+                console.error("refreshSystemAudit error:", err);
+            }
+        }
+
+        async function executeFullRecovery() {
+            await fetch('/api/recovery/execute', { method: 'POST' });
+            fetchMetrics();
+            refreshSystemAudit();
+        }
+
+        async function executeEmergencyStop() {
+            await fetch('/api/system/emergency-stop', { method: 'POST' });
+            fetchMetrics();
+        }
+
+        async function downloadJsonReport() {
+            const resp = await fetch('/api/diagnostics');
+            const data = await resp.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system_diagnostics_${Date.now()}.json`;
+            a.click();
+        }
+
+        // --- 9 DEMONSTRATION SCENARIOS ---
         async function runScenario(scenarioNum) {
             if (scenarioNum === 1) {
-                // Baseline Check
-                await fetch('/api/simulation/stop', { method: 'POST' });
+                await executeEmergencyStop();
                 await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: true}) });
             } else if (scenarioNum === 2) {
-                // CPU Spike
-                await fetch('/api/simulation/cpu/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({duration: 8, intensity: 0.90}) });
+                await injectCpuFault();
             } else if (scenarioNum === 3) {
-                // Network Spike with Auto-Remediation OFF
-                await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: false}) });
-                await fetch('/api/simulation/network/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({mbps: 45, duration: 10}) });
+                await injectNetworkFlood();
             } else if (scenarioNum === 4) {
-                // Auto-Defense ON
                 await fetch('/api/sdn/remediation_toggle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled: true}) });
                 await fetch('/api/attack/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({agent_id: 'Node-1', c2_port: 5001, duration: 12}) });
             } else if (scenarioNum === 5) {
-                // Power OFF Server 2
                 await toggleBackendPower('backend-2');
             } else if (scenarioNum === 6) {
-                // Power ON Server 2
                 await toggleBackendPower('backend-2');
             } else if (scenarioNum === 7) {
-                // Transit loss simulation
                 await simulateTransitLoss(24);
             } else if (scenarioNum === 8) {
                 const cur = document.getElementById('lb-algo-select').value;
@@ -1774,12 +2819,7 @@
                 document.getElementById('lb-algo-select').value = next;
                 await changeLbAlgorithm(next);
             } else if (scenarioNum === 9) {
-                // Full recovery
-                await stopAllSimulations();
-                await fetch('/api/backend/backend-1/power_on', { method: 'POST' });
-                await fetch('/api/backend/backend-2/power_on', { method: 'POST' });
-                await fetch('/api/backend/backend-3/power_on', { method: 'POST' });
-                await fetch('/api/sdn/unblock', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({src_ip: 'ALL'}) });
+                await executeFullRecovery();
             }
             fetchMetrics();
         }
@@ -1790,11 +2830,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ transit_link: pct, client_access: 0.0, backend_cluster: 0.0 })
             });
-            fetchMetrics();
-        }
-
-        async function stopAllSimulations() {
-            await fetch('/api/simulation/stop', { method: 'POST' });
             fetchMetrics();
         }
 
