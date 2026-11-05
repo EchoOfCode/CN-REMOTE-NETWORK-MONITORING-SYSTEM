@@ -67,3 +67,4 @@
 4. **`load_balancer/proxy.py`**: Configured for backend network `10.0.2.30:8000`, supporting dynamic power control failover.
 5. **`server.py`**: APIs for R1, R2, transit link, packet loss statistics, and backend power controls.
 6. **`templates/index.html`**: Plain-English NOC dashboard with live particle animations, Power ON/OFF controls, 4 live graphs, and 9 demonstration scenarios.
+
