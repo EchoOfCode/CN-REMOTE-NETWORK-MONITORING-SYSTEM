@@ -69,6 +69,34 @@ class ReverseProxy:
         except Exception as e:
             return web.json_response({"error": str(e)}, status=400)
 
+    async def handle_backend_power_off(self, request):
+        bid = request.match_info.get("id")
+        backend = self.config.backends.get(bid)
+        if backend:
+            backend.power_off()
+            self.metrics.record_failover(bid, "MANUAL_POWER_OFF")
+            print(f"[LOAD BALANCER] 🛑 Backend {bid} powered OFF. Recalculated traffic shares: {self.config.get_traffic_shares()}")
+            return web.json_response({
+                "status": "SUCCESS",
+                "backend": backend.to_dict(),
+                "traffic_shares": self.config.get_traffic_shares()
+            })
+        return web.json_response({"error": "Backend not found"}, status=404)
+
+    async def handle_backend_power_on(self, request):
+        bid = request.match_info.get("id")
+        backend = self.config.backends.get(bid)
+        if backend:
+            backend.power_on()
+            self.metrics.record_failover(bid, "MANUAL_POWER_ON")
+            print(f"[LOAD BALANCER] 🟢 Backend {bid} powered ON. Recalculated traffic shares: {self.config.get_traffic_shares()}")
+            return web.json_response({
+                "status": "SUCCESS",
+                "backend": backend.to_dict(),
+                "traffic_shares": self.config.get_traffic_shares()
+            })
+        return web.json_response({"error": "Backend not found"}, status=404)
+
     async def handle_backend_drain(self, request):
         bid = request.match_info.get("id")
         backend = self.config.backends.get(bid)
