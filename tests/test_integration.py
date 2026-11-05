@@ -70,6 +70,61 @@ class TestLoadBalancerIntegration(unittest.TestCase):
         with urllib.request.urlopen(req, timeout=2) as resp:
             self.assertEqual(resp.status, 200)
 
+    def test_flask_server_endpoints(self):
+        from server import app
+        client = app.test_client()
+
+        # 1. Health check
+        res = client.get("/api/health")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("TWO_ROUTER_MULTI_SUBNET", res.get_json().get("architecture", ""))
+
+        # 2. Automated Remediation Toggle
+        res = client.post("/api/sdn/remediation_toggle", json={"enabled": False})
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.get_json().get("auto_remediation_enabled"))
+
+        res = client.get("/api/sdn/remediation_status")
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.get_json().get("auto_remediation_enabled"))
+
+        # Re-enable
+        res = client.post("/api/sdn/remediation_toggle", json={"enabled": True})
+        self.assertTrue(res.get_json().get("auto_remediation_enabled"))
+
+        # 3. Two Routers & Transit Link
+        res = client.get("/api/routers")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("r1", data)
+        self.assertIn("r2", data)
+        self.assertIn("transit_link", data)
+
+        # 4. Packet Loss Localization
+        res = client.get("/api/network/packet_loss")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("overall_loss_percent", data)
+        self.assertIn("diagnosis", data)
+
+        # 5. Backend Status & Power Controls
+        res = client.get("/api/backend/status")
+        self.assertEqual(res.status_code, 200)
+        backends = res.get_json()
+        self.assertIn("backend-1", backends)
+        self.assertIn("backend-2", backends)
+        self.assertIn("backend-3", backends)
+
+        # Power OFF Backend 2
+        res = client.post("/api/backend/backend-2/power_off")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.get_json().get("power_state"), "OFF")
+
+        # Power ON Backend 2
+        res = client.post("/api/backend/backend-2/power_on")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.get_json().get("power_state"), "ON")
+
 if __name__ == '__main__':
     unittest.main()
 
