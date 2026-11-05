@@ -50,7 +50,7 @@
             --radius-lg: 8px;
             
             --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
         }
 
@@ -60,8 +60,8 @@
             background-color: var(--bg-app);
             color: var(--text-main);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12.5px;
+            line-height: 1.45;
             min-height: 100vh;
         }
 
@@ -72,7 +72,7 @@
             background-color: #ffffff;
             border-bottom: 1px solid var(--border-subtle);
             padding: 0 1.25rem;
-            height: 52px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -82,8 +82,8 @@
         }
 
         .brand-logo {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             background: #eff6ff;
             border: 1px solid #bfdbfe;
             border-radius: var(--radius-sm);
@@ -91,11 +91,11 @@
             align-items: center;
             justify-content: center;
             color: var(--color-primary);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .brand-title {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: var(--text-heading);
             letter-spacing: -0.01em;
@@ -104,7 +104,7 @@
         .brand-badge {
             font-size: 10px;
             font-weight: 600;
-            padding: 2px 7px;
+            padding: 2px 6px;
             border-radius: var(--radius-sm);
             background-color: #f1f5f9;
             color: var(--text-muted);
@@ -121,8 +121,8 @@
         }
 
         .nav-tab-item {
-            padding: 10px 0;
-            font-size: 12.5px;
+            padding: 8px 0;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             border-bottom: 2px solid transparent;
@@ -145,7 +145,7 @@
             background-color: var(--bg-panel);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 12px 14px;
+            padding: 9px 12px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -154,25 +154,25 @@
         }
 
         .kpi-label {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.04em;
             color: var(--text-muted);
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .kpi-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             line-height: 1.2;
             font-family: 'JetBrains Mono', monospace;
         }
 
         .kpi-subtext {
-            font-size: 11px;
+            font-size: 10.5px;
             color: var(--text-muted);
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         /* Panel Containers */
@@ -182,13 +182,12 @@
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-card);
             overflow: hidden;
-            height: 100%;
             display: flex;
             flex-direction: column;
         }
 
         .panel-header {
-            padding: 10px 14px;
+            padding: 8px 12px;
             background-color: var(--bg-panel-header);
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
@@ -197,33 +196,46 @@
         }
 
         .panel-title {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             color: var(--text-heading);
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
             letter-spacing: -0.01em;
         }
 
         .panel-body {
-            padding: 12px 14px;
+            padding: 10px 12px;
             flex: 1;
+        }
+
+        /* Compact Node Card */
+        .node-card-compact {
+            background-color: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            transition: all 0.15s ease;
+        }
+        .node-card-compact:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* Buttons */
         .btn-action {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 600;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-muted);
             background-color: #ffffff;
             color: var(--text-main);
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             cursor: pointer;
             transition: all 0.15s ease;
         }
@@ -264,9 +276,9 @@
 
         /* Status Badges */
         .badge-status {
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 700;
-            padding: 2px 7px;
+            padding: 2px 6px;
             border-radius: var(--radius-sm);
             letter-spacing: 0.02em;
             text-transform: uppercase;
@@ -278,7 +290,7 @@
 
         /* Progress Bars */
         .progress-bar-track {
-            height: 6px;
+            height: 5px;
             background-color: #e2e8f0;
             border-radius: 3px;
             overflow: hidden;
@@ -295,8 +307,7 @@
         /* SVG Topology Diagram */
         .topology-canvas {
             width: 100%;
-            height: auto;
-            max-height: 240px;
+            height: 215px;
             display: block;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
@@ -311,7 +322,7 @@
         /* Data Tables */
         .table-custom {
             width: 100%;
-            font-size: 11.5px;
+            font-size: 11px;
             border-collapse: separate;
             border-spacing: 0;
         }
@@ -320,13 +331,13 @@
             color: var(--text-muted);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 10px;
-            padding: 7px 10px;
+            font-size: 9.5px;
+            padding: 6px 9px;
             border-bottom: 1px solid var(--border-subtle);
             border-top: 1px solid var(--border-subtle);
         }
         .table-custom td {
-            padding: 8px 10px;
+            padding: 6px 9px;
             border-bottom: 1px solid #f1f5f9;
             color: var(--text-heading);
             vertical-align: middle;
@@ -339,7 +350,7 @@
             height: 7px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 5px;
+            margin-right: 4px;
         }
         .pulse-green { background-color: #10b981; }
         .pulse-red { background-color: #ef4444; }
@@ -368,7 +379,7 @@
             <!-- Controller Status Pill -->
             <div class="bg-white px-2 py-1 border border-secondary border-opacity-25 rounded d-flex align-items-center shadow-sm" style="font-size: 11px;">
                 <span class="status-dot pulse-green" id="sdn-indicator"></span>
-                <span class="text-muted">SDN Controller: <strong class="text-dark" id="sdn-status">ONLINE</strong></span>
+                <span class="text-muted">SDN: <strong class="text-dark" id="sdn-status">ONLINE</strong></span>
             </div>
 
             <!-- Router Health Pill -->
@@ -379,7 +390,7 @@
 
             <!-- Emergency Stop -->
             <button class="btn-action btn-action-danger shadow-sm" onclick="stopAllSimulations()" title="Halt all stressors">
-                <i class="fa-solid fa-hand me-1"></i> Stop All Stress
+                <i class="fa-solid fa-hand me-1"></i> Stop Stress
             </button>
 
             <!-- Refresh Button -->
@@ -409,10 +420,10 @@
     </div>
 
     <!-- Main Workspace Container -->
-    <main class="container-fluid px-3 py-3">
+    <main class="container-fluid px-3 py-2">
 
         <!-- Top Overview Stats (Row of 5 KPI Cards) -->
-        <div class="row g-2 mb-3">
+        <div class="row g-2 mb-2">
             <div class="col-6 col-md-4 col-xl">
                 <div class="kpi-card">
                     <div class="kpi-label">Active Nodes</div>
@@ -443,7 +454,7 @@
                         <div class="kpi-label mb-0">Cluster Avg CPU</div>
                         <span class="mono fw-bold text-dark" id="cluster-avg-cpu">0%</span>
                     </div>
-                    <div class="progress-bar-track mt-2 mb-2">
+                    <div class="progress-bar-track mt-1 mb-1">
                         <div class="progress-bar-fill fill-green" id="cluster-cpu-bar" style="width: 0%;"></div>
                     </div>
                     <div class="kpi-subtext">Mean across active nodes</div>
@@ -463,181 +474,189 @@
 
         <!-- ================= SECTION 1: OVERVIEW & SDN DEFENSE ================= -->
         <div id="section-overview" class="tab-content-section active">
-            <div class="row g-2">
-                <!-- LEFT COLUMN: Nodes & Topology -->
-                <div class="col-lg-7">
-                    <!-- Host Node Health Cards -->
-                    <div class="panel mb-2">
-                        <div class="panel-header">
-                            <h2 class="panel-title">
-                                <i class="fa-solid fa-server text-muted"></i> Managed Nodes (Clients & Backends)
-                            </h2>
-                            <span class="text-muted mono" style="font-size: 11px;">Polling: 1.0s</span>
-                        </div>
-                        <div class="panel-body">
-                            <div class="row g-2" id="nodes-container">
-                                <div class="col-12 text-center py-4 text-muted">
-                                    <span class="spinner-border spinner-border-sm me-1"></span> Waiting for telemetry packets...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Multi-Subnet SDN Topology Diagram -->
+            
+            <!-- TOP ROW: Topology (Left) & Real-Time Chart (Right) - VISIBLE IMMEDIATELY ABOVE THE FOLD -->
+            <div class="row g-2 mb-2">
+                <!-- TOP LEFT: Multi-Subnet SDN Topology Diagram -->
+                <div class="col-lg-6">
                     <div class="panel">
                         <div class="panel-header">
                             <h2 class="panel-title">
-                                <i class="fa-solid fa-diagram-project text-muted"></i> Multi-Subnet Network Topology & SDN Control Plane
+                                <i class="fa-solid fa-diagram-project text-muted"></i> Network Topology & Flow Paths
                             </h2>
-                            <div class="d-flex gap-2 text-muted" style="font-size: 10.5px;">
+                            <div class="d-flex gap-2 text-muted" style="font-size: 10px;">
                                 <span><span class="status-dot pulse-green"></span>Normal</span>
                                 <span><span class="status-dot pulse-red"></span>Attack/Stress</span>
                                 <span><i class="fa-solid fa-ban text-danger me-1"></i>SDN Drop</span>
                             </div>
                         </div>
-                        <div class="panel-body p-2">
-                            <svg class="topology-canvas" viewBox="0 0 920 210">
-                                <rect width="920" height="210" fill="#f8fafc" />
+                        <div class="panel-body p-1">
+                            <svg class="topology-canvas" viewBox="0 0 920 200">
+                                <rect width="920" height="200" fill="#f8fafc" />
 
                                 <!-- Subnet 1 Box (Clients & Monitoring) -->
-                                <rect x="15" y="15" width="370" height="180" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
-                                <text x="25" y="32" fill="#64748b" font-weight="700" font-size="9.5">SUBNET 1: 10.0.1.0/24 (Clients, Monitor & LB)</text>
+                                <rect x="15" y="10" width="370" height="180" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
+                                <text x="25" y="26" fill="#64748b" font-weight="700" font-size="9">SUBNET 1: 10.0.1.0/24 (Clients, Monitor & LB)</text>
 
                                 <!-- Subnet 2 Box (Backends) -->
-                                <rect x="535" y="15" width="370" height="180" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
-                                <text x="545" y="32" fill="#64748b" font-weight="700" font-size="9.5">SUBNET 2: 10.0.2.0/24 (Backend Servers)</text>
+                                <rect x="535" y="10" width="370" height="180" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3 3" />
+                                <text x="545" y="26" fill="#64748b" font-weight="700" font-size="9">SUBNET 2: 10.0.2.0/24 (Backend Servers)</text>
 
                                 <!-- Links in Subnet 1 -->
-                                <line id="link-h1" class="topo-line" x1="80" y1="65" x2="260" y2="105" />
-                                <line id="link-h2" class="topo-line" x1="80" y1="115" x2="260" y2="105" />
-                                <line id="link-h3" class="topo-line" x1="80" y1="165" x2="260" y2="105" />
-                                <line id="link-h4" class="topo-line" x1="180" y1="165" x2="260" y2="105" />
-                                <line id="link-h8" class="topo-line" x1="180" y1="65" x2="260" y2="105" />
+                                <line id="link-h1" class="topo-line" x1="80" y1="60" x2="260" y2="100" />
+                                <line id="link-h2" class="topo-line" x1="80" y1="110" x2="260" y2="100" />
+                                <line id="link-h3" class="topo-line" x1="80" y1="160" x2="260" y2="100" />
+                                <line id="link-h4" class="topo-line" x1="180" y1="160" x2="260" y2="100" />
+                                <line id="link-h8" class="topo-line" x1="180" y1="60" x2="260" y2="100" />
 
                                 <!-- Router r1 Links -->
-                                <line id="link-r1-s1" class="topo-line-active" x1="260" y1="105" x2="460" y2="105" />
-                                <line id="link-r1-s2" class="topo-line-active" x1="460" y1="105" x2="660" y2="105" />
+                                <line id="link-r1-s1" class="topo-line-active" x1="260" y1="100" x2="460" y2="100" />
+                                <line id="link-r1-s2" class="topo-line-active" x1="460" y1="100" x2="660" y2="100" />
 
                                 <!-- Links in Subnet 2 -->
-                                <line id="link-h5" class="topo-line" x1="660" y1="105" x2="820" y2="65" />
-                                <line id="link-h6" class="topo-line" x1="660" y1="105" x2="820" y2="115" />
-                                <line id="link-h7" class="topo-line" x1="660" y1="105" x2="820" y2="165" />
+                                <line id="link-h5" class="topo-line" x1="660" y1="100" x2="820" y2="60" />
+                                <line id="link-h6" class="topo-line" x1="660" y1="100" x2="820" y2="110" />
+                                <line id="link-h7" class="topo-line" x1="660" y1="100" x2="820" y2="160" />
 
                                 <!-- SDN Controller Control Lines -->
-                                <line class="topo-line" x1="460" y1="28" x2="260" y2="105" stroke="#9333ea" />
-                                <line class="topo-line" x1="460" y1="28" x2="660" y2="105" stroke="#9333ea" />
+                                <line class="topo-line" x1="460" y1="24" x2="260" y2="100" stroke="#9333ea" />
+                                <line class="topo-line" x1="460" y1="24" x2="660" y2="100" stroke="#9333ea" />
 
                                 <!-- SDN Controller (c0) -->
-                                <g transform="translate(460, 28)">
-                                    <rect x="-65" y="-14" width="130" height="28" rx="4" fill="#faf5ff" stroke="#a855f7" stroke-width="1.3" />
-                                    <text text-anchor="middle" dy="4" fill="#7e22ce" font-weight="700" font-size="10.5">SDN Controller (c0)</text>
+                                <g transform="translate(460, 24)">
+                                    <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#faf5ff" stroke="#a855f7" stroke-width="1.2" />
+                                    <text text-anchor="middle" dy="4" fill="#7e22ce" font-weight="700" font-size="10">SDN Controller (c0)</text>
                                 </g>
 
                                 <!-- Switch s1 (Client OVS) -->
-                                <g transform="translate(260, 105)">
-                                    <rect x="-35" y="-20" width="70" height="40" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
-                                    <text text-anchor="middle" dy="-3" fill="#1d4ed8" font-weight="700" font-size="11">Switch s1</text>
-                                    <text text-anchor="middle" dy="12" fill="#2563eb" font-size="8.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
+                                <g transform="translate(260, 100)">
+                                    <rect x="-35" y="-18" width="70" height="36" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                                    <text text-anchor="middle" dy="-2" fill="#1d4ed8" font-weight="700" font-size="10.5">Switch s1</text>
+                                    <text text-anchor="middle" dy="11" fill="#2563eb" font-size="8" font-family="'JetBrains Mono', monospace">OF 1.3</text>
                                 </g>
 
                                 <!-- Linux Layer 3 Router (r1) -->
-                                <g id="viz-router-node" transform="translate(460, 105)">
-                                    <rect x="-42" y="-22" width="84" height="44" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
-                                    <text text-anchor="middle" dy="-4" fill="#047857" font-weight="700" font-size="11.5">Router r1</text>
-                                    <text text-anchor="middle" dy="11" fill="#059669" font-size="8" font-family="'JetBrains Mono', monospace">10.0.1.1 / 2.1</text>
+                                <g id="viz-router-node" transform="translate(460, 100)">
+                                    <rect x="-42" y="-20" width="84" height="40" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.6" />
+                                    <text text-anchor="middle" dy="-3" fill="#047857" font-weight="700" font-size="11">Router r1</text>
+                                    <text text-anchor="middle" dy="10" fill="#059669" font-size="7.5" font-family="'JetBrains Mono', monospace">10.0.1.1 / 2.1</text>
                                 </g>
 
                                 <!-- Switch s2 (Backend OVS) -->
-                                <g transform="translate(660, 105)">
-                                    <rect x="-35" y="-20" width="70" height="40" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
-                                    <text text-anchor="middle" dy="-3" fill="#1d4ed8" font-weight="700" font-size="11">Switch s2</text>
-                                    <text text-anchor="middle" dy="12" fill="#2563eb" font-size="8.5" font-family="'JetBrains Mono', monospace">OF 1.3</text>
+                                <g transform="translate(660, 100)">
+                                    <rect x="-35" y="-18" width="70" height="36" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                                    <text text-anchor="middle" dy="-2" fill="#1d4ed8" font-weight="700" font-size="10.5">Switch s2</text>
+                                    <text text-anchor="middle" dy="11" fill="#2563eb" font-size="8" font-family="'JetBrains Mono', monospace">OF 1.3</text>
                                 </g>
 
                                 <!-- Subnet 1 Nodes -->
-                                <g transform="translate(80, 65)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h1 (Node-1)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.1.11</text>
+                                <g id="viz-node-h1" transform="translate(80, 60)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h1 (Node-1)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.1.11</text>
                                 </g>
 
-                                <g transform="translate(80, 115)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h2 (Node-2)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.1.12</text>
+                                <g id="viz-node-h2" transform="translate(80, 110)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h2 (Node-2)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.1.12</text>
                                 </g>
 
-                                <g transform="translate(80, 165)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h3 (Node-3)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.1.13</text>
+                                <g id="viz-node-h3" transform="translate(80, 160)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h3 (Node-3)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.1.13</text>
                                 </g>
 
-                                <g transform="translate(180, 65)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#eff6ff" stroke="#3b82f6" />
-                                    <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9.5">h8: Load Balancer</text>
-                                    <text text-anchor="middle" dy="11" fill="#2563eb" font-family="'JetBrains Mono', monospace" font-size="8">10.0.1.30:8000</text>
+                                <g id="viz-node-h8" transform="translate(180, 60)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#eff6ff" stroke="#3b82f6" />
+                                    <text text-anchor="middle" dy="-1" fill="#1d4ed8" font-weight="700" font-size="9">h8: Load Balancer</text>
+                                    <text text-anchor="middle" dy="9" fill="#2563eb" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.1.30:8000</text>
                                 </g>
 
-                                <g transform="translate(180, 165)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#f0fdf4" stroke="#16a34a" />
-                                    <text text-anchor="middle" dy="-1" fill="#15803d" font-weight="700" font-size="9.5">h4: Monitor UI</text>
-                                    <text text-anchor="middle" dy="11" fill="#16a34a" font-family="'JetBrains Mono', monospace" font-size="8">10.0.1.20:5050</text>
+                                <g id="viz-node-h4" transform="translate(180, 160)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#f0fdf4" stroke="#16a34a" />
+                                    <text text-anchor="middle" dy="-1" fill="#15803d" font-weight="700" font-size="9">h4: Monitor UI</text>
+                                    <text text-anchor="middle" dy="9" fill="#16a34a" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.1.20:5050</text>
                                 </g>
 
                                 <!-- Subnet 2 Nodes (Backends) -->
-                                <g transform="translate(820, 65)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h5 (Backend-1)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.2.11:8001</text>
+                                <g id="viz-node-h5" transform="translate(820, 60)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h5 (Backend-1)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.2.11:8001</text>
                                 </g>
 
-                                <g transform="translate(820, 115)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h6 (Backend-2)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.2.12:8002</text>
+                                <g id="viz-node-h6" transform="translate(820, 110)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h6 (Backend-2)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.2.12:8002</text>
                                 </g>
 
-                                <g transform="translate(820, 165)">
-                                    <rect x="-42" y="-16" width="84" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" />
-                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9.5">h7 (Backend-3)</text>
-                                    <text text-anchor="middle" dy="11" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="8">10.0.2.13:8003</text>
+                                <g id="viz-node-h7" transform="translate(820, 160)">
+                                    <rect x="-42" y="-14" width="84" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+                                    <text text-anchor="middle" dy="-1" fill="#0f172a" font-weight="600" font-size="9">h7 (Backend-3)</text>
+                                    <text text-anchor="middle" dy="9" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="7.5">10.0.2.13:8003</text>
                                 </g>
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: Real-Time Charts & OpenFlow Rules -->
-                <div class="col-lg-5">
-                    <!-- Real-Time Telemetry Spikes Chart -->
-                    <div class="panel mb-2">
+                <!-- TOP RIGHT: Real-Time Telemetry Spikes Chart (DYNAMIC AUTO-SCALE) -->
+                <div class="col-lg-6">
+                    <div class="panel">
                         <div class="panel-header">
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-primary active" id="btn-chart-mbps" onclick="switchChartMode('mbps')">
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-primary active py-0 px-2" style="font-size: 11px;" id="btn-chart-mbps" onclick="switchChartMode('mbps')">
                                     <i class="fa-solid fa-chart-line me-1"></i> Throughput Rate (Mbps)
                                 </button>
-                                <button class="btn btn-sm btn-outline-secondary" id="btn-chart-cpu" onclick="switchChartMode('cpu')">
-                                    <i class="fa-solid fa-gauge-high me-1"></i> CPU Utilization (%)
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="btn-chart-cpu" onclick="switchChartMode('cpu')">
+                                    <i class="fa-solid fa-gauge-high me-1"></i> CPU (%)
                                 </button>
                             </div>
-                            <span class="badge bg-danger d-none" id="chart-spike-badge">SPIKE DETECTED</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-danger d-none" id="chart-spike-badge">SPIKE DETECTED</span>
+                                <span class="text-muted mono" style="font-size: 10.5px;">Scale: <strong class="text-primary" id="chart-scale-label">Auto</strong></span>
+                            </div>
                         </div>
-                        <div class="panel-body p-2" style="height: 220px; position: relative;">
+                        <div class="panel-body p-2" style="height: 215px; position: relative;">
                             <canvas id="telemetryChart"></canvas>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- OpenFlow 1.3 Flow Rules Table -->
+            <!-- BOTTOM ROW: Managed Nodes (Left) & OpenFlow Rules (Right) -->
+            <div class="row g-2">
+                <!-- BOTTOM LEFT: Managed Nodes Grid -->
+                <div class="col-lg-6">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title"><i class="fa-solid fa-server text-muted"></i> Managed Nodes (Clients & Backends)</h2>
+                            <span class="text-muted mono" style="font-size: 10px;">7 Active Agents</span>
+                        </div>
+                        <div class="panel-body p-2" style="max-height: 250px; overflow-y: auto;">
+                            <div class="row g-2" id="nodes-container">
+                                <div class="col-12 text-center py-4 text-muted">
+                                    <span class="spinner-border spinner-border-sm me-1"></span> Waiting for telemetry...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM RIGHT: Active OpenFlow 1.3 DROP Rules -->
+                <div class="col-lg-6">
                     <div class="panel">
                         <div class="panel-header">
                             <h2 class="panel-title">
-                                <i class="fa-solid fa-table-list text-muted"></i> Active OpenFlow 1.3 Rules
+                                <i class="fa-solid fa-table-list text-muted"></i> Active OpenFlow 1.3 DROP Rules
                                 <span class="badge bg-secondary ms-1" id="rules-badge">0</span>
                             </h2>
-                            <button class="btn btn-sm btn-outline-danger" onclick="triggerManualUnblockAll()">Clear Rules</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" onclick="triggerManualUnblockAll()">Clear Rules</button>
                         </div>
-                        <div class="panel-body p-0" style="max-height: 220px; overflow-y: auto;">
+                        <div class="panel-body p-0" style="max-height: 250px; overflow-y: auto;">
                             <table class="table-custom">
                                 <thead>
                                     <tr>
@@ -1009,7 +1028,7 @@
             renderChart();
         }
 
-        // 3. Chart Setup
+        // 3. Chart Setup with Dynamic Smart Y-Axis Scaling
         function initChart() {
             const ctx = document.getElementById('telemetryChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -1022,17 +1041,54 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     scales: {
-                        x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9 }, maxTicksLimit: 8 } },
+                        x: { 
+                            grid: { color: '#f1f5f9' }, 
+                            ticks: { font: { size: 9 }, maxTicksLimit: 7 } 
+                        },
                         y: { 
                             grid: { color: '#e2e8f0' }, 
-                            ticks: { font: { size: 9 } },
+                            ticks: { 
+                                font: { size: 9 },
+                                callback: function(value) {
+                                    if (chartMode === 'mbps') {
+                                        if (value < 0.05) {
+                                            return value.toFixed(3) + ' M';
+                                        }
+                                        return value.toFixed(1) + ' M';
+                                    }
+                                    return value + '%';
+                                }
+                            },
                             suggestedMin: 0,
-                            suggestedMax: chartMode === 'mbps' ? 10 : 100
+                            suggestedMax: 0.008
                         }
                     },
                     plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10.5 } } }
+                        legend: { 
+                            position: 'top', 
+                            labels: { boxWidth: 8, font: { size: 9.5 }, padding: 6 } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        if (chartMode === 'mbps') {
+                                            label += context.parsed.y.toFixed(4) + ' Mbps';
+                                        } else {
+                                            label += context.parsed.y.toFixed(1) + '%';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -1040,20 +1096,24 @@
 
         function renderChart() {
             if (!chartInstance) return;
-            const colors = ['#2563eb', '#dc2626', '#d97706', '#059669', '#7c3aed'];
+            const colors = ['#2563eb', '#dc2626', '#d97706', '#059669', '#7c3aed', '#0891b2', '#e11d48'];
             const datasets = [];
             let i = 0;
+            let maxVal = 0;
 
             for (const [nodeId, metrics] of Object.entries(chartHistory.datasets)) {
                 const color = colors[i % colors.length];
                 const dataPoints = chartMode === 'mbps' ? metrics.mbps : metrics.cpu;
+                if (dataPoints.length > 0) {
+                    maxVal = Math.max(maxVal, ...dataPoints);
+                }
                 datasets.push({
                     label: `${nodeId} (${chartMode === 'mbps' ? 'Mbps' : '%'})`,
                     data: dataPoints,
                     borderColor: color,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
-                    tension: 0.25,
+                    tension: 0.2,
                     pointRadius: 1
                 });
                 i++;
@@ -1061,7 +1121,32 @@
 
             chartInstance.data.labels = chartHistory.labels;
             chartInstance.data.datasets = datasets;
-            chartInstance.options.scales.y.suggestedMax = chartMode === 'mbps' ? 25 : 100;
+
+            // SMART DYNAMIC SCALE: Keeps normal baseline (0.003 Mbps) clearly visible in the middle!
+            if (chartMode === 'mbps') {
+                if (maxVal <= 0.006) {
+                    // Idle traffic baseline: scale max = 0.008 so 0.003-0.004 Mbps is at ~45% height!
+                    chartInstance.options.scales.y.suggestedMax = 0.008;
+                    document.getElementById('chart-scale-label').innerText = '0 - 0.008 M';
+                } else if (maxVal < 0.05) {
+                    chartInstance.options.scales.y.suggestedMax = Math.max(0.015, maxVal * 1.35);
+                    document.getElementById('chart-scale-label').innerText = '0 - ' + (maxVal * 1.35).toFixed(3) + ' M';
+                } else if (maxVal < 5.0) {
+                    chartInstance.options.scales.y.suggestedMax = maxVal * 1.25;
+                    document.getElementById('chart-scale-label').innerText = '0 - ' + (maxVal * 1.25).toFixed(1) + ' M';
+                } else {
+                    // Massive Spike during DDoS flood or iperf3 stress (e.g. 20-50 Mbps)
+                    chartInstance.options.scales.y.suggestedMax = Math.max(25, maxVal * 1.15);
+                    document.getElementById('chart-scale-label').innerText = '0 - ' + Math.round(maxVal * 1.15) + ' M (SPIKE)';
+                }
+                chartInstance.options.scales.y.suggestedMin = 0;
+            } else {
+                // CPU Utilization scale (0 - 100%)
+                chartInstance.options.scales.y.suggestedMin = 0;
+                chartInstance.options.scales.y.suggestedMax = 100;
+                document.getElementById('chart-scale-label').innerText = '0 - 100%';
+            }
+
             chartInstance.update();
         }
 
@@ -1114,7 +1199,7 @@
         function updateNodes(nodes) {
             const container = document.getElementById('nodes-container');
             if (!nodes.length) {
-                container.innerHTML = '<div class="col-12 text-center py-4 text-muted">No nodes active.</div>';
+                container.innerHTML = '<div class="col-12 text-center py-3 text-muted">No nodes active.</div>';
                 return;
             }
 
@@ -1123,27 +1208,39 @@
                 const isAttacking = node.status === 'ATTACKING';
                 const isDown = node.status === 'DOWN';
                 const cpu = node.cpu_percent || 0;
-                const mem = node.memory_percent || 0;
                 const uploadMbps = node.upload_mbps || 0;
 
+                // Animate topology link if attacking
+                const linkId = `link-${node.agent_id.toLowerCase().replace('node-', 'h').replace('backend-', 'h')}`;
+                const topoLink = document.getElementById(linkId);
+                if (topoLink) {
+                    if (isAttacking) {
+                        topoLink.setAttribute('class', 'topo-line-attack');
+                    } else if (node.sdn_mitigated) {
+                        topoLink.setAttribute('class', 'topo-line');
+                    } else {
+                        topoLink.setAttribute('class', 'topo-line');
+                    }
+                }
+
                 html += `
-                <div class="col-12 col-md-6">
-                    <div class="kpi-card" style="border-left: 3px solid ${isAttacking ? '#dc2626' : isDown ? '#94a3b8' : '#2563eb'};">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong>${node.agent_id}</strong>
-                            <span class="badge-status status-${node.status}">${node.status}</span>
+                <div class="col-6">
+                    <div class="node-card-compact" style="border-left: 3px solid ${isAttacking ? '#dc2626' : isDown ? '#94a3b8' : '#2563eb'};">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong style="font-size: 11.5px;">${node.agent_id}</strong>
+                            <span class="badge-status status-${node.status}" style="font-size: 8.5px;">${node.status}</span>
                         </div>
-                        <div class="mono text-muted mb-2" style="font-size: 10px;">${node.ip_address} &bull; C2: ${node.c2_port}</div>
-                        <div class="mb-1 d-flex justify-content-between text-muted" style="font-size: 11px;">
+                        <div class="d-flex justify-content-between text-muted mono my-1" style="font-size: 9.5px;">
+                            <span>${node.ip_address}</span>
                             <span>CPU: <strong>${cpu}%</strong></span>
-                            <span>Upload: <strong class="text-primary">${uploadMbps} Mbps</strong></span>
                         </div>
-                        <div class="progress-bar-track mb-2">
-                            <div class="progress-bar-fill ${cpu > 80 ? 'fill-red' : 'fill-green'}" style="width: ${cpu}%"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted" style="font-size: 9.5px;">Rate:</span>
+                            <span class="mono fw-bold ${uploadMbps > 10 ? 'text-danger' : 'text-primary'}" style="font-size: 10px;">${uploadMbps} Mbps</span>
                         </div>
                         <div class="d-flex gap-1 mt-1">
-                            <button class="btn btn-xs btn-outline-danger flex-fill" onclick="triggerAttack('${node.agent_id}', ${node.c2_port})">Attack</button>
-                            <button class="btn btn-xs btn-outline-secondary flex-fill" onclick="stopAttack('${node.agent_id}', ${node.c2_port})">Stop</button>
+                            <button class="btn btn-action btn-action-danger py-0 px-2 flex-fill" style="font-size: 10px;" onclick="triggerAttack('${node.agent_id}', ${node.c2_port})">Attack</button>
+                            <button class="btn btn-action py-0 px-2 flex-fill" style="font-size: 10px;" onclick="stopAttack('${node.agent_id}', ${node.c2_port})">Stop</button>
                         </div>
                     </div>
                 </div>`;
@@ -1198,7 +1295,7 @@
             const tbody = document.getElementById('rules-table-body');
 
             if (!rules.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No OpenFlow DROP rules installed. Traffic forwarding normally.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No OpenFlow DROP rules installed. Traffic forwarding normally.</td></tr>';
                 return;
             }
 
@@ -1209,9 +1306,9 @@
                 <tr>
                     <td><strong>${r.agent_id || 'Attacker'}</strong></td>
                     <td class="mono">nw_src=${srcIp}</td>
-                    <td><span class="badge bg-danger">DROP (Priority ${r.priority})</span></td>
+                    <td><span class="badge bg-danger" style="font-size: 9px;">DROP (Priority ${r.priority})</span></td>
                     <td class="mono">${r.installed_at || ''}</td>
-                    <td><button class="btn btn-xs btn-outline-success" onclick="unblockIp('${srcIp}')">Unblock</button></td>
+                    <td><button class="btn btn-action btn-action-success py-0 px-2" style="font-size: 10px;" onclick="unblockIp('${srcIp}')">Unblock</button></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -1221,7 +1318,7 @@
             document.getElementById('active-alert-count').innerText = events.length;
             const tbody = document.getElementById('events-stream-body');
             if (!events.length) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No events logged yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No events logged yet.</td></tr>';
                 return;
             }
 
@@ -1237,7 +1334,7 @@
                     <td class="mono">${e.observed_metric || ''} (Thresh: ${e.threshold || ''})</td>
                     <td>${e.action_taken || 'LOGGED'}</td>
                     <td><span class="badge-status status-${e.status}">${e.status}</span></td>
-                    <td><button class="btn btn-xs btn-outline-secondary" onclick="ackAlert('${e.event_id}')">Ack</button></td>
+                    <td><button class="btn btn-action py-0 px-2" style="font-size: 10px;" onclick="ackAlert('${e.event_id}')">Ack</button></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -1262,7 +1359,7 @@
                 if (chartHistory.datasets[n.agent_id].mbps.length > 25) chartHistory.datasets[n.agent_id].mbps.shift();
                 if (chartHistory.datasets[n.agent_id].cpu.length > 25) chartHistory.datasets[n.agent_id].cpu.shift();
 
-                if (mbps > 15 || cpu > 80) spikeDetected = true;
+                if (mbps > 5.0 || cpu > 80) spikeDetected = true;
             });
 
             document.getElementById('chart-spike-badge').classList.toggle('d-none', !spikeDetected);
