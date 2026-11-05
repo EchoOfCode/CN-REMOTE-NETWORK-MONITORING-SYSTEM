@@ -121,3 +121,4 @@ To evolve this repository into an industry-grade, production-defensible network 
 - **Milestone 4**: Build simulation engine (`simulation/`) for CPU stress, `iperf3` bandwidth stress, backend failure, and router interface failure, integrated with anomaly detector (`monitoring/anomaly_detector.py`).
 - **Milestone 5**: Redesign NOC dashboard with modular assets and dedicated operational views.
 - **Milestone 6**: Expand benchmark suite (`performance_eval.py`) to 9 comprehensive evaluation phases.
+

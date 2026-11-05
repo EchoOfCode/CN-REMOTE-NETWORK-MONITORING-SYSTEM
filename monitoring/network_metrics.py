@@ -170,3 +170,4 @@ def get_interface_statistics():
     except Exception as e:
         stats["error"] = str(e)
     return stats
+

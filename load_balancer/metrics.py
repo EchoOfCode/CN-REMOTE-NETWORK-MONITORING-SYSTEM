@@ -77,3 +77,4 @@ class LoadBalancerMetrics:
                 "traffic_distribution": dict(self.requests_by_backend),
                 "failover_events": list(self.failover_events)
             }
+

@@ -63,3 +63,4 @@ class LoadBalancerConfig:
             "total_backends": len(self.backends),
             "backends": {bid: b.to_dict() for bid, b in self.backends.items()}
         }
+

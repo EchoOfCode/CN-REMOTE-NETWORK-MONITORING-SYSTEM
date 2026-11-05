@@ -75,3 +75,4 @@ if __name__ == "__main__":
         simulate_backend_failure(backend_id=args.backend, backend_ip=args.ip, port=args.port)
     else:
         restore_backend(backend_id=args.backend, backend_ip=args.ip, port=args.port)
+

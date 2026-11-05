@@ -67,3 +67,4 @@ def get_algorithm(name):
         return WeightedRoundRobinAlgorithm()
     else:
         return RoundRobinAlgorithm()
+

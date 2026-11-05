@@ -69,3 +69,4 @@ class HealthChecker:
                 backend.status = "unhealthy"
                 print(f"[LB HEALTH] 🔴 Backend {backend.backend_id} FAILED ({backend.consecutive_failures} timeouts)! Removed from rotation.")
                 self.metrics.record_failover(backend.backend_id, f"FAILED_HEALTH_CHECK_{backend.consecutive_failures}_CONSECUTIVE_ERRORS")
+

@@ -77,3 +77,4 @@ class EventManager:
 
 # Global singleton
 event_manager = EventManager()
+

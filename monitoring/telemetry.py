@@ -86,3 +86,4 @@ class TelemetryPacket:
     def from_bytes(cls, raw_bytes):
         data = json.loads(raw_bytes.decode('utf-8'))
         return cls.from_dict(data)
+

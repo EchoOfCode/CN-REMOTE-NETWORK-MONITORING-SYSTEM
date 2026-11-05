@@ -45,3 +45,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     toggle_router_interface(interface=args.interface, state=args.state, duration=args.duration)
+

@@ -65,3 +65,4 @@ def run_full_demo(server_url="http://10.0.1.20:5050", lb_url="http://10.0.1.30:8
 
 if __name__ == "__main__":
     run_full_demo()
+

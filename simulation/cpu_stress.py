@@ -88,3 +88,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_cpu_stress(duration=args.duration, intensity=args.intensity, cores=args.cores)
+

@@ -128,3 +128,4 @@ class AnomalyDetector:
             events.append(recovery_event)
 
         return events
+
