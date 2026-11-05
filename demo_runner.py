@@ -104,6 +104,7 @@ def main():
 
     # Auto-detect reachable server endpoint
     server_urls = [args.server_url] if args.server_url else [
+        "http://10.0.1.20:5050",
         "http://10.0.0.4:5050",
         "http://127.0.0.1:5050"
     ]

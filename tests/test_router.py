@@ -10,6 +10,10 @@ class TestRouterHealth(unittest.TestCase):
     def setUp(self):
         self.router = RouterMonitor(router_id="r1", server_ip="127.0.0.1")
 
+    def tearDown(self):
+        if hasattr(self.router, 'udp_sock') and self.router.udp_sock:
+            self.router.udp_sock.close()
+
     def test_health_classification_normal(self):
         interfaces = {"r1-eth0": {"state": "UP"}, "r1-eth1": {"state": "UP"}}
         status, reason = self.router.evaluate_health_status(cpu=15.0, packet_loss=0.0, interfaces=interfaces)
