@@ -12,7 +12,7 @@ import socket
 import urllib.request
 import urllib.error
 import threading
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 
 # Ensure local packages are importable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
