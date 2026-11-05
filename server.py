@@ -478,6 +478,7 @@ def get_metrics():
 
     return jsonify({
         "nodes": nodes,
+        "nodes_control": node_manager.get_all_nodes(),
         "router": r1_copy,  # Backwards compatibility
         "routers": {
             "r1": r1_copy,
