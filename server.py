@@ -129,8 +129,16 @@ anomaly_engine = AnomalyDetector()
 db.create_database()
 
 
+_sdn_cached_url = None
+_sdn_cache_time = 0
+
 def get_sdn_controller_url():
-    """Dynamically probes Mininet bridge IP (10.0.1.254/10.0.0.254:8080) and local loopback."""
+    """Dynamically probes Mininet bridge IP (10.0.1.254/10.0.0.254:8080) and local loopback with 5s cache."""
+    global _sdn_cached_url, _sdn_cache_time
+    now = time.time()
+    if _sdn_cached_url and (now - _sdn_cache_time < 5.0):
+        return _sdn_cached_url
+
     candidates = [
         os.getenv("SDN_CONTROLLER_URL"),
         "http://10.0.1.254:8080",
@@ -142,15 +150,29 @@ def get_sdn_controller_url():
             continue
         try:
             req = urllib.request.Request(f"{url}/api/v1/sdn/stats")
-            with urllib.request.urlopen(req, timeout=0.5) as resp:
+            with urllib.request.urlopen(req, timeout=0.15) as resp:
+                _sdn_cached_url = url
+                _sdn_cache_time = now
                 return url
         except Exception:
             pass
-    return os.getenv("SDN_CONTROLLER_URL", "http://10.0.1.254:8080")
 
+    fallback = os.getenv("SDN_CONTROLLER_URL", "http://10.0.1.254:8080")
+    _sdn_cached_url = fallback
+    _sdn_cache_time = now
+    return fallback
+
+
+_lb_cached_url = None
+_lb_cache_time = 0
 
 def get_lb_url():
-    """Dynamically probes Load Balancer URL on Subnet 2 (10.0.2.30:8000), Subnet 1 (10.0.1.30:8000), or localhost."""
+    """Dynamically probes Load Balancer URL with 5s cache."""
+    global _lb_cached_url, _lb_cache_time
+    now = time.time()
+    if _lb_cached_url and (now - _lb_cache_time < 5.0):
+        return _lb_cached_url
+
     candidates = [
         os.getenv("LB_URL"),
         "http://10.0.2.30:8000",
@@ -162,11 +184,17 @@ def get_lb_url():
             continue
         try:
             req = urllib.request.Request(f"{url}/lb/status")
-            with urllib.request.urlopen(req, timeout=0.5) as resp:
+            with urllib.request.urlopen(req, timeout=0.15) as resp:
+                _lb_cached_url = url
+                _lb_cache_time = now
                 return url
         except Exception:
             pass
-    return os.getenv("LB_URL", "http://10.0.2.30:8000")
+
+    fallback = os.getenv("LB_URL", "http://10.0.2.30:8000")
+    _lb_cached_url = fallback
+    _lb_cache_time = now
+    return fallback
 
 
 def get_all_backends_status():
@@ -588,7 +616,7 @@ def power_off_backend(backend_id):
     try:
         req_data = json.dumps({"status": "offline"}).encode('utf-8')
         req = urllib.request.Request(f"http://{b_info['ip']}:{b_info['port']}/admin/status", data=req_data, headers={'Content-Type': 'application/json'})
-        urllib.request.urlopen(req, timeout=1.0)
+        urllib.request.urlopen(req, timeout=0.2)
     except Exception:
         pass
 
@@ -597,7 +625,7 @@ def power_off_backend(backend_id):
     lb_res = {}
     try:
         req = urllib.request.Request(f"{lb_url}/lb/backend/{backend_id}/power_off", data=b"{}", headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
+        with urllib.request.urlopen(req, timeout=0.2) as resp:
             lb_res = json.loads(resp.read().decode('utf-8'))
     except Exception as e:
         lb_res = {"notice": f"LB notify error: {e}"}
@@ -634,7 +662,7 @@ def power_on_backend(backend_id):
     try:
         req_data = json.dumps({"status": "healthy"}).encode('utf-8')
         req = urllib.request.Request(f"http://{b_info['ip']}:{b_info['port']}/admin/status", data=req_data, headers={'Content-Type': 'application/json'})
-        urllib.request.urlopen(req, timeout=1.0)
+        urllib.request.urlopen(req, timeout=0.2)
     except Exception:
         pass
 
@@ -643,7 +671,7 @@ def power_on_backend(backend_id):
     lb_res = {}
     try:
         req = urllib.request.Request(f"{lb_url}/lb/backend/{backend_id}/power_on", data=b"{}", headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
+        with urllib.request.urlopen(req, timeout=0.2) as resp:
             lb_res = json.loads(resp.read().decode('utf-8'))
     except Exception as e:
         lb_res = {"notice": f"LB notify error: {e}"}
